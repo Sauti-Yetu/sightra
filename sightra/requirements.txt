@@ -1,0 +1,28 @@
+# Django Core
+Django>=5.0
+djangorestframework>=3.14.0
+django-filter>=23.5
+
+# Celery & Background Tasks
+celery>=5.3.6
+redis>=5.0.1
+
+# AI & Models Integration (Core)
+google-generativeai>=0.4.0
+
+# Vision Open Source Models
+ultralytics>=8.1.0  # YOLO
+opencv-python-headless>=4.9.0
+torch>=2.2.0
+torchvision>=0.17.0
+# Note: ByteTrack, GroundedSAM, and ZoeDepth often require
+# custom clone/installations from GitHub or specific dependencies.
+# We will use stubs or wrapper libraries available via pip if possible.
+
+# Audio Open Source Models
+# openai-whisper
+# pyttsx3 or piper-tts for text-to-speech
+transformers>=4.38.0
+numpy>=1.26.0
+pyttsx3>=2.90
+soundfile>=0.12.1

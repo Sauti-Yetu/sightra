@@ -112,10 +112,8 @@
     class="bg-background text-on-surface font-body overflow-hidden selection:bg-primary-container selection:text-on-primary-container">
     <!-- Live Camera Feed (Background Canvas) -->
     <div class="fixed inset-0 z-0">
-        <img alt="First-person perspective of a modern urban hallway with stark lighting and geometric shadows"
-            class="w-full h-full object-cover grayscale brightness-50"
-            data-alt="First-person perspective of a modern urban hallway with stark lighting and geometric shadows, cinematic low-angle photography, moody industrial atmosphere"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDicVOh9KuIlIM2DNRu4OtOtA8QmbsJHzaw97qp3Ay3KHsMoLkfU2MxBbqmZom2oxp4DurpjQdAN7IVtoIstY0dyvZ0smUXFQFhXo_D5Yg1pliqY_fWzQzwEanQfggt5Hn9Y48iz7cwzpfPZdH0WO9nKkRj_VOxmjyHfpPgqajDNcZoTMhmCYypBPJ3FnhC6fAS9-xKaln4zwKc2RtjajSStsnI9BgqOnjSwi7JKIwiEDEGKK2Vj-sSIvw5vc0P3Qmj_blfrdgM4oGh" />
+        <video id="cameraElement" class="w-full h-full object-cover grayscale brightness-50" autoplay playsinline></video>
+        <canvas id="canvasElement" style="display:none;"></canvas>
         <div class="absolute inset-0 bg-neutral-950/20 scanline pointer-events-none"></div>
     </div>
     <!-- UI Overlay Layer -->
@@ -193,7 +191,7 @@
                 <span
                     class="font-headline text-[10px] tracking-[0.4em] font-black text-primary-container animate-pulse uppercase">INITIATE
                     SIGHT SCAN</span>
-                <button
+                <button id="scanBtn"
                     class="group relative w-24 h-24 rounded-full flex items-center justify-center transition-all duration-500 hover:scale-110 active:scale-95 pointer-events-auto">
                     <!-- Outer Ring -->
                     <div
@@ -278,6 +276,57 @@
     </div>
     <!-- UI Overlay for Vignette -->
     <div class="fixed inset-0 pointer-events-none shadow-[inset_0_0_150px_rgba(0,0,0,0.8)] z-20"></div>
+
+    <script>
+        const video = document.getElementById('cameraElement');
+        const canvas = document.getElementById('canvasElement');
+        const scanBtn = document.getElementById('scanBtn');
+
+        // Request camera access
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                console.error("Error accessing camera: ", err);
+                alert("Please enable camera access for SIGHTRA to work properly.");
+            });
+
+        // Handle Scan Button Click
+        scanBtn.addEventListener('click', async () => {
+            // Draw current frame to canvas
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            
+            // Get base64 string
+            const frameData = canvas.toDataURL('image/jpeg');
+
+            // Send to backend
+            try {
+                const response = await fetch('/api/navigation/stream/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        frame_data: frameData,
+                        text_prompt: "Describe the path ahead."
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Read out the text response via the browser's TTS as a fallback or if audio_url is not ready
+                if (data.analysis_text) {
+                    const speech = new SpeechSynthesisUtterance(data.analysis_text);
+                    window.speechSynthesis.speak(speech);
+                }
+            } catch (err) {
+                console.error("Error sending frame: ", err);
+            }
+        });
+    </script>
 </body>
 
 </html>

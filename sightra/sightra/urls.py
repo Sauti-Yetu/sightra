@@ -23,6 +23,8 @@ from apps.core.views import *
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", index, name="index"),
+    path("vision/", vision, name="vision"),
+    path("settings/", settings_view, name="settings"),
     path("api/accounts/", include("apps.accounts.urls")),
     path("api/audio/", include("apps.audio.urls")),
     path("api/vision/", include("apps.vision.urls")),
