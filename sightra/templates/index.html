@@ -5,7 +5,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Sightra AI Dashboard</title>
+    <title>Sightra</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&amp;family=Inter:wght@300;400;500;600&amp;display=swap"
@@ -115,7 +115,7 @@
             <span class="material-symbols-outlined text-[#00E5FF] text-2xl" data-icon="visibility">visibility</span>
             <h1
                 class="font-['Lexend'] tracking-widest uppercase font-bold text-2xl font-black text-[#00E5FF] tracking-tighter">
-                SIGHTRA AI</h1>
+                Sightra</h1>
         </div>
         <button
             class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#353534] transition-colors active:scale-95 duration-200">
@@ -154,7 +154,7 @@
                 <img alt="Real-time visual data feed"
                     class="w-full h-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-60 transition-all duration-700"
                     data-alt="Futuristic digital scan of a city street showing bounding boxes around cars and pedestrians in neon blue and green"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuxFsa-aQA7HjgkLb0wJSrcByueGKqv9CFgflZ3Oc9fUE5gq9PLjnMQTec_vxsgkinrN7O06mzEQYt820P_q2pNzP5AWERMNrdGr4k3zXT-cqzxzTKRGHflg8JOjQVTIT9-TxwA63VVWRuWeRS2Cn-ENYE1r2d1alMZFcXdPIkf-Kmje7VDP1Py3sWnoWtlbr8r_uNU2gT53PAiADWjvEM5EphSoizhytNdchTQ-oqMb_6znxU_RTrYPqVxOfKE1LOK8phErSOsZHu" />
+                    src="https://userway.org/blog/wp-content/uploads/2022/01/Web-Accessibility-for-Visually-Impaired.jpg" />
                 <div class="absolute inset-0 p-8 flex flex-col justify-between z-20">
                     <div class="flex justify-between items-start">
                         <div
@@ -282,24 +282,7 @@
         </section>
     </main>
     <!-- BottomNavBar -->
-    <nav
-        class="fixed bottom-0 left-0 w-full flex justify-around items-center pb-6 pt-3 px-4 bg-[#131313]/80 backdrop-blur-xl z-50 border-t border-[#00E5FF]/10 shadow-[0_-10px_40px_rgba(0,229,255,0.08)] rounded-t-3xl">
-        <a class="flex flex-col items-center justify-center bg-[#00E5FF] text-[#131313] rounded-2xl px-6 py-2 scale-110 active:scale-90 duration-300 ease-out transition-all"
-            href="#">
-            <span class="material-symbols-outlined text-2xl" data-icon="dashboard">dashboard</span>
-            <span class="font-['Lexend'] text-[10px] font-medium tracking-wide">Dashboard</span>
-        </a>
-        <a class="flex flex-col items-center justify-center text-[#BAC9CC] px-6 py-2 hover:text-[#C3F400] transition-all active:scale-90 duration-300 ease-out"
-            href="/vision">
-            <span class="material-symbols-outlined text-2xl" data-icon="visibility">visibility</span>
-            <span class="font-['Lexend'] text-[10px] font-medium tracking-wide">Vision</span>
-        </a>
-        <a class="flex flex-col items-center justify-center text-[#BAC9CC] px-6 py-2 hover:text-[#C3F400] transition-all active:scale-90 duration-300 ease-out"
-            href="#">
-            <span class="material-symbols-outlined text-2xl" data-icon="settings">settings</span>
-            <span class="font-['Lexend'] text-[10px] font-medium tracking-wide">Settings</span>
-        </a>
-    </nav>
+    {% include 'bottom_nav.html' %}
 </body>
 
 </html>

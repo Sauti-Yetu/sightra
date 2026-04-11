@@ -2,14 +2,18 @@ import logging
 import google.generativeai as genai
 from django.conf import settings
 import json
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
 class GeminiAnalyzer:
     def __init__(self):
         try:
-            genai.configure(api_key=settings.GEMINI_API_KEY)
-            self.model = genai.GenerativeModel('gemini-1.5-pro')
+            genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+            self.model = genai.GenerativeModel('gemini-3.1-flash-lite-preview')
             self.ready = True
             logger.info("GeminiAnalyzer initialized successfully.")
         except Exception as e:
