@@ -9,7 +9,7 @@ class YoloObjectDetector:
     def __init__(self):
         try:
             from ultralytics import YOLO
-            self.model = YOLO("yolov8n.pt")
+            self.model = YOLO("yolo11n.pt")
             self.ready = True
         except Exception as e:
             logger.error(f"Failed to load YOLO: {e}")
