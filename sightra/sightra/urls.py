@@ -18,6 +18,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from apps.core.views import *
+from apps.audio.views import *
+from apps.vision.views import *
+from apps.settings.views import *
 
 
 urlpatterns = [
@@ -25,6 +28,7 @@ urlpatterns = [
     path("", index, name="index"),
     path("vision/", vision, name="vision"),
     path("settings/", settings_view, name="settings"),
+    path("voice_assistant/", voice_assistant, name="voice_assistant"),
     path("api/accounts/", include("apps.accounts.urls")),
     path("api/audio/", include("apps.audio.urls")),
     path("api/vision/", include("apps.vision.urls")),

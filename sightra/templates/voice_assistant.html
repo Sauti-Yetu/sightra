@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;700;800;900&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#ffeac0",
+                        "secondary-container": "#c3f400",
+                        "surface-variant": "#353534",
+                        "surface-container-highest": "#353534",
+                        "on-primary": "#00363d",
+                        "tertiary-container": "#fec931",
+                        "secondary-fixed-dim": "#abd600",
+                        "surface-container-high": "#2a2a2a",
+                        "on-error-container": "#ffdad6",
+                        "surface-container-low": "#1c1b1b",
+                        "on-tertiary-fixed": "#251a00",
+                        "surface-dim": "#131313",
+                        "surface-container": "#201f1f",
+                        "on-primary-container": "#00626e",
+                        "on-primary-fixed": "#001f24",
+                        "on-surface": "#e5e2e1",
+                        "tertiary-fixed": "#ffdf96",
+                        "on-tertiary-container": "#6f5500",
+                        "on-background": "#e5e2e1",
+                        "on-tertiary-fixed-variant": "#594400",
+                        "on-secondary-fixed": "#161e00",
+                        "secondary": "#ffffff",
+                        "inverse-on-surface": "#313030",
+                        "background": "#131313",
+                        "inverse-surface": "#e5e2e1",
+                        "on-tertiary": "#3e2e00",
+                        "primary-fixed": "#9cf0ff",
+                        "error": "#ffb4ab",
+                        "primary-fixed-dim": "#00daf3",
+                        "secondary-fixed": "#c3f400",
+                        "outline": "#849396",
+                        "on-surface-variant": "#bac9cc",
+                        "tertiary-fixed-dim": "#f3bf26",
+                        "primary-container": "#00e5ff",
+                        "on-secondary-container": "#556d00",
+                        "inverse-primary": "#006875",
+                        "surface-tint": "#00daf3",
+                        "primary": "#c3f5ff",
+                        "surface": "#131313",
+                        "on-secondary": "#283500",
+                        "outline-variant": "#3b494c",
+                        "surface-container-lowest": "#0e0e0e",
+                        "surface-bright": "#393939",
+                        "on-secondary-fixed-variant": "#3c4d00",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "on-primary-fixed-variant": "#004f58"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Lexend"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .pulsate-ring {
+            animation: pulsate 3s ease-out infinite;
+        }
+
+        @keyframes pulsate {
+            0% {
+                transform: scale(0.9);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.4;
+            }
+
+            100% {
+                transform: scale(0.9);
+                opacity: 0.8;
+            }
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+    <!-- Top Navigation Anchor (Manual Mapping from JSON style_) -->
+    <header
+        class="fixed top-0 w-full z-50 bg-[#131313] backdrop-blur-md bg-opacity-80 shadow-[0_0_40px_rgba(0,218,243,0.08)] flex justify-between items-center px-6 h-20">
+        <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-[#00E5FF]"
+                data-icon="signal_cellular_alt">signal_cellular_alt</span>
+            <span class="font-['Lexend'] tracking-wider uppercase font-bold text-lg text-[#00E5FF]">Sightra</span>
+        </div>
+        <!-- Language Selector: High Contrast Toggle -->
+        <div class="flex items-center bg-surface-container-high rounded-full p-1 gap-1">
+            <button
+                class="px-4 py-1.5 rounded-full text-xs font-bold bg-secondary-fixed text-on-secondary-fixed">ENGLISH</button>
+            <button
+                class="px-4 py-1.5 rounded-full text-xs font-bold text-on-surface-variant hover:text-on-surface">SWAHILI</button>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[#BAC9CC]"
+                data-icon="battery_horiz_075">battery_horiz_075</span>
+        </div>
+    </header>
+    <main class="min-h-screen pt-28 pb-40 px-6 flex flex-col items-center max-w-2xl mx-auto">
+        <!-- AI Activity Center -->
+        <section class="w-full flex flex-col items-center justify-center py-12 relative">
+            <div class="absolute inset-0 flex items-center justify-center opacity-20">
+                <div class="w-64 h-64 bg-primary-container rounded-full blur-[100px]"></div>
+            </div>
+            <!-- Pulsating Voice Indicator -->
+            <div class="relative w-48 h-48 flex items-center justify-center">
+                <div class="absolute inset-0 rounded-full border-4 border-primary-container opacity-20 pulsate-ring">
+                </div>
+                <div class="absolute inset-4 rounded-full border-2 border-secondary-container opacity-40 pulsate-ring"
+                    style="animation-delay: 0.5s;"></div>
+                <div
+                    class="z-10 w-32 h-32 rounded-full bg-gradient-to-tr from-primary-container to-primary flex items-center justify-center shadow-[0_0_50px_rgba(0,229,255,0.4)]">
+                    <span class="material-symbols-outlined text-on-primary text-5xl" data-icon="settings_voice"
+                        data-weight="fill" style="font-variation-settings: 'FILL' 1;">settings_voice</span>
+                </div>
+            </div>
+            <div class="mt-8 text-center">
+                <h2 class="font-headline text-2xl font-black text-secondary-fixed tracking-tight">Listening...</h2>
+                <p class="text-on-surface-variant mt-2 text-sm">"What is in front of me?"</p>
+            </div>
+        </section>
+        <!-- Command Suggestions (Bento Style) -->
+        <section class="w-full grid grid-cols-2 gap-4 mt-8">
+            <button
+                class="flex flex-col items-start p-5 bg-surface-container-low hover:bg-surface-container-high transition-all rounded-3xl group">
+                <span class="material-symbols-outlined text-primary mb-3 group-hover:scale-110 transition-transform"
+                    data-icon="visibility">visibility</span>
+                <span class="text-sm font-bold text-on-surface">What is in front of me?</span>
+            </button>
+            <button
+                class="flex flex-col items-start p-5 bg-surface-container-low hover:bg-surface-container-high transition-all rounded-3xl group">
+                <span
+                    class="material-symbols-outlined text-secondary-fixed mb-3 group-hover:scale-110 transition-transform"
+                    data-icon="home_pin">home_pin</span>
+                <span class="text-sm font-bold text-on-surface">Guide me home</span>
+            </button>
+            <button
+                class="flex flex-col items-start p-5 bg-surface-container-low hover:bg-surface-container-high transition-all rounded-3xl group col-span-2">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-tertiary-fixed" data-icon="menu_book">menu_book</span>
+                    <span class="text-sm font-bold text-on-surface">Read this document aloud</span>
+                </div>
+            </button>
+        </section>
+        <!-- Transcript History -->
+        <section class="w-full mt-12 space-y-6">
+            <div class="flex items-center justify-between border-b border-outline-variant pb-2 opacity-50">
+                <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-on-surface-variant">Conversation
+                    History</h3>
+                <span class="material-symbols-outlined text-sm" data-icon="history">history</span>
+            </div>
+            <!-- Query Item -->
+            <div class="flex flex-col gap-4">
+                <div class="self-end max-w-[85%] bg-surface-container-high px-5 py-3 rounded-2xl rounded-tr-none">
+                    <p class="text-sm text-on-surface font-medium leading-relaxed">Is there a crossing nearby?</p>
+                </div>
+                <div class="self-start max-w-[90%] flex gap-4">
+                    <div
+                        class="w-8 h-8 rounded-full bg-primary-container/20 flex items-center justify-center shrink-0 mt-1">
+                        <span class="material-symbols-outlined text-primary-container text-sm"
+                            data-icon="smart_toy">smart_toy</span>
+                    </div>
+                    <div class="space-y-2">
+                        <p class="text-md text-on-surface leading-snug font-semibold">Yes. There is a pedestrian
+                            crossing 15 meters ahead of you. Traffic light is currently RED.</p>
+                        <span class="text-[10px] text-on-surface-variant font-bold uppercase tracking-tighter">AI
+                            RESPONSE • 2 MIN AGO</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Query Item 2 -->
+            <div class="flex flex-col gap-4 opacity-70">
+                <div class="self-end max-w-[85%] bg-surface-container-high px-5 py-3 rounded-2xl rounded-tr-none">
+                    <p class="text-sm text-on-surface font-medium">Identify the object at 2 o'clock.</p>
+                </div>
+                <div class="self-start max-w-[90%] flex gap-4">
+                    <div
+                        class="w-8 h-8 rounded-full bg-primary-container/20 flex items-center justify-center shrink-0 mt-1">
+                        <span class="material-symbols-outlined text-primary-container text-sm"
+                            data-icon="smart_toy">smart_toy</span>
+                    </div>
+                    <div class="space-y-2">
+                        <p class="text-md text-on-surface leading-snug">That is a blue bench in front of a coffee shop.
+                            There is a person sitting on the right side.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- Bottom Controls Overlay -->
+    <div class="fixed bottom-0 left-0 w-full z-50 p-6 bg-gradient-to-t from-background via-background to-transparent">
+        <div class="max-w-2xl mx-auto flex flex-col gap-4">
+            <!-- Stop Button (Critical Focus) -->
+            <button
+                class="w-full h-16 bg-error-container hover:bg-red-900 transition-colors rounded-2xl flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(147,0,10,0.3)] group">
+                <span
+                    class="material-symbols-outlined text-on-error-container text-3xl group-active:scale-90 transition-transform"
+                    data-icon="stop_circle" data-weight="fill"
+                    style="font-variation-settings: 'FILL' 1;">stop_circle</span>
+                <span class="text-on-error-container font-headline font-extrabold text-xl tracking-tight uppercase">STOP
+                    ASSISTANCE</span>
+            </button>
+        </div>
+    </div>
+    <!-- Navigation Shell (Manual mapping from JSON BottomNavBar) -->
+    {% include 'bottom_nav_bar.html' %}
+</body>
+
+</html>
