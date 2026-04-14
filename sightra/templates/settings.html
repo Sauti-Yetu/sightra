@@ -117,13 +117,10 @@
     class="bg-surface text-on-surface font-body min-h-screen pb-32 selection:bg-primary-container selection:text-on-primary-container">
     <!-- TopAppBar -->
     <header
-        class="fixed top-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-neutral-950/80 backdrop-blur-xl shadow-[0_0_40px_rgba(0,218,243,0.08)]">
-        <div class="flex items-center gap-4">
-            <span class="material-symbols-outlined text-[#00E5FF]">location_on</span>
-            <h1 class="font-headline font-bold tracking-widest text-sm uppercase text-[#00E5FF]">VisionOS</h1>
-        </div>
-        <div class="flex items-center gap-4">
-            <span class="material-symbols-outlined text-[#BAC9CC]">wifi</span>
+        class="fixed top-0 w-full z-50 bg-[#131313] backdrop-blur-md bg-opacity-80 shadow-[0_0_40px_rgba(0,218,243,0.08)] flex justify-between items-center px-6 h-20">
+        <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-[#00E5FF]" data-icon="visibility">visibility</span>
+            <span class="font-['Lexend'] tracking-wider uppercase font-bold text-lg text-[#00E5FF]">Sightra</span>
         </div>
     </header>
     <main class="pt-24 px-6 max-w-2xl mx-auto">
@@ -308,19 +305,19 @@
                     langWrappers.forEach(w => {
                         w.classList.remove('border-primary-container/30', 'bg-surface-container-high');
                         w.classList.add('border-transparent', 'bg-surface-container-low');
-                        
+
                         const circleTxt = w.querySelector('.w-12.h-12');
                         if (circleTxt) {
                             circleTxt.classList.remove('text-primary');
                             circleTxt.classList.add('text-on-surface-variant');
                         }
-                        
+
                         const titleTxt = w.querySelector('p.font-headline');
                         if (titleTxt) {
                             titleTxt.classList.remove('text-on-surface');
                             titleTxt.classList.add('text-on-surface-variant');
                         }
-                        
+
                         const cbox = w.querySelector('.w-8.h-8');
                         if (cbox) {
                             cbox.classList.remove('border-primary-container');
@@ -328,23 +325,23 @@
                             cbox.innerHTML = ''; // Remove dot
                         }
                     });
-                    
+
                     // Set active
                     wrapper.classList.add('bg-surface-container-high');
                     wrapper.classList.remove('border-transparent', 'bg-surface-container-low');
-                    
+
                     const activeCircle = wrapper.querySelector('.w-12.h-12');
                     if (activeCircle) {
                         activeCircle.classList.add('text-primary');
                         activeCircle.classList.remove('text-on-surface-variant');
                     }
-                    
+
                     const activeTitle = wrapper.querySelector('p.font-headline');
                     if (activeTitle) {
                         activeTitle.classList.add('text-on-surface');
                         activeTitle.classList.remove('text-on-surface-variant');
                     }
-                    
+
                     const activeBox = wrapper.querySelector('.w-8.h-8');
                     if (activeBox) {
                         activeBox.classList.add('border-primary-container');
@@ -363,9 +360,9 @@
                     if (!btn) return;
                     const circle = btn.querySelector('div');
                     if (!circle) return;
-                    
+
                     // Check if it's currently ON (justify-end)
-                    if(btn.classList.contains('justify-end')) {
+                    if (btn.classList.contains('justify-end')) {
                         // Turn OFF
                         btn.classList.remove('justify-end', 'bg-secondary-container', 'shadow-[0_0_20px_rgba(195,244,0,0.2)]');
                         btn.classList.add('justify-start', 'bg-surface-container-highest');
@@ -386,27 +383,27 @@
             sliders.forEach(slider => {
                 slider.style.cursor = 'pointer';
                 let isDragging = false;
-                
+
                 const updateSlider = (e) => {
                     const rect = slider.getBoundingClientRect();
                     let percentage = (e.clientX - rect.left) / rect.width;
                     percentage = Math.max(0, Math.min(1, percentage)); // Clamp between 0 and 1
-                    
+
                     const fill = slider.children[1];
                     const thumb = slider.children[2];
-                    
-                    if(fill) fill.style.width = `${percentage * 100}%`;
-                    if(thumb) thumb.style.left = `${percentage * 100}%`;
-                    
+
+                    if (fill) fill.style.width = `${percentage * 100}%`;
+                    if (thumb) thumb.style.left = `${percentage * 100}%`;
+
                     // Update text readout logically
                     const valElem = slider.parentElement.querySelector('.font-black');
-                    if(valElem) {
+                    if (valElem) {
                         const unitElem = valElem.querySelector('span');
                         const unit = unitElem ? unitElem.outerHTML : '';
                         let rawVal = Math.round(percentage * 100);
-                        
+
                         // Fake visual mapping for Frequency vs Percentage
-                        if(unit.includes('Hz')) {
+                        if (unit.includes('Hz')) {
                             rawVal = Math.round(20 + percentage * 180);
                         }
                         valElem.innerHTML = rawVal + unit;
@@ -417,29 +414,29 @@
                     isDragging = true;
                     updateSlider(e);
                 });
-                
+
                 window.addEventListener('mousemove', (e) => {
                     if (isDragging) updateSlider(e);
                 });
-                
+
                 window.addEventListener('mouseup', () => {
                     isDragging = false;
                 });
-                
+
                 // Touch support for mobile dragging
                 slider.addEventListener('touchstart', (e) => {
                     isDragging = true;
                     updateSlider(e.touches[0]);
                 });
-                
+
                 window.addEventListener('touchmove', (e) => {
                     if (isDragging && e.touches.length > 0) {
                         // Prevent page scrolling while dragging scalar
-                        e.preventDefault(); 
+                        e.preventDefault();
                         updateSlider(e.touches[0]);
                     }
                 }, { passive: false });
-                
+
                 window.addEventListener('touchend', () => {
                     isDragging = false;
                 });
@@ -447,4 +444,5 @@
         });
     </script>
 </body>
+
 </html>
