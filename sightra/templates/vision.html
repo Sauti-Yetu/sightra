@@ -223,6 +223,12 @@
         const scanLabel = document.getElementById('scanLabel');
         let isScanning = false;
         let streamRef = null;
+        let captureIntervalId = null;
+        let isFetchInFlight = false;   // prevent parallel requests
+        let pendingSpeech = null;      // next utterance queued while TTS plays
+
+        // --- How often to capture a new frame (ms). Independent of TTS. ---
+        const CAPTURE_INTERVAL_MS = 1500;
 
         async function startCamera() {
             try {
@@ -242,7 +248,6 @@
             }
         }
 
-        // Function to stop camera
         function stopCamera() {
             if (streamRef) {
                 streamRef.getTracks().forEach(track => track.stop());
@@ -251,32 +256,48 @@
             }
         }
 
-        // Request initial camera access to show feed before scanning
         startCamera();
 
-        // Handle Scan Button Click
         scanBtn.addEventListener('click', () => {
             isScanning = !isScanning;
 
             if (isScanning) {
-                // Ensure camera is running
                 if (!streamRef) startCamera();
                 scanLabel.innerText = "STOP SIGHT SCAN";
                 scanLabel.classList.replace('text-primary-container', 'text-error');
                 scanBtn.querySelector('.backdrop-blur-2xl').classList.replace('bg-primary-container/10', 'bg-error/20');
                 scanBtn.querySelector('.material-symbols-outlined').style.color = '#ffb4ab';
-                captureAndAnalyze();
+                startCaptureLoop();
             } else {
                 scanLabel.innerText = "INITIATE SIGHT SCAN";
                 scanLabel.classList.replace('text-error', 'text-primary-container');
                 scanBtn.querySelector('.backdrop-blur-2xl').classList.replace('bg-error/20', 'bg-primary-container/10');
                 scanBtn.querySelector('.material-symbols-outlined').style.color = '';
-
+                stopCaptureLoop();
                 window.speechSynthesis.cancel();
                 clearDynamicUI();
                 stopCamera();
             }
         });
+
+        // ---------------------------------------------------------------
+        // Continuous capture loop — fires every CAPTURE_INTERVAL_MS.
+        // Completely independent of TTS so the UI refreshes in near-real-time.
+        // ---------------------------------------------------------------
+        function startCaptureLoop() {
+            captureAndAnalyze();  // fire immediately
+            captureIntervalId = setInterval(() => {
+                if (!isFetchInFlight) captureAndAnalyze();
+            }, CAPTURE_INTERVAL_MS);
+        }
+
+        function stopCaptureLoop() {
+            if (captureIntervalId !== null) {
+                clearInterval(captureIntervalId);
+                captureIntervalId = null;
+            }
+            isFetchInFlight = false;
+        }
 
         function clearDynamicUI() {
             document.getElementById('dynamic-boxes').innerHTML = `
@@ -294,6 +315,7 @@
 
         async function captureAndAnalyze() {
             if (!isScanning) return;
+            isFetchInFlight = true;
 
             // Draw current frame to canvas
             canvas.width = video.videoWidth || 640;
@@ -302,7 +324,8 @@
                 canvas.getContext('2d').drawImage(video, 0, 0);
             }
 
-            const frameData = canvas.toDataURL('image/jpeg', 0.5); // Compressing simple frame
+            // Compress to JPEG at 0.4 quality — smaller = faster upload to server
+            const frameData = canvas.toDataURL('image/jpeg', 0.4);
 
             try {
                 const response = await fetch('/api/navigation/stream/', {
@@ -316,21 +339,55 @@
 
                 const data = await response.json();
 
-                if (!isScanning) return; // check again after await
+                if (!isScanning) { isFetchInFlight = false; return; }
 
+                // Immediately replace stale bounding boxes with current frame results
                 updateDynamicUI(data.metadata);
 
+                // Speak — but do NOT block the next capture on this.
+                // If TTS is still running, interrupt with the newer, fresher description.
                 if (data.analysis_text) {
-                    const speech = new SpeechSynthesisUtterance(data.analysis_text);
-                    speech.onend = () => { if (isScanning) requestAnimationFrame(captureAndAnalyze); };
-                    speech.onerror = () => { if (isScanning) setTimeout(captureAndAnalyze, 1000); };
-                    window.speechSynthesis.speak(speech);
-                } else {
-                    setTimeout(captureAndAnalyze, 1000);
+                    speakNonBlocking(data.analysis_text);
                 }
             } catch (err) {
                 console.error("Error sending frame: ", err);
-                if (isScanning) setTimeout(captureAndAnalyze, 3000);
+            } finally {
+                isFetchInFlight = false;
+            }
+        }
+
+        // Speaks text without blocking capture. If speech is in progress it is
+        // queued and replaces the previous pending utterance (only latest wins).
+        function speakNonBlocking(text) {
+            if (!text) return;
+            // If nothing is speaking, speak immediately.
+            if (!window.speechSynthesis.speaking) {
+                const utt = new SpeechSynthesisUtterance(text);
+                pendingSpeech = null;
+                window.speechSynthesis.speak(utt);
+            } else {
+                // Store as pending — when current TTS ends the latest result speaks.
+                pendingSpeech = text;
+                // Attach a one-shot onend listener to the currently queued utterance
+                // so we pick up the most recent pending description.
+                if (!window._sightraTTSHooked) {
+                    window._sightraTTSHooked = true;
+                    const checkPending = () => {
+                        window._sightraTTSHooked = false;
+                        if (pendingSpeech && isScanning) {
+                            const utt2 = new SpeechSynthesisUtterance(pendingSpeech);
+                            pendingSpeech = null;
+                            utt2.onend = checkPending;
+                            window.speechSynthesis.speak(utt2);
+                        }
+                    };
+                    // Cancel current and replace immediately if scene changed significantly
+                    window.speechSynthesis.cancel();
+                    const utt3 = new SpeechSynthesisUtterance(text);
+                    pendingSpeech = null;
+                    utt3.onend = checkPending;
+                    window.speechSynthesis.speak(utt3);
+                }
             }
         }
 

@@ -5,15 +5,31 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
+# Maximum width to resize frames to before YOLO inference.
+# Smaller = faster; 416px gives a good speed/accuracy trade-off for nano models.
+YOLO_INFER_WIDTH = 416
+
 class YoloObjectDetector:
     def __init__(self):
         try:
             from ultralytics import YOLO
             self.model = YOLO("yolo11n.pt")
             self.ready = True
+            logger.info("YoloObjectDetector ready.")
         except Exception as e:
             logger.error(f"Failed to load YOLO: {e}")
             self.ready = False
+
+    def _resize_for_inference(self, img: np.ndarray) -> tuple[np.ndarray, float]:
+        """Downscale img width to YOLO_INFER_WIDTH, return (resized_img, scale_factor)."""
+        h, w = img.shape[:2]
+        if w <= YOLO_INFER_WIDTH:
+            return img, 1.0
+        scale = YOLO_INFER_WIDTH / w
+        new_w = YOLO_INFER_WIDTH
+        new_h = int(h * scale)
+        resized = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
+        return resized, scale
 
     def detect(self, image_b64):
         """
@@ -34,19 +50,28 @@ class YoloObjectDetector:
             if img is None:
                 return []
 
-            results = self.model(img, verbose=False)
-            
+            # Resize once for faster inference, keep scale to map boxes back
+            infer_img, scale = self._resize_for_inference(img)
+
+            results = self.model(
+                infer_img,
+                verbose=False,
+                stream=True,       # generator mode – lower peak memory
+                imgsz=YOLO_INFER_WIDTH,
+            )
+
             detections = []
             for r in results:
                 for box in r.boxes:
                     conf = float(box.conf[0])
-                    if conf >= 0.4:  # 40% confidence threshold
+                    if conf >= 0.35:  # slightly relaxed for faster moving objects
                         cls_id = int(box.cls[0])
                         label = self.model.names[cls_id]
-                        x1, y1, x2, y2 = [int(float(c)) for c in box.xyxy[0]]
+                        # Map coordinates back to original image scale
+                        x1, y1, x2, y2 = [int(float(c) / scale) for c in box.xyxy[0]]
                         w = x2 - x1
                         h = y2 - y1
-                        
+
                         detections.append({
                             "label": label,
                             "box": [x1, y1, w, h],
