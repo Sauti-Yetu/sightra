@@ -1,5 +1,6 @@
 # Django Core
 Django>=5.0
+python-dotenv>=1.0.0
 djangorestframework>=3.14.0
 django-filter>=23.5
 

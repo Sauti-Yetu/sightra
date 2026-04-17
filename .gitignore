@@ -134,8 +134,10 @@ celerybeat.pid
 # SageMath parsed files
 *.sage.py
 
-# Environments
+# Environments (never commit secrets)
 .env
+.env.local
+.env.*.local
 .envrc
 .venv
 env/
@@ -143,6 +145,9 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# Project-local Python venv (e.g. sightra/sauti)
+sightra/sauti/
 
 # Spyder project settings
 .spyderproject
