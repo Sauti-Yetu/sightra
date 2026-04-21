@@ -1,37 +1,69 @@
+import io
 import logging
-import base64
-try:
-    import pyttsx3
-except ImportError:
-    pyttsx3 = None
+import os
+import shutil
+import subprocess
+import wave
 
 logger = logging.getLogger(__name__)
 
+# espeak-ng --stdout: signed 16-bit mono PCM at this rate (documented default)
+_ESPEAK_SAMPLE_RATE = 22050
+
+
+def _espeak_binary() -> str | None:
+    for name in ("espeak-ng", "espeak"):
+        path = shutil.which(name)
+        if path:
+            return path
+    return None
+
+
 class AudioService:
-    def __init__(self):
-        self.tts_engine = None
-        if pyttsx3:
-            try:
-                self.tts_engine = pyttsx3.init()
-            except Exception as e:
-                logger.error(f"Failed to initialize pyttsx3: {e}")
-        
-    def save_text_to_speech(self, text, output_file_path="output.wav"):
+    """TTS via espeak stdout; can write WAV bytes to MEDIA_ROOT for Nginx."""
+
+    def text_to_speech_wav_bytes(self, text: str, speed: int = 150) -> bytes:
         """
-        Converts text to speech using an offline TTS engine (pyttsx3) or a fallback mechanism.
-        Returns the absolute path to the generated audio file.
+        Synthesize speech to a WAV file in memory using espeak-ng/espeak stdout.
         """
-        logger.info(f"Generating TTS for text: {text}")
-        if self.tts_engine:
-            self.tts_engine.save_to_file(text, output_file_path)
-            self.tts_engine.runAndWait()
-            return output_file_path
-        else:
-            logger.warning("TTS Engine not available. Returning empty audio.")
-            # Mock generating a tiny empty wav file if TTS fails
-            with open(output_file_path, "wb") as f:
-                pass
-            return output_file_path
+        safe = (text or "").replace("\x00", "")[:8000]
+        if not safe.strip():
+            return _silent_wav_bytes(200)
+
+        exe = _espeak_binary()
+        if not exe:
+            logger.warning("No espeak-ng or espeak in PATH; returning silent WAV")
+            return _silent_wav_bytes(300)
+
+        try:
+            pcm = subprocess.check_output(
+                [exe, "--stdout", "-s", str(speed), safe],
+                stderr=subprocess.PIPE,
+                timeout=120,
+            )
+        except subprocess.CalledProcessError as e:
+            logger.error("espeak failed: %s", e.stderr or e)
+            return _silent_wav_bytes(300)
+        except FileNotFoundError:
+            return _silent_wav_bytes(300)
+
+        if not pcm:
+            return _silent_wav_bytes(200)
+
+        buf = io.BytesIO()
+        with wave.open(buf, "wb") as wf:
+            wf.setnchannels(1)
+            wf.setsampwidth(2)
+            wf.setframerate(_ESPEAK_SAMPLE_RATE)
+            wf.writeframes(pcm)
+        return buf.getvalue()
+
+    def write_wav_file(self, text: str, path: str, speed: int = 150) -> None:
+        """Write synthesized WAV to path (under MEDIA_ROOT)."""
+        data = self.text_to_speech_wav_bytes(text, speed=speed)
+        os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+        with open(path, "wb") as f:
+            f.write(data)
 
     def transcribe_audio(self, audio_data):
         """
@@ -39,5 +71,19 @@ class AudioService:
         `audio_data` is base64 encoded audio.
         """
         logger.info("Running speech-to-text transcription...")
-        # Simulated transcription
         return "Can you tell me if the path ahead is clear?"
+
+
+def _silent_wav_bytes(duration_ms: int) -> bytes:
+    n = int(_ESPEAK_SAMPLE_RATE * duration_ms / 1000)
+    pcm = b"\x00\x00" * max(1, n)
+    buf = io.BytesIO()
+    with wave.open(buf, "wb") as wf:
+        wf.setnchannels(1)
+        wf.setsampwidth(2)
+        wf.setframerate(_ESPEAK_SAMPLE_RATE)
+        wf.writeframes(pcm)
+    return buf.getvalue()
+
+
+_audio_service = AudioService()

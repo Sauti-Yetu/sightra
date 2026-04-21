@@ -22,8 +22,7 @@ torchvision>=0.17.0
 
 # Audio Open Source Models
 # openai-whisper
-# pyttsx3 or piper-tts for text-to-speech
+# Server TTS uses espeak-ng/espeak (system package), not pyttsx3 file output
 transformers>=4.38.0
 numpy>=1.26.0
-pyttsx3>=2.90
 soundfile>=0.12.1

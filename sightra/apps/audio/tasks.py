@@ -1,20 +1,32 @@
-from celery import shared_task
 import os
+import uuid
+
+from celery import shared_task
+from django.conf import settings
+
 from .services import AudioService
 
 audio_service = AudioService()
 
-@shared_task
-def generate_audio_feedback(text, output_filename="response.wav"):
+
+def generate_audio_feedback(text, output_filename=None):
     """
-    Converts Gemini analysis text into speech audio.
-    Returns the URL/path to the generated audio file.
+    Writes TTS WAV under MEDIA_ROOT for Nginx to serve at MEDIA_URL.
+    Synchronous helper (also safe to call from views without Celery queue).
     """
-    output_path = os.path.join("/tmp", output_filename)
-    audio_file_path = audio_service.save_text_to_speech(text, output_path)
-    # In a real django app, this would be saved to MEDIA_ROOT 
-    # to be served statically, or streamed directly.
-    return {"audio_url": f"/media/{output_filename}"}
+    media_root = settings.MEDIA_ROOT
+    os.makedirs(media_root, exist_ok=True)
+
+    if output_filename is None:
+        output_filename = f"response_{uuid.uuid4().hex}.wav"
+
+    rel = output_filename.lstrip("/")
+    output_path = os.path.join(media_root, rel)
+    audio_service.write_wav_file(text, output_path)
+
+    base = settings.MEDIA_URL.rstrip("/") + "/"
+    return {"audio_url": f"{base}{rel}"}
+
 
 @shared_task
 def transcribe_user_command(audio_data):

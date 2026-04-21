@@ -16,6 +16,7 @@ import time
 import uuid
 import wave
 from pathlib import Path
+from urllib.parse import urljoin
 
 import requests
 from dotenv import load_dotenv
@@ -25,18 +26,25 @@ _PI_CLIENT_DIR = Path(__file__).resolve().parent
 load_dotenv(_PI_CLIENT_DIR / ".env")
 
 
+def _resolve_public_base() -> str:
+    """Single HTTP origin for API + media (no :8000, no HTTPS by default)."""
+    b = (os.environ.get("SIGHTRA_PUBLIC_BASE") or os.environ.get("SIGHTRA_BASE_URL") or "").strip().rstrip("/")
+    if b:
+        return b
+    return "http://72.61.88.50"
+
+
 def _resolve_api_url() -> str:
-    """Full navigation endpoint, or derived from SIGHTRA_BASE_URL."""
+    """POST /api/navigation/stream/ on same host as PUBLIC_BASE unless overridden."""
     explicit = (os.environ.get("SIGHTRA_API_URL") or "").strip()
     if explicit:
         return explicit
-    base = (os.environ.get("SIGHTRA_BASE_URL") or "").strip().rstrip("/")
-    if base:
-        return f"{base}/api/navigation/stream/"
-    return "http://127.0.0.1:8000/api/navigation/stream/"
+    base = _resolve_public_base()
+    return urljoin(base + "/", "api/navigation/stream/")
 
 
 # --- Config (.env + environment variables) ---
+SIGHTRA_PUBLIC_BASE = _resolve_public_base()
 SIGHTRA_API_URL = _resolve_api_url()
 SIGHTRA_DEVICE_ID = os.environ.get("SIGHTRA_DEVICE_ID", "pi-zero-2w-01")
 TEXT_PROMPT = os.environ.get(
@@ -74,12 +82,12 @@ LOOP_SLEEP_SEC = float(os.environ.get("SIGHTRA_LOOP_SLEEP", "2.5"))
 REQUEST_TIMEOUT_SEC = float(os.environ.get("SIGHTRA_REQUEST_TIMEOUT", "120"))
 MAX_NETWORK_RETRIES = int(os.environ.get("SIGHTRA_MAX_RETRIES", "5"))
 RETRY_BACKOFF_SEC = float(os.environ.get("SIGHTRA_RETRY_BACKOFF", "3.0"))
-SIGHTRA_TLS_VERIFY = os.environ.get("SIGHTRA_TLS_VERIFY", "1") == "1"
-SIGHTRA_TLS_CA_CERT = os.environ.get("SIGHTRA_TLS_CA_CERT", "").strip()
 
-# espeak: optional voice e.g. en, en-gb
+# espeak: optional voice e.g. en, en-gb (fallback when server sends no playable audio)
 SIGHTRA_ESPEAK_VOICE = os.environ.get("SIGHTRA_ESPEAK_VOICE", "")
 SIGHTRA_ESPEAK_SPEED = os.environ.get("SIGHTRA_ESPEAK_SPEED", "150")
+# Prefer server TTS: 1) audio_url over HTTP  2) optional audio_base64 in JSON
+SIGHTRA_USE_SERVER_AUDIO = os.environ.get("SIGHTRA_USE_SERVER_AUDIO", "1") == "1"
 
 _vosk_model = None  # lazy singleton
 
@@ -209,6 +217,24 @@ def jpeg_file_to_data_url(path: str) -> str:
     return f"data:image/jpeg;base64,{b64}"
 
 
+def absolute_url(path_or_url: str) -> str:
+    """Join relative paths like /media/foo.wav to SIGHTRA_PUBLIC_BASE."""
+    p = (path_or_url or "").strip()
+    if not p:
+        return ""
+    if p.startswith("http://") or p.startswith("https://"):
+        return p
+    return urljoin(SIGHTRA_PUBLIC_BASE.rstrip("/") + "/", p.lstrip("/"))
+
+
+def fetch_audio_wav(url: str) -> bytes:
+    log(f"fetching audio: {url}")
+    r = requests.get(url, timeout=REQUEST_TIMEOUT_SEC)
+    r.raise_for_status()
+    log(f"audio bytes received: {len(r.content)}")
+    return r.content
+
+
 def post_frame(data_url: str, text_prompt: str) -> dict:
     payload = {
         "frame_data": data_url,
@@ -217,9 +243,6 @@ def post_frame(data_url: str, text_prompt: str) -> dict:
         "frame_id": f"pi-{uuid.uuid4().hex[:16]}",
     }
     headers = {"Content-Type": "application/json"}
-    verify_opt: bool | str = SIGHTRA_TLS_VERIFY
-    if SIGHTRA_TLS_CA_CERT:
-        verify_opt = SIGHTRA_TLS_CA_CERT
     last_exc: Exception | None = None
     for attempt in range(1, MAX_NETWORK_RETRIES + 1):
         try:
@@ -229,7 +252,6 @@ def post_frame(data_url: str, text_prompt: str) -> dict:
                 data=json.dumps(payload),
                 headers=headers,
                 timeout=REQUEST_TIMEOUT_SEC,
-                verify=verify_opt,
             )
             r.raise_for_status()
             log("response received")
@@ -243,7 +265,20 @@ def post_frame(data_url: str, text_prompt: str) -> dict:
     raise last_exc  # type: ignore[misc]
 
 
-def speak_analysis(text: str) -> None:
+def play_wav_bytes(wav_bytes: bytes) -> None:
+    """Play WAV from memory via aplay (no /media download)."""
+    if not wav_bytes:
+        return
+    cmd = ["aplay", "-q"]
+    if SIGHTRA_PLAYBACK_DEVICE:
+        cmd.extend(["-D", SIGHTRA_PLAYBACK_DEVICE])
+    cmd.append("-")
+    log(f"aplay from stdin ({len(wav_bytes)} bytes wav)")
+    subprocess.run(cmd, input=wav_bytes, check=False, timeout=300)
+
+
+def speak_analysis_local(text: str) -> None:
+    """Fallback TTS on the Pi using espeak + aplay file in /tmp (local only)."""
     safe = text.replace("\x00", "")[:8000]
     if not safe.strip():
         return
@@ -253,15 +288,13 @@ def speak_analysis(text: str) -> None:
         espeak_cmd.extend(["-v", SIGHTRA_ESPEAK_VOICE])
     espeak_cmd.append(safe)
 
-    log(f"tts speaking ({len(safe)} chars)")
+    log(f"local espeak tts ({len(safe)} chars)")
     r = subprocess.run(espeak_cmd, check=False, timeout=300)
     if r.returncode != 0:
-        log("espeak failed; trying direct speak without wav")
         subprocess.run(["espeak", safe], check=False, timeout=300)
         return
 
     if SIGHTRA_PLAYBACK_DEVICE:
-        log(f"playback to ALSA device {SIGHTRA_PLAYBACK_DEVICE!r}")
         subprocess.run(
             ["aplay", "-q", "-D", SIGHTRA_PLAYBACK_DEVICE, TTS_WAV_PATH],
             check=False,
@@ -284,28 +317,43 @@ def run_cycle() -> None:
     analysis = body.get("analysis_text")
     if analysis:
         log(f"analysis_text: {analysis[:200]}{'...' if len(analysis) > 200 else ''}")
-        speak_analysis(str(analysis))
-    else:
-        log("no analysis_text in response; skipping speech")
+
+    played = False
+    if SIGHTRA_USE_SERVER_AUDIO and body.get("audio_url"):
+        try:
+            au = absolute_url(body["audio_url"])
+            wav_bytes = fetch_audio_wav(au)
+            play_wav_bytes(wav_bytes)
+            played = True
+            log("played server audio from audio_url")
+        except Exception as e:
+            log(f"server audio_url fetch/play failed: {e!r}")
+
+    if SIGHTRA_USE_SERVER_AUDIO and not played and body.get("audio_base64"):
+        try:
+            wav_bytes = base64.b64decode(body["audio_base64"])
+            play_wav_bytes(wav_bytes)
+            played = True
+            log("played server audio_base64")
+        except Exception as e:
+            log(f"server audio decode/play failed: {e!r}")
+
+    if not played and analysis:
+        speak_analysis_local(str(analysis))
+    elif not played:
+        log("no audio (no server audio_base64 and no analysis_text)")
 
 
 def main() -> None:
     log(
-        f"starting Sightra Pi client | API={SIGHTRA_API_URL} | device={SIGHTRA_DEVICE_ID}"
+        f"starting Sightra Pi client | public={SIGHTRA_PUBLIC_BASE} | API={SIGHTRA_API_URL} | device={SIGHTRA_DEVICE_ID}"
     )
     log(
         f"audio: capture_dev={SIGHTRA_CAPTURE_DEVICE or 'default'} "
         f"playback_dev={SIGHTRA_PLAYBACK_DEVICE or 'default'} "
         f"stt={'vosk' if SIGHTRA_VOSK_MODEL else 'off'}"
     )
-    log(
-        "tls: "
-        + (
-            f"ca_cert={SIGHTRA_TLS_CA_CERT}"
-            if SIGHTRA_TLS_CA_CERT
-            else f"verify={'on' if SIGHTRA_TLS_VERIFY else 'off'}"
-        )
-    )
+    log(f"server_audio: {'on' if SIGHTRA_USE_SERVER_AUDIO else 'off'}")
     while True:
         try:
             run_cycle()
