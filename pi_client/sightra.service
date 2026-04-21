@@ -12,9 +12,8 @@ ExecStart=/usr/bin/python3 /home/pi/pi_client/main.py
 Restart=always
 RestartSec=5
 
-# Optional: create /home/pi/pi_client/sightra.env with:
-# SIGHTRA_API_URL=https://your-server.example.com/api/navigation/stream/
-# SIGHTRA_DEVICE_ID=pi-zero-2w-01
+# URLs and options: prefer /home/pi/pi_client/.env (loaded by main.py via python-dotenv).
+# Optional extra file for systemd-only variables:
 EnvironmentFile=-/home/pi/pi_client/sightra.env
 
 [Install]
