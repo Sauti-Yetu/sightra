@@ -2,4 +2,9 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/sightran/public_html/
-    - /bin/rsync -av --delete --exclude='.git' --exclude='venv' --exclude='virtualenv' --exclude='__pycache__' --exclude='*.pyc' ./ $DEPLOYPATH
+    - /bin/cp -R apps $DEPLOYPATH
+    - /bin/cp -R templates $DEPLOYPATH
+    - /bin/cp -R public $DEPLOYPATH
+    - /bin/cp -R sightra $DEPLOYPATH
+    - /bin/cp manage.py $DEPLOYPATH
+    - /bin/cp requirements.txt $DEPLOYPATH
