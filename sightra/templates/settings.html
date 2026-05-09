@@ -118,10 +118,30 @@
     <!-- TopAppBar -->
     <header
         class="fixed top-0 w-full z-50 bg-[#131313] backdrop-blur-md bg-opacity-80 shadow-[0_0_40px_rgba(0,218,243,0.08)] flex justify-between items-center px-6 h-20">
-        <div class="flex items-center gap-3">
+        <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <span class="material-symbols-outlined text-[#00E5FF]" data-icon="visibility">visibility</span>
             <span class="font-['Lexend'] tracking-wider uppercase font-bold text-lg text-[#00E5FF]">Sightra</span>
-        </div>
+        </a>
+        
+        <!-- Desktop Navigation -->
+        <nav class="hidden md:flex items-center gap-8" id="desktopNav">
+            <a href="/" data-target="/" class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
+                <span class="material-symbols-outlined text-[20px]">home</span>
+                Home
+            </a>
+            <a href="/vision/" data-target="/vision" class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
+                <span class="material-symbols-outlined text-[20px]">visibility</span>
+                Vision
+            </a>
+            <a href="/voice_assistant/" data-target="/voice_assistant" class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
+                <span class="material-symbols-outlined text-[20px]">mic</span>
+                Voice
+            </a>
+            <a href="/settings/" data-target="/settings" class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
+                <span class="material-symbols-outlined text-[20px]">settings</span>
+                Settings
+            </a>
+        </nav>
     </header>
     <main class="pt-24 px-6 max-w-2xl mx-auto">
         <!-- Title Section -->

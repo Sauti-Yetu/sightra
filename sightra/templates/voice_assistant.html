@@ -122,10 +122,31 @@
     <!-- Top Navigation Anchor (Manual Mapping from JSON style_) -->
     <header
         class="fixed top-0 w-full z-50 bg-[#131313] backdrop-blur-md bg-opacity-80 shadow-[0_0_40px_rgba(0,218,243,0.08)] flex justify-between items-center px-6 h-20">
-        <div class="flex items-center gap-3">
+        <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <span class="material-symbols-outlined text-[#00E5FF]" data-icon="visibility">visibility</span>
             <span class="font-['Lexend'] tracking-wider uppercase font-bold text-lg text-[#00E5FF]">Sightra</span>
-        </div>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <nav class="hidden md:flex items-center gap-8" id="desktopNav">
+            <a href="/" data-target="/" class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
+                <span class="material-symbols-outlined text-[20px]">home</span>
+                Home
+            </a>
+            <a href="/vision/" data-target="/vision" class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
+                <span class="material-symbols-outlined text-[20px]">visibility</span>
+                Vision
+            </a>
+            <a href="/voice_assistant/" data-target="/voice_assistant" class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
+                <span class="material-symbols-outlined text-[20px]">mic</span>
+                Voice
+            </a>
+            <a href="/settings/" data-target="/settings" class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
+                <span class="material-symbols-outlined text-[20px]">settings</span>
+                Settings
+            </a>
+        </nav>
+
         <!-- Language Selector: High Contrast Toggle -->
         <div class="flex items-center bg-surface-container-high rounded-full p-1 gap-1">
             <button
@@ -226,8 +247,8 @@
         </section>
     </main>
     <!-- Bottom Controls Overlay -->
-    <div class="fixed bottom-0 left-0 w-full z-50 p-6 bg-gradient-to-t from-background via-background to-transparent">
-        <div class="max-w-2xl mx-auto flex flex-col gap-4">
+    <div class="fixed bottom-20 md:bottom-6 left-0 w-full z-40 p-6 bg-gradient-to-t from-background via-background to-transparent pointer-events-none">
+        <div class="max-w-2xl mx-auto flex flex-col gap-4 pointer-events-auto">
             <!-- Stop Button (Critical Focus) -->
             <button
                 class="w-full h-16 bg-error-container hover:bg-red-900 transition-colors rounded-2xl flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(147,0,10,0.3)] group">

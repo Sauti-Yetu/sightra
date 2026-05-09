@@ -111,17 +111,36 @@
     <!-- TopAppBar -->
     <header
         class="fixed top-0 w-full z-50 bg-[#131313]/80 backdrop-blur-xl border-b border-[#00E5FF]/20 flex justify-between items-center px-6 h-16 w-full shadow-[0_0_20px_rgba(0,229,255,0.1)]">
-        <div class="flex items-center gap-3">
+        <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <span class="material-symbols-outlined text-[#00E5FF] text-2xl" data-icon="visibility">visibility</span>
             <h1
                 class="font-['Lexend'] tracking-widest uppercase font-bold text-2xl font-black text-[#00E5FF] tracking-tighter">
                 Sightra</h1>
-        </div>
-        <!-- <button
-            class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#353534] transition-colors active:scale-95 duration-200">
-            <span class="material-symbols-outlined text-[#BAC9CC]"
-                data-icon="settings_input_antenna">settings_input_antenna</span>
-        </button> -->
+        </a>
+
+        <!-- Desktop Navigation -->
+        <nav class="hidden md:flex items-center gap-8" id="desktopNav">
+            <a href="/" data-target="/"
+                class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
+                <span class="material-symbols-outlined text-[20px]">home</span>
+                Home
+            </a>
+            <a href="/vision/" data-target="/vision"
+                class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
+                <span class="material-symbols-outlined text-[20px]">visibility</span>
+                Vision
+            </a>
+            <a href="/voice_assistant/" data-target="/voice_assistant"
+                class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
+                <span class="material-symbols-outlined text-[20px]">mic</span>
+                Voice
+            </a>
+            <a href="/settings/" data-target="/settings"
+                class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
+                <span class="material-symbols-outlined text-[20px]">settings</span>
+                Settings
+            </a>
+        </nav>
     </header>
     <main class="pt-24 pb-32 px-6 max-w-7xl mx-auto space-y-10">
         <!-- Welcome & System Status Section -->
@@ -218,14 +237,14 @@
             </div>
         </section>
         <!-- Lower Section: Recent Activity -->
-        <section class="space-y-6">
+        <!-- <section class="space-y-6">
             <div class="flex justify-between items-end">
                 <h2 class="font-headline text-2xl font-bold">Recent Activity</h2>
                 <button class="text-primary text-sm font-medium hover:underline">View History</button>
             </div>
-            <div class="space-y-3">
-                <!-- Activity Item 1 -->
-                <div
+            <div class="space-y-3"> -->
+        <!-- Activity Item 1 -->
+        <!-- <div
                     class="group flex items-center justify-between p-5 bg-surface-container-low rounded-xl hover:bg-surface-container-high transition-colors">
                     <div class="flex items-center gap-5">
                         <div
@@ -241,9 +260,9 @@
                         <p class="font-headline text-xl font-black text-primary-container">2m</p>
                         <p class="text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">Distance</p>
                     </div>
-                </div>
-                <!-- Activity Item 2 -->
-                <div
+                </div> -->
+        <!-- Activity Item 2 -->
+        <!-- <div
                     class="group flex items-center justify-between p-5 bg-surface-container-low rounded-xl hover:bg-surface-container-high transition-colors">
                     <div class="flex items-center gap-5">
                         <div
@@ -259,9 +278,9 @@
                         <p class="font-headline text-xl font-black text-secondary-container">10m</p>
                         <p class="text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">Distance</p>
                     </div>
-                </div>
-                <!-- Activity Item 3 -->
-                <div
+                </div> -->
+        <!-- Activity Item 3 -->
+        <!-- <div
                     class="group flex items-center justify-between p-5 bg-surface-container-low rounded-xl hover:bg-surface-container-high transition-colors opacity-70">
                     <div class="flex items-center gap-5">
                         <div
@@ -279,8 +298,21 @@
                     </div>
                 </div>
             </div>
-        </section>
+        </section> -->
     </main>
+    
+    <!-- Footer -->
+    <footer class="w-full max-w-7xl mx-auto px-6 pb-24 text-center text-xs md:text-sm text-on-surface-variant/60">
+        <div class="flex flex-wrap justify-center gap-4 font-medium">
+            <a href="#" class="hover:text-[#00E5FF] transition-colors">Privacy Policy</a>
+            <span class="opacity-40">&bull;</span>
+            <a href="#" class="hover:text-[#00E5FF] transition-colors">Terms of Service</a>
+            <span class="opacity-40">&bull;</span>
+            <a href="#" class="hover:text-[#00E5FF] transition-colors">Your Data Rights</a>
+        </div>
+        <p class="mt-4 opacity-50">&copy; 2026 Sightra. All rights reserved.</p>
+    </footer>
+
     <!-- BottomNavBar -->
     {% include 'bottom_nav.html' %}
 </body>

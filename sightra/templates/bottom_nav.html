@@ -1,6 +1,6 @@
 <!-- BottomNavBar -->
 <nav id="bottomNav"
-    class="fixed bottom-0 left-0 w-full flex justify-around items-center pb-6 pt-3 px-4 bg-[#131313]/80 backdrop-blur-xl z-50 border-t border-[#00E5FF]/10 shadow-[0_-10px_40px_rgba(0,229,255,0.08)] rounded-t-3xl">
+    class="fixed bottom-0 left-0 w-full md:hidden flex justify-around items-center pb-6 pt-3 px-4 bg-[#131313]/80 backdrop-blur-xl z-50 border-t border-[#00E5FF]/10 shadow-[0_-10px_40px_rgba(0,229,255,0.08)] rounded-t-3xl">
     <a class="nav-link flex flex-col items-center justify-center text-[#BAC9CC] px-2 sm:px-6 py-2 hover:text-[#C3F400] transition-all active:scale-90 duration-300 ease-out"
         href="/" data-target="/">
         <span class="material-symbols-outlined text-2xl" data-icon="home">home</span>
@@ -26,14 +26,22 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const path = window.location.pathname;
-        const links = document.querySelectorAll('#bottomNav .nav-link');
+        const bottomLinks = document.querySelectorAll('#bottomNav .nav-link');
+        const desktopLinks = document.querySelectorAll('#desktopNav .nav-link');
 
-        links.forEach(link => {
+        bottomLinks.forEach(link => {
             const target = link.getAttribute('data-target');
             if (path === target || (target !== '/' && path.startsWith(target))) {
-                // Apply active styling
                 link.classList.remove('text-[#BAC9CC]', 'hover:text-[#C3F400]');
                 link.classList.add('bg-[#00E5FF]', 'text-[#131313]', 'rounded-2xl', 'scale-110');
+            }
+        });
+
+        desktopLinks.forEach(link => {
+            const target = link.getAttribute('data-target');
+            if (path === target || (target !== '/' && path.startsWith(target))) {
+                link.classList.remove('text-[#BAC9CC]');
+                link.classList.add('text-[#00E5FF]', 'border-b-2', 'border-[#00E5FF]', 'pb-1');
             }
         });
     });

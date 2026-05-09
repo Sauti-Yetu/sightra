@@ -129,12 +129,33 @@
         <!-- Shared Component: TopAppBar -->
         <header
             class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-neutral-950/80 backdrop-blur-xl shadow-[0_0_40px_rgba(0,229,255,0.08)]">
-            <div class="flex items-center gap-3" href="/">
+            <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
                 <span class="material-symbols-outlined text-[#00E5FF] text-2xl" data-icon="visibility">visibility</span>
                 <h1
                     class="font-['Lexend'] tracking-widest uppercase font-bold text-2xl font-black text-[#00E5FF] tracking-tighter">
                     Sightra</h1>
-            </div>
+            </a>
+            
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center gap-8" id="desktopNav">
+                <a href="/" data-target="/" class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
+                    <span class="material-symbols-outlined text-[20px]">home</span>
+                    Home
+                </a>
+                <a href="/vision/" data-target="/vision" class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
+                    <span class="material-symbols-outlined text-[20px]">visibility</span>
+                    Vision
+                </a>
+                <a href="/voice_assistant/" data-target="/voice_assistant" class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
+                    <span class="material-symbols-outlined text-[20px]">mic</span>
+                    Voice
+                </a>
+                <a href="/settings/" data-target="/settings" class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
+                    <span class="material-symbols-outlined text-[20px]">settings</span>
+                    Settings
+                </a>
+            </nav>
+
             <!-- AI Status Indicators -->
             <div class="flex items-center gap-6">
                 <div class="flex items-center gap-2">
@@ -145,7 +166,7 @@
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-cyan-400 text-sm" data-icon="gps_fixed">gps_fixed</span>
                     <span
-                        class="font-headline text-[10px] tracking-[0.2em] font-bold text-on-surface-variant uppercase">GPS
+                        class="font-headline text-[10px] tracking-[0.2em] font-bold text-on-surface-variant uppercase hidden md:inline">GPS
                         LOCKED</span>
                 </div>
                 <!-- <span class="material-symbols-outlined text-cyan-400 hover:opacity-80 transition-opacity"
@@ -436,6 +457,8 @@
             });
         }
     </script>
+    <!-- BottomNavBar -->
+    {% include 'bottom_nav.html' %}
 </body>
 
 </html>
