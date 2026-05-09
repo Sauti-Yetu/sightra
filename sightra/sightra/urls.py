@@ -21,14 +21,24 @@ from apps.core.views import *
 from apps.audio.views import *
 from apps.vision.views import *
 from apps.settings.views import *
+from apps.accounts.views import *
 
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    # Authentication 
+    path("signin/", signin, name="signin"),
+    path("signup/", signup, name="signup"),
+    # Homepage
     path("", index, name="index"),
+    path("landing-page/", landing_page, name="landing_page"),
+    # Vision 
     path("vision/", vision, name="vision"),
-    path("settings/", settings_view, name="settings"),
+    # Voice assistant
     path("voice_assistant/", voice_assistant, name="voice_assistant"),
+    # User settings
+    path("settings/", settings_view, name="settings"),
+    # APIs
     path("api/accounts/", include("apps.accounts.urls")),
     path("api/audio/", include("apps.audio.urls")),
     path("api/vision/", include("apps.vision.urls")),

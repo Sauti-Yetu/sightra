@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;family=Inter:wght@100..900&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#abd600",
+                        "primary-fixed": "#9cf0ff",
+                        "on-surface-variant": "#bac9cc",
+                        "secondary": "#ffffff",
+                        "secondary-fixed": "#c3f400",
+                        "on-error": "#690005",
+                        "on-secondary-fixed": "#161e00",
+                        "inverse-on-surface": "#313030",
+                        "surface-bright": "#393939",
+                        "background": "#131313",
+                        "tertiary": "#ffeac0",
+                        "on-primary-fixed-variant": "#004f58",
+                        "surface": "#131313",
+                        "primary-fixed-dim": "#00daf3",
+                        "surface-container-low": "#1c1b1b",
+                        "on-tertiary-fixed-variant": "#594400",
+                        "surface-container-high": "#2a2a2a",
+                        "error": "#ffb4ab",
+                        "secondary-container": "#c3f400",
+                        "surface-container-highest": "#353534",
+                        "on-primary-container": "#00626e",
+                        "on-secondary": "#283500",
+                        "inverse-surface": "#e5e2e1",
+                        "surface-variant": "#353534",
+                        "on-surface": "#e5e2e1",
+                        "on-error-container": "#ffdad6",
+                        "error-container": "#93000a",
+                        "surface-dim": "#131313",
+                        "surface-tint": "#00daf3",
+                        "primary": "#c3f5ff",
+                        "tertiary-fixed": "#ffdf96",
+                        "surface-container": "#201f1f",
+                        "on-primary-fixed": "#001f24",
+                        "inverse-primary": "#006875",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-secondary-container": "#556d00",
+                        "on-tertiary": "#3e2e00",
+                        "primary-container": "#00e5ff",
+                        "on-tertiary-container": "#6f5500",
+                        "outline": "#849396",
+                        "tertiary-fixed-dim": "#f3bf26",
+                        "on-secondary-fixed-variant": "#3c4d00",
+                        "on-background": "#e5e2e1",
+                        "on-primary": "#00363d",
+                        "outline-variant": "#3b494c",
+                        "tertiary-container": "#fec931",
+                        "on-tertiary-fixed": "#251a00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Lexend"],
+                        "display": ["Lexend"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        body {
+            background-color: #131313;
+            color: #e5e2e1;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .glass-effect {
+            background: rgba(19, 19, 19, 0.8);
+            backdrop-filter: blur(20px);
+        }
+
+        .neon-glow {
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
+        }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="selection:bg-primary-container selection:text-on-primary-container overflow-x-hidden">
+    <!-- TopAppBar -->
+    <header
+        class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-neutral-950/80 backdrop-blur-xl shadow-[0_0_40px_rgba(0,229,255,0.08)]">
+        <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-cyan-400" data-icon="location_on">location_on</span>
+            <h1 class="text-cyan-400 dark:text-cyan-400 font-lexend font-black tracking-tighter text-xl">SIGHTRA</h1>
+        </div>
+        <nav class="hidden md:flex gap-8 items-center">
+            <a class="font-lexend tracking-widest uppercase text-sm font-bold text-cyan-400 hover:opacity-80 transition-opacity"
+                href="#">Intelligence</a>
+            <a class="font-lexend tracking-widest uppercase text-sm font-bold text-neutral-400 hover:opacity-80 transition-opacity"
+                href="#">Navigation</a>
+            <a class="font-lexend tracking-widest uppercase text-sm font-bold text-neutral-400 hover:opacity-80 transition-opacity"
+                href="#">Impact</a>
+        </nav>
+        <div class="flex items-center gap-4">
+            <a href="/signin/"
+                class="bg-primary-container text-on-primary-container font-lexend font-bold px-6 py-2 rounded-xl text-xs tracking-widest uppercase hover:opacity-90 active:scale-95 transition-all">Sign
+                In</a>
+        </div>
+    </header>
+    <main class="pt-24 pb-32">
+        <!-- Hero Section -->
+        <section class="px-6 md:px-12 lg:px-24 py-12 md:py-24 relative overflow-hidden">
+            <div class="absolute -top-24 -right-24 w-96 h-96 bg-primary-container/10 blur-[120px] rounded-full"></div>
+            <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-16">
+                <div class="w-full md:w-3/5 space-y-8 relative z-10">
+                    <h2
+                        class="text-6xl md:text-8xl font-display font-extrabold tracking-tighter leading-[0.9] text-on-surface">
+                        See The World,<br /><span
+                            class="text-transparent bg-clip-text bg-gradient-to-br from-primary to-primary-container">Differently.</span>
+                    </h2>
+                    <p class="text-on-surface-variant text-lg md:text-xl leading-relaxed max-w-xl">
+                        Sightra uses live camera vision to help people with visual impairment safely understand their
+                        surroundings and move with confidence.
+
+                    </p>
+                    <div class="flex flex-wrap gap-4 pt-4">
+                        <a href="/signup/"
+                            class="bg-primary-container text-on-primary-container px-10 py-5 rounded-xl font-headline font-bold text-lg hover:opacity-90 shadow-[0_0_30px_rgba(0,229,255,0.3)] transition-all">
+                            Get Started
+                        </a>
+                        <a href="/vision/"
+                            class="bg-surface-container-high text-primary px-10 py-5 rounded-xl font-headline font-bold text-lg hover:bg-surface-container-highest transition-all">
+                            Live Demo
+                        </a>
+                    </div>
+                </div>
+                <div
+                    class="w-full md:w-2/5 aspect-[4/5] rounded-[3rem] overflow-hidden bg-surface-container-low relative group">
+                    <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        data-alt="A close-up shot of a sophisticated wearable ocular device that uses neon cyan light to project high-tech data directly into a user's vision. The background is a moody, dark futuristic cityscape with blurred streetlights and glowing architectural details. The aesthetic is ultra-modern, high-contrast, and clinical, emphasizing the advanced edge-to-edge camera perception technology."
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-zeg2TGK1WJ0DA7yuIBS3KcK5efJiwmLhBUn8LpS55DTAVMjaGJ0CnhQC1AM8wORLGXIX7vUsnVpBMyR6twcmBteHSVkueSwtPuH4fWL9U_b8W-FHG2mB6gVJ1Nw6VTWoabZbwRcTPNy2WfHudykRhcTq91DK8DpnGxc9K7BEKqk-Ee9skrWrbTHf3d7iMVIROQL6_vkp5pnR2qe8Ng8HYm4bI1dsVprvJ4ueZccdrmjgJsZO4wlObZ4ri79ffgDw78p7pCrgV3JR" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-surface to-transparent opacity-60"></div>
+                    <div
+                        class="absolute bottom-8 left-8 right-8 p-6 glass-effect rounded-2xl border border-outline-variant/20">
+                        <div class="flex items-center gap-4">
+                            <div class="w-2 h-2 rounded-full bg-secondary-fixed animate-pulse"></div>
+                            <p class="text-xs font-display tracking-widest text-secondary-fixed uppercase">Active
+                                Perception System</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Bento Features Section -->
+        <section class="px-6 md:px-12 lg:px-24 py-24">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex justify-between items-end mb-16">
+                    <div class="max-w-xl">
+                        <h3 class="text-4xl md:text-5xl font-display font-bold mb-4">Built for Independence.</h3>
+                        <p class="text-on-surface-variant">Sightra helps to understand and navigate the world in
+                            real time using real-time camera guidance.</p>
+                    </div>
+                    <span class="material-symbols-outlined text-cyan-400 text-6xl hidden md:block"
+                        data-icon="settings_overscan">settings_overscan</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:auto-rows-[250px] auto-rows-auto">
+                    <!-- Feature 1: Real-time Awareness -->
+                    <div
+                        class="md:col-span-8 bg-surface-container-low rounded-[2.5rem] p-6 md:p-10 flex flex-col justify-between hover:bg-surface-container shadow-sm transition-all border border-transparent hover:border-primary-container/20 overflow-hidden relative group">
+                        <div class="relative z-10">
+                            <span class="material-symbols-outlined text-primary-container text-4xl mb-6"
+                                data-icon="visibility">visibility</span>
+                            <h4 class="text-2xl md:text-3xl font-display font-bold mb-2">Real-time Awareness</h4>
+                            <p class="text-on-surface-variant max-w-sm">Sightra detects obstacles, pathways, objects,
+                                and movement around you to help you stay aware and safe in real time.</p>
+                        </div>
+                        <div
+                            class="absolute right-0 bottom-0 w-1/2 h-full opacity-30 group-hover:opacity-50 transition-opacity">
+                            <img class="w-full h-full object-cover"
+                                data-alt="A futuristic digital grid overlaying a real-world city intersection at night, showing highlighted pedestrians and vehicles with neon blue bounding boxes. The lighting is dominated by glowing cyan lines and data markers against a deep charcoal urban setting. The mood is highly analytical, reflecting real-time visual intelligence and hazard detection."
+                                src="https://i0.wp.com/mwarv.click.co.ke/wp-content/uploads/2022/07/20220716-CPW-A-109.jpg?resize=768%2C500&ssl=1" />
+                        </div>
+                    </div>
+                    <!-- Feature 2: Spatial Navigation -->
+                    <div
+                        class="md:col-span-4 bg-secondary-fixed text-on-secondary-fixed rounded-[2.5rem] p-6 md:p-10 flex flex-col justify-between hover:opacity-95 transition-all">
+                        <div>
+                            <span class="material-symbols-outlined text-4xl mb-6" data-icon="filter_center_focus"
+                                style="font-variation-settings: 'FILL' 1;">filter_center_focus</span>
+                            <h4 class="text-2xl md:text-3xl font-display font-bold mb-2 leading-none">Smart Navigation
+                            </h4>
+                        </div>
+                        <p class="font-medium">Get step-by-step guidance powered by live camera vision and Google Maps
+                            for easier movement indoors and outdoors.</p>
+                    </div>
+                    <!-- Feature 3: Smart Assistance -->
+                    <div
+                        class="md:col-span-5 bg-surface-container-low rounded-[2.5rem] p-6 md:p-10 flex flex-col justify-between hover:bg-surface-container transition-all overflow-hidden relative">
+                        <div class="z-10">
+                            <span class="material-symbols-outlined text-primary-container text-4xl mb-6"
+                                data-icon="radio_button_checked">radio_button_checked</span>
+                            <h4 class="text-2xl md:text-3xl font-display font-bold mb-2">Voice Conversations</h4>
+                            <p class="text-on-surface-variant">Talk naturally with Sightra and receive instant audio
+                                responses, directions, and environmental descriptions.</p>
+                        </div>
+                    </div>
+                    <!-- Testimonial Bento Item -->
+                    <div
+                        class="md:col-span-7 bg-surface-container-highest rounded-[2.5rem] p-6 md:p-10 flex flex-col justify-center items-center text-center relative overflow-hidden">
+                        <div class="absolute top-4 left-10 text-8xl font-serif text-primary/10 select-none">“</div>
+                        <p
+                            class="text-xl md:text-2xl font-body italic leading-relaxed text-on-surface z-10 max-w-lg mb-6">
+                            “Sightra helped me feel more confident moving through unfamiliar places. It felt like having
+                            guidance and support whenever I needed it.”
+                        </p>
+                        <div class="flex items-center gap-4 z-10">
+                            <div
+                                class="w-12 h-12 rounded-full bg-primary-container/20 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-primary-container"
+                                    data-icon="person">person</span>
+                            </div>
+                            <div class="text-left">
+                                <p class="font-bold font-display text-sm tracking-widest uppercase">Jace Wairimu</p>
+                                <p class="text-xs text-on-surface-variant">Beta Tester</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Visual Impact Section -->
+        <section class="px-6 md:px-12 lg:px-24 py-24 bg-surface-container-lowest">
+            <div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-16 items-center">
+                <div class="w-full md:w-1/2 rounded-[3rem] overflow-hidden h-64 md:h-[500px]">
+                    <img class="w-full h-full object-cover"
+                        data-alt="A cinematic, wide-angle shot of a person standing on a quiet street at dusk, wearing a sleek headset. Their field of vision is visualized with glowing topographic lines and soft lime green waypoints that stretch into the distance. The overall palette is deep indigo and charcoal, illuminated by the bright, futuristic AR guidance system."
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcYNP3jVH5SH9TascLxDN-kV82d5sK4jZMl6mzRiLstE5WyELmhzeNj84vzfbmVpNJELy1lrSebWhgSQx0bf02eD3zAI7piWDaiLmEdm_PAP5jKd6D_gHOLbwr8HApeuGPrsU3CbDBjvLi7ZJiyLWucSWVdFb5E2dfypKs5hUIZeOn8x6o_ptycDPhotto9Jfp1XVx1PdfHuevyyvTuEScqeEZnvv9SNa4vGB6ZJlc3NKHi_EXYa7zcvXc2lyZQ17y5BN7s0rWq6sN" />
+                </div>
+                <div class="w-full md:w-1/2 space-y-8">
+                    <div
+                        class="inline-block px-4 py-1 rounded-full border border-primary-container text-primary-container font-lexend text-xs font-bold tracking-[0.2em] uppercase">
+                        The Impact
+                    </div>
+                    <h3 class="text-5xl font-display font-bold leading-tight">Beyond Vision, Real Support.</h3>
+                    <p class="text-on-surface-variant text-lg">Sightra combines vision, voice interaction, smart
+                        mobility tools, and human assistance to help the visually impaierd move through the world more
+                        independently
+                        and confidently.</p>
+                    <ul class="space-y-4">
+                        <li class="flex items-center gap-4">
+                            <span
+                                class="w-6 h-6 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed">
+                                <span class="material-symbols-outlined text-sm" data-icon="check">check</span>
+                            </span>
+                            <span class="font-headline font-semibold">Real-time environmental awareness</span>
+                        </li>
+                        <li class="flex items-center gap-4">
+                            <span
+                                class="w-6 h-6 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed">
+                                <span class="material-symbols-outlined text-sm" data-icon="check">check</span>
+                            </span>
+                            <span class="font-headline font-semibold">Voice-guided assistance</span>
+                        </li>
+                        <li class="flex items-center gap-4">
+                            <span
+                                class="w-6 h-6 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed">
+                                <span class="material-symbols-outlined text-sm" data-icon="check">check</span>
+                            </span>
+                            <span class="font-headline font-semibold">Smart mobility and navigation support</span>
+                        </li>
+                        <li class="flex items-center gap-4">
+                            <span
+                                class="w-6 h-6 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed">
+                                <span class="material-symbols-outlined text-sm" data-icon="check">check</span>
+                            </span>
+                            <span class="font-headline font-semibold">Human volunteer assistance when needed</span>
+                        </li>
+                        <li class="flex items-center gap-4">
+                            <span
+                                class="w-6 h-6 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed">
+                                <span class="material-symbols-outlined text-sm" data-icon="check">check</span>
+                            </span>
+                            <span class="font-headline font-semibold">Works in multiple languages and dialects</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        <!-- Final Call to Action -->
+        <section class="px-6 md:px-12 lg:px-24 py-32 text-center">
+            <div class="max-w-4xl mx-auto space-y-12">
+                <h2 class="text-5xl md:text-7xl font-display font-black tracking-tight uppercase leading-none">Ready for
+                    the future?</h2>
+                <p class="text-on-surface-variant text-xl md:text-2xl max-w-2xl mx-auto">Join the movement and be the
+                    first to experience the visual intelligence layer that changes everything.</p>
+                <div class="pt-8">
+                    <button
+                        class="group relative px-16 py-8 bg-primary-container rounded-full overflow-hidden transition-all active:scale-95 shadow-[0_0_50px_rgba(0,229,255,0.4)]">
+                        <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity">
+                        </div>
+                        <span
+                            class="relative z-10 text-on-primary-container font-headline font-black text-2xl tracking-widest uppercase">Get
+                            Started Now</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Desktop Footer -->
+    <footer class="hidden md:block bg-surface py-12 px-12 lg:px-24 border-t border-outline-variant/10">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <h1 class="text-cyan-400 font-lexend font-black tracking-tighter text-2xl">SIGHTRA</h1>
+            </div>
+            <div class="text-on-surface-variant font-label text-xs tracking-[0.2em] uppercase">
+                © {% now "Y" %} Sightra Intelligence Systems. All rights reserved.
+            </div>
+            <div class="flex gap-6">
+                <a class="text-on-surface-variant hover:text-primary transition-colors font-headline text-sm uppercase tracking-widest font-bold"
+                    href="#">Privacy</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors font-headline text-sm uppercase tracking-widest font-bold"
+                    href="#">Terms</a>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>
