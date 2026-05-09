@@ -121,7 +121,7 @@
     class="bg-background text-on-surface font-body overflow-hidden selection:bg-primary-container selection:text-on-primary-container">
     <!-- Live Camera Feed (Background Canvas) -->
     <div class="fixed inset-0 z-0 bg-black">
-        <video id="cameraElement" class="w-full h-full object-cover" autoplay playsinline></video>
+        <video id="cameraElement" class="w-full h-full object-cover" autoplay playsinline muted></video>
         <canvas id="canvasElement" style="display:none;"></canvas>
     </div>
     <!-- UI Overlay Layer -->
@@ -256,19 +256,33 @@
         const CAPTURE_INTERVAL_MS = 1500;
 
         async function startCamera() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                const errorMsg = "Camera access is not available. Please ensure you are using HTTPS and that your browser supports camera access.";
+                console.error(errorMsg);
+                alert(errorMsg);
+                return;
+            }
+
             try {
-                streamRef = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                // Try environment camera first (rear camera on mobile)
+                streamRef = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: "environment",
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    } 
+                });
                 video.srcObject = streamRef;
-                video.play().catch(e => console.log("Play error: ", e));
+                await video.play();
             } catch (err) {
                 console.warn("Environment camera failed, trying default camera...", err);
                 try {
                     streamRef = await navigator.mediaDevices.getUserMedia({ video: true });
                     video.srcObject = streamRef;
-                    video.play().catch(e => console.log("Play error: ", e));
+                    await video.play();
                 } catch (fallbackErr) {
                     console.error("Error accessing camera: ", fallbackErr);
-                    alert("Please enable camera access for SIGHTRA to work properly.");
+                    alert("Please enable camera access for SIGHTRA to work properly. If you are on mobile, ensure no other app is using the camera.");
                 }
             }
         }
