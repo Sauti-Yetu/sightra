@@ -1,10 +1,10 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/sightran/public_html/
-    - /bin/cp -R apps $DEPLOYPATH
-    - /bin/cp -R templates $DEPLOYPATH
-    - /bin/cp -R public $DEPLOYPATH
-    - /bin/cp -R sightra $DEPLOYPATH
-    - /bin/cp manage.py $DEPLOYPATH
-    - /bin/cp requirements.txt $DEPLOYPATH
+    - export DEPLOYPATH=/home/sightran/sightra-main/sightra/
+    - /bin/cp -R sightra/apps $DEPLOYPATH
+    - /bin/cp -R sightra/templates $DEPLOYPATH
+    - /bin/cp -R sightra/sightra $DEPLOYPATH
+    - /bin/cp -R sightra/public $DEPLOYPATH
+    - /bin/cp sightra/manage.py $DEPLOYPATH
+    - /bin/cp sightra/requirements.txt $DEPLOYPATH
