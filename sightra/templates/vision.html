@@ -5,6 +5,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <!-- <meta http-equiv="Permissions-Policy" content="camera=(self); microphone=(self)"> -->
     <title>SIGHTRA | Live Perception</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link
@@ -265,12 +266,12 @@
 
             try {
                 // Try environment camera first (rear camera on mobile)
-                streamRef = await navigator.mediaDevices.getUserMedia({ 
-                    video: { 
+                streamRef = await navigator.mediaDevices.getUserMedia({
+                    video: {
                         facingMode: "environment",
                         width: { ideal: 1280 },
                         height: { ideal: 720 }
-                    } 
+                    }
                 });
                 video.srcObject = streamRef;
                 await video.play();
