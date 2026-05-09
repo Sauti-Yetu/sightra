@@ -1,0 +1,5 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/sightran/public_html/
+    - /bin/rsync -av --delete --exclude='.git' --exclude='venv' --exclude='virtualenv' --exclude='__pycache__' --exclude='*.pyc' ./ $DEPLOYPATH
