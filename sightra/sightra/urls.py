@@ -22,6 +22,7 @@ from apps.audio.views import *
 from apps.vision.views import *
 from apps.settings.views import *
 from apps.accounts.views import *
+from apps.volunteer.views import *
 
 
 urlpatterns = [
@@ -36,6 +37,9 @@ urlpatterns = [
     path("vision/", vision, name="vision"),
     # Voice assistant
     path("voice_assistant/", voice_assistant, name="voice_assistant"),
+    # Volunteer
+    path("sightra-connect/", sightra_connect, name="sightra-connect"),
+    path("live-call/", live_call, name="live-call"),
     # User settings
     path("settings/", settings_view, name="settings"),
     # APIs

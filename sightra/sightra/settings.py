@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "apps.navigation",
     "apps.core",
     "apps.settings",
+    "apps.volunteer",
 ]
 
 MIDDLEWARE = [

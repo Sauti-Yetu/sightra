@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;family=Inter:wght@100..900&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#0e0e0e",
+                        "outline-variant": "#3b494c",
+                        "on-secondary-container": "#556d00",
+                        "surface-container": "#201f1f",
+                        "surface": "#131313",
+                        "on-tertiary-fixed-variant": "#594400",
+                        "secondary-fixed": "#c3f400",
+                        "secondary-container": "#c3f400",
+                        "surface-dim": "#131313",
+                        "on-surface": "#e5e2e1",
+                        "surface-container-highest": "#353534",
+                        "secondary-fixed-dim": "#abd600",
+                        "tertiary-fixed-dim": "#f3bf26",
+                        "outline": "#849396",
+                        "surface-tint": "#00daf3",
+                        "inverse-on-surface": "#313030",
+                        "on-tertiary": "#3e2e00",
+                        "tertiary-fixed": "#ffdf96",
+                        "on-secondary-fixed": "#161e00",
+                        "on-primary-fixed": "#001f24",
+                        "surface-container-high": "#2a2a2a",
+                        "primary-container": "#00e5ff",
+                        "on-primary-fixed-variant": "#004f58",
+                        "primary-fixed-dim": "#00daf3",
+                        "on-error": "#690005",
+                        "inverse-surface": "#e5e2e1",
+                        "on-secondary-fixed-variant": "#3c4d00",
+                        "surface-bright": "#393939",
+                        "on-surface-variant": "#bac9cc",
+                        "on-secondary": "#283500",
+                        "surface-container-low": "#1c1b1b",
+                        "surface-variant": "#353534",
+                        "tertiary": "#ffeac0",
+                        "inverse-primary": "#006875",
+                        "on-error-container": "#ffdad6",
+                        "on-background": "#e5e2e1",
+                        "error-container": "#93000a",
+                        "primary": "#c3f5ff",
+                        "on-tertiary-container": "#6f5500",
+                        "on-primary-container": "#00626e",
+                        "primary-fixed": "#9cf0ff",
+                        "tertiary-container": "#fec931",
+                        "on-tertiary-fixed": "#251a00",
+                        "error": "#ffb4ab",
+                        "on-primary": "#00363d",
+                        "secondary": "#ffffff",
+                        "background": "#131313"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Lexend"],
+                        "display": ["Lexend"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .font-lexend {
+            font-family: 'Lexend', sans-serif;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+    <!-- TopAppBar -->
+    <header
+        class="fixed top-0 w-full z-50 bg-[#131313]/80 backdrop-blur-xl border-b border-[#00E5FF]/20 flex justify-between items-center px-6 h-16 w-full shadow-[0_0_20px_rgba(0,229,255,0.1)]">
+        <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <span class="material-symbols-outlined text-[#00E5FF] text-2xl" data-icon="visibility">visibility</span>
+            <h1
+                class="font-['Lexend'] tracking-widest uppercase font-bold text-2xl font-black text-[#00E5FF] tracking-tighter">
+                Sightra</h1>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <nav class="hidden md:flex items-center gap-8" id="desktopNav">
+            <a href="/" data-target="/"
+                class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
+                <span class="material-symbols-outlined text-[20px]">home</span>
+                Home
+            </a>
+            <a href="/vision/" data-target="/vision"
+                class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
+                <span class="material-symbols-outlined text-[20px]">visibility</span>
+                Vision
+            </a>
+            <a href="/voice_assistant/" data-target="/voice_assistant"
+                class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
+                <span class="material-symbols-outlined text-[20px]">mic</span>
+                Voice
+            </a>
+            <a href="/settings/" data-target="/settings"
+                class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
+                <span class="material-symbols-outlined text-[20px]">settings</span>
+                Settings
+            </a>
+        </nav>
+    </header>
+    <main class="flex-grow pt-24 pb-48 px-6 max-w-2xl mx-auto w-full">
+        <!-- Hero Section -->
+        <section class="mb-12">
+            <div class="relative rounded-xl overflow-hidden mb-8 aspect-[16/10] group">
+                <img class="w-full h-full object-cover brightness-75 group-hover:scale-105 transition-transform duration-700"
+                    data-alt="A futuristic digital interface showing a video stream of a remote volunteer assisting a user. The visual style is high-contrast with deep charcoal backgrounds and vibrant neon cyan and lime green data overlays. Soft ambient light illuminates a professional volunteer in a modern, minimalist workspace, creating a feeling of reliable human connection through advanced technology."
+                    src="https://grassrootsvolunteering.org/wp-content/uploads/2022/05/remote-volunteer-bemyeyes.jpg" />
+                <div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent"></div>
+                <div
+                    class="absolute bottom-6 left-6 flex items-center gap-3 px-4 py-2 bg-surface-container-highest/80 backdrop-blur-md rounded-full border border-primary-container/20">
+                    <div class="w-2 h-2 bg-secondary-container rounded-full animate-pulse shadow-[0_0_10px_#C3F400]">
+                    </div>
+                    <span class="font-lexend text-[10px] uppercase tracking-widest text-on-surface font-bold">142
+                        Volunteers Ready</span>
+                </div>
+            </div>
+            <h1
+                class="font-lexend text-5xl md:text-6xl font-extrabold tracking-tighter leading-none mb-4 text-on-surface">
+                Human Insight
+            </h1>
+            <p class="text-on-surface-variant text-lg leading-relaxed max-w-md">
+                Connect with a sighted volunteer for personalized visual assistance.
+            </p>
+        </section>
+        <!-- Primary Action Area (Asymmetric Layout) -->
+        <div class="grid grid-cols-1 gap-4 mb-12">
+            <a href="/live-call/"
+                class="group relative flex items-center justify-between w-full h-[72px] px-8 bg-gradient-to-r from-primary-container to-primary-fixed-dim rounded-xl overflow-hidden transition-all active:scale-[0.98]">
+                <span
+                    class="relative z-10 font-lexend text-on-primary-container font-black uppercase tracking-tighter text-xl">Start
+                    Video Call</span>
+                <span class="material-symbols-outlined text-on-primary-container relative z-10 text-3xl"
+                    style="font-variation-settings: 'FILL' 1;">videocam</span>
+                <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </a>
+            <button
+                class="flex items-center justify-between w-full h-[72px] px-8 bg-surface-container-high rounded-xl hover:bg-surface-container-highest transition-colors active:scale-[0.98]">
+                <span class="font-lexend text-primary font-bold uppercase tracking-widest text-sm">Schedule
+                    Assistance</span>
+                <span class="material-symbols-outlined text-primary">calendar_today</span>
+            </button>
+        </div>
+        <!-- Connectivity Stats / Bento Grid Lite -->
+        <div class="grid grid-cols-2 gap-4">
+            <div class="bg-surface-container-low p-6 rounded-xl flex flex-col justify-between h-32">
+                <span class="material-symbols-outlined text-secondary-container text-2xl">speed</span>
+                <div>
+                    <div class="text-[10px] uppercase tracking-widest text-on-surface-variant mb-1">Latency</div>
+                    <div class="font-lexend font-bold text-on-surface">24ms Ultra-Low</div>
+                </div>
+            </div>
+            <div class="bg-surface-container-low p-6 rounded-xl flex flex-col justify-between h-32">
+                <span class="material-symbols-outlined text-primary-container text-2xl">security</span>
+                <div>
+                    <div class="text-[10px] uppercase tracking-widest text-on-surface-variant mb-1">Encryption</div>
+                    <div class="font-lexend font-bold text-on-surface">End-to-End</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Visual Polish: Subtle Background Gradients -->
+    <div
+        class="fixed top-0 right-0 w-[500px] h-[500px] bg-primary-container/5 blur-[120px] -z-10 rounded-full pointer-events-none">
+    </div>
+    <div
+        class="fixed bottom-0 left-0 w-[400px] h-[400px] bg-secondary-container/5 blur-[100px] -z-10 rounded-full pointer-events-none">
+    </div>
+</body>
+
+</html>
