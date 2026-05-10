@@ -44,3 +44,26 @@ class NavigationStreamView(APIView):
             "audio_url": audio_info.get("audio_url"),
             "metadata": analysis_result.get("vision_metadata")
         }, status=status.HTTP_200_OK)
+
+class RouteGuidanceView(APIView):
+    """
+    Endpoint for getting turn-by-turn navigation instructions.
+    """
+    def post(self, request):
+        origin = request.data.get("origin")
+        destination = request.data.get("destination")
+        
+        if not origin or not destination:
+            return Response({"error": "Origin and destination are required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Mocking route guidance for now
+        return Response({
+            "route_id": "route_12345",
+            "instructions": [
+                "Head north on Main Street",
+                "Turn right onto 5th Avenue",
+                "Your destination is on the left"
+            ],
+            "distance": "1.2 km",
+            "estimated_time": "15 mins walk"
+        }, status=status.HTTP_200_OK)
