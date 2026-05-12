@@ -110,3 +110,32 @@ class ByteTrackTracker:
             tracked_objects.append(d)
         return tracked_objects
 
+
+
+
+def analyze_scene(frame_data, text_prompt, device_id=None, language="en"):
+    """
+    This is where your AI logic goes.
+    For now, return mock data so hardware developers can test integration.
+    """
+
+    return {
+        "analysis_text": "Obstacle detected ahead. Move slightly to the left.",
+        "navigation_hint": "Turn left slightly and continue forward.",
+        "objects": [
+            {
+                "label": "chair",
+                "confidence": 0.91,
+                "position": "front",
+                "distance_estimate": "near"
+            }
+        ],
+        "warnings": [
+            "Obstacle ahead"
+        ],
+        "metadata": {
+            "source": "sightra_scene_analysis",
+            "processing_mode": "camera_frame"
+        }
+    }
+

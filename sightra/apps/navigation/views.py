@@ -3,7 +3,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from apps.core.tasks import analyze_frame_context
 from apps.audio.tasks import generate_audio_feedback
+from django.shortcuts import render
 import time
+
+def live_map(request):
+    return render(request, "live-map.html")
 
 class NavigationStreamView(APIView):
     """

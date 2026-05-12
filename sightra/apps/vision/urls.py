@@ -1,8 +1,7 @@
 from django.urls import path
 
-from .views import ObjectDetectionView, SceneAnalysisView
+from .views import *
 
 urlpatterns = [
-    path("detect/", ObjectDetectionView.as_view(), name="vision_detect"),
-    path("analyze/", SceneAnalysisView.as_view(), name="vision_analyze"),
+    path("api/vision/analyze/", SceneAnalysisView.as_view(), name="scene_analysis_api"),
 ]
