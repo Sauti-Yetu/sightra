@@ -43,6 +43,7 @@ urlpatterns = [
     # Volunteer
     path("sightra-connect/", sightra_connect, name="sightra-connect"),
     path("live-call/", live_call, name="live-call"),
+    path("api/volunteer/token/", get_livekit_token, name="get-livekit-token"),
     # User settings
     path("settings/", settings_view, name="settings"),
     # APIs
