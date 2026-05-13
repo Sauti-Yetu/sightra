@@ -116,7 +116,8 @@
         class="fixed top-0 w-full z-50 bg-[#131313]/80 backdrop-blur-xl border-b border-[#00E5FF]/20 flex justify-between items-center px-6 h-16 shadow-[0_0_20px_rgba(0,229,255,0.1)]">
         <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <span class="material-symbols-outlined text-[#00E5FF] text-2xl" data-icon="visibility">visibility</span>
-            <h1 class="font-['Lexend'] tracking-widest uppercase font-bold text-xl md:text-2xl font-black text-[#00E5FF] tracking-tighter">
+            <h1
+                class="font-['Lexend'] tracking-widest uppercase font-bold text-xl md:text-2xl font-black text-[#00E5FF] tracking-tighter">
                 Sightra</h1>
         </a>
 
@@ -131,6 +132,11 @@
                 class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
                 <span class="material-symbols-outlined text-[20px]">visibility</span>
                 Vision
+            </a>
+            <a href="/live-map/" data-target="/map"
+                class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
+                <span class="material-symbols-outlined text-[20px]">map</span>
+                Map
             </a>
             <a href="/voice_assistant/" data-target="/voice_assistant"
                 class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
@@ -150,8 +156,10 @@
         <div id="map" class="absolute inset-0 z-0"></div>
 
         <!-- Navigation Routing Panel (Top Anchor) -->
-        <div class="absolute top-20 left-4 right-4 md:top-24 md:left-6 md:w-[420px] z-20 transition-all duration-300 pointer-events-none" id="route-panel">
-            <div class="bg-surface-container-high/90 backdrop-blur-xl rounded-xl p-4 md:p-6 shadow-[0_40px_100px_rgba(0,0,0,0.5)] pointer-events-auto">
+        <div class="absolute top-20 left-4 right-4 md:top-24 md:left-6 md:w-[420px] z-20 transition-all duration-300 pointer-events-none"
+            id="route-panel">
+            <div
+                class="bg-surface-container-high/90 backdrop-blur-xl rounded-xl p-4 md:p-6 shadow-[0_40px_100px_rgba(0,0,0,0.5)] pointer-events-auto">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="font-headline text-primary-container text-base md:text-lg font-bold">Set Navigation</h2>
                     <button id="toggle-route-panel" class="md:hidden text-on-surface-variant">
@@ -160,32 +168,47 @@
                 </div>
                 <div id="route-inputs" class="flex flex-col gap-3">
                     <div class="relative">
-                        <span class="material-symbols-outlined absolute left-3 top-3 text-on-surface-variant text-xl">my_location</span>
-                        <input type="text" id="start-location" autocomplete="off" placeholder="Start location" class="w-full bg-surface-container-highest text-on-surface py-2.5 pl-10 pr-10 rounded-lg border border-outline-variant focus:border-primary-container focus:outline-none transition-colors text-sm placeholder:text-on-surface-variant/60" />
-                        <button id="use-gps-btn" class="absolute right-3 top-2.5 text-primary-container hover:text-primary transition-colors" title="Use My Location">
+                        <span
+                            class="material-symbols-outlined absolute left-3 top-3 text-on-surface-variant text-xl">my_location</span>
+                        <input type="text" id="start-location" autocomplete="off" placeholder="Start location"
+                            class="w-full bg-surface-container-highest text-on-surface py-2.5 pl-10 pr-10 rounded-lg border border-outline-variant focus:border-primary-container focus:outline-none transition-colors text-sm placeholder:text-on-surface-variant/60" />
+                        <button id="use-gps-btn"
+                            class="absolute right-3 top-2.5 text-primary-container hover:text-primary transition-colors"
+                            title="Use My Location">
                             <span class="material-symbols-outlined text-sm">gps_fixed</span>
                         </button>
-                        <div id="start-suggestions" class="absolute w-full mt-1 bg-surface-container-highest border border-outline-variant rounded-lg shadow-xl z-30 hidden max-h-48 overflow-y-auto"></div>
+                        <div id="start-suggestions"
+                            class="absolute w-full mt-1 bg-surface-container-highest border border-outline-variant rounded-lg shadow-xl z-30 hidden max-h-48 overflow-y-auto">
+                        </div>
                     </div>
                     <div class="relative">
-                        <span class="material-symbols-outlined absolute left-3 top-3 text-on-surface-variant text-xl">location_on</span>
-                        <input type="text" id="end-location" autocomplete="off" placeholder="Destination" class="w-full bg-surface-container-highest text-on-surface py-2.5 pl-10 pr-4 rounded-lg border border-outline-variant focus:border-primary-container focus:outline-none transition-colors text-sm placeholder:text-on-surface-variant/60" />
-                        <div id="end-suggestions" class="absolute w-full mt-1 bg-surface-container-highest border border-outline-variant rounded-lg shadow-xl z-30 hidden max-h-48 overflow-y-auto"></div>
+                        <span
+                            class="material-symbols-outlined absolute left-3 top-3 text-on-surface-variant text-xl">location_on</span>
+                        <input type="text" id="end-location" autocomplete="off" placeholder="Destination"
+                            class="w-full bg-surface-container-highest text-on-surface py-2.5 pl-10 pr-4 rounded-lg border border-outline-variant focus:border-primary-container focus:outline-none transition-colors text-sm placeholder:text-on-surface-variant/60" />
+                        <div id="end-suggestions"
+                            class="absolute w-full mt-1 bg-surface-container-highest border border-outline-variant rounded-lg shadow-xl z-30 hidden max-h-48 overflow-y-auto">
+                        </div>
                     </div>
-                    <button id="get-directions-btn" class="w-full mt-1 bg-primary-container text-on-primary-container font-bold py-2.5 rounded-lg hover:bg-primary transition-colors flex items-center justify-center gap-2 text-sm">
+                    <button id="get-directions-btn"
+                        class="w-full mt-1 bg-primary-container text-on-primary-container font-bold py-2.5 rounded-lg hover:bg-primary transition-colors flex items-center justify-center gap-2 text-sm">
                         <span class="material-symbols-outlined text-lg">directions</span>
                         Get Directions
                     </button>
                 </div>
             </div>
-            
+
             <!-- Turn-by-turn Instruction (Hidden initially) -->
-            <div id="turn-instruction-panel" style="display: none;" class="mt-3 bg-surface-container-high/90 backdrop-blur-xl rounded-xl p-4 items-center gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.4)] pointer-events-auto">
+            <div id="turn-instruction-panel" style="display: none;"
+                class="mt-3 bg-surface-container-high/90 backdrop-blur-xl rounded-xl p-4 items-center gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.4)] pointer-events-auto">
                 <div class="h-10 w-10 bg-secondary-container flex items-center justify-center rounded-lg shrink-0">
-                    <span id="turn-icon" class="material-symbols-outlined text-on-secondary-container text-xl font-bold">straight</span>
+                    <span id="turn-icon"
+                        class="material-symbols-outlined text-on-secondary-container text-xl font-bold">straight</span>
                 </div>
                 <div class="min-w-0">
-                    <p id="turn-text" class="font-display text-primary-container text-sm font-bold tracking-tight truncate">Continue Straight</p>
+                    <p id="turn-text"
+                        class="font-display text-primary-container text-sm font-bold tracking-tight truncate">Continue
+                        Straight</p>
                     <p id="turn-distance" class="font-body text-on-surface-variant text-[10px] flex items-center gap-1">
                         <span class="material-symbols-outlined text-[10px]">straighten</span>
                         <span>--</span>
@@ -195,11 +218,13 @@
         </div>
 
         <!-- Stats Metadata Window (Bottom Float) -->
-        <div class="absolute bottom-24 left-4 right-4 z-20 md:bottom-32 md:right-6 md:w-[420px] md:left-auto pointer-events-none transition-all duration-300" id="stats-panel"
-            style="display: none;">
-            <div class="bg-surface-container-lowest/90 backdrop-blur-2xl rounded-xl p-4 md:p-8 border-l-4 border-primary-container shadow-2xl pointer-events-auto">
+        <div class="absolute bottom-24 left-4 right-4 z-20 md:bottom-32 md:right-6 md:w-[420px] md:left-auto pointer-events-none transition-all duration-300"
+            id="stats-panel" style="display: none;">
+            <div
+                class="bg-surface-container-lowest/90 backdrop-blur-2xl rounded-xl p-4 md:p-8 border-l-4 border-primary-container shadow-2xl pointer-events-auto">
                 <div class="flex justify-between items-center md:hidden mb-4">
-                    <span class="text-[10px] font-bold text-primary-container uppercase tracking-widest">Route Summary</span>
+                    <span class="text-[10px] font-bold text-primary-container uppercase tracking-widest">Route
+                        Summary</span>
                     <button id="toggle-stats-panel" class="text-on-surface-variant">
                         <span class="material-symbols-outlined">expand_less</span>
                     </button>
@@ -207,30 +232,38 @@
                 <div id="stats-content">
                     <div class="grid grid-cols-3 gap-4 md:gap-8">
                         <div class="flex flex-col gap-1">
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Distance</span>
+                            <span
+                                class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Distance</span>
                             <div class="flex items-baseline gap-1">
-                                <span id="stat-distance" class="font-display text-lg md:text-2xl font-black text-on-surface">--</span>
+                                <span id="stat-distance"
+                                    class="font-display text-lg md:text-2xl font-black text-on-surface">--</span>
                                 <span class="text-[10px] font-bold text-primary-container">KM</span>
                             </div>
                         </div>
                         <div class="flex items-baseline gap-1 self-center justify-center col-span-1">
-                             <div class="flex flex-col gap-1 items-center">
-                                <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Arrival</span>
-                                <span id="stat-arrival" class="font-display text-lg md:text-2xl font-black text-on-surface">--:--</span>
-                             </div>
+                            <div class="flex flex-col gap-1 items-center">
+                                <span
+                                    class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Arrival</span>
+                                <span id="stat-arrival"
+                                    class="font-display text-lg md:text-2xl font-black text-on-surface">--:--</span>
+                            </div>
                         </div>
                         <div class="flex flex-col gap-1 items-end">
-                            <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Time</span>
+                            <span
+                                class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/60">Time</span>
                             <div class="flex items-baseline gap-1">
-                                <span id="stat-duration" class="font-display text-lg md:text-2xl font-black text-on-surface">--</span>
+                                <span id="stat-duration"
+                                    class="font-display text-lg md:text-2xl font-black text-on-surface">--</span>
                                 <span class="text-[10px] font-bold text-primary-container">MIN</span>
                             </div>
                         </div>
                     </div>
                     <div class="mt-4 md:mt-6 pt-4 md:pt-6 border-t border-outline-variant/20">
-                        <h3 id="stat-destination-name" class="font-headline text-primary-container text-xs md:text-sm font-bold mb-1 truncate">
+                        <h3 id="stat-destination-name"
+                            class="font-headline text-primary-container text-xs md:text-sm font-bold mb-1 truncate">
                             Navigation Active</h3>
-                        <p class="text-on-surface-variant text-[10px] md:text-xs leading-relaxed">Follow the highlighted path on the map.
+                        <p class="text-on-surface-variant text-[10px] md:text-xs leading-relaxed">Follow the highlighted
+                            path on the map.
                             Rerouting is enabled.</p>
                     </div>
                 </div>
@@ -292,14 +325,14 @@
     const useGpsBtn = document.getElementById('use-gps-btn');
     const startSuggestions = document.getElementById('start-suggestions');
     const endSuggestions = document.getElementById('end-suggestions');
-    
+
     const statsPanel = document.getElementById('stats-panel');
     const statDistance = document.getElementById('stat-distance');
     const statArrival = document.getElementById('stat-arrival');
     const statDuration = document.getElementById('stat-duration');
     const statDestName = document.getElementById('stat-destination-name');
     const statsContent = document.getElementById('stats-content');
-    
+
     const turnInstructionPanel = document.getElementById('turn-instruction-panel');
     const turnText = document.getElementById('turn-text');
     const turnDistance = document.getElementById('turn-distance');
@@ -327,10 +360,10 @@
             startInput.disabled = true;
             navigator.geolocation.getCurrentPosition(position => {
                 userLocation = L.latLng(position.coords.latitude, position.coords.longitude);
-                startInput.value = "My Current Location";
+                startInput.value = "Your Location";
                 startInput.disabled = false;
                 map.setView(userLocation, 15);
-                L.circleMarker(userLocation, {radius: 8, color: '#00E5FF', fillOpacity: 0.8}).addTo(map);
+                L.circleMarker(userLocation, { radius: 8, color: '#00E5FF', fillOpacity: 0.8 }).addTo(map);
             }, err => {
                 startInput.value = "";
                 startInput.disabled = false;
@@ -341,14 +374,14 @@
 
     // Autocomplete Logic
     const fetchSuggestions = async (query, container) => {
-        if (query.length < 3 || query === "My Current Location") {
+        if (query.length < 3 || query === "Your Location") {
             container.classList.add('hidden');
             return;
         }
 
         let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`;
         if (userLocation) {
-            const viewbox = `${userLocation.lng-2},${userLocation.lat+2},${userLocation.lng+2},${userLocation.lat-2}`;
+            const viewbox = `${userLocation.lng - 2},${userLocation.lat + 2},${userLocation.lng + 2},${userLocation.lat - 2}`;
             url += `&viewbox=${viewbox}&bounded=0`;
         }
 
@@ -397,12 +430,12 @@
 
     // Geocoding Helper
     const geocode = async (input) => {
-        if (input.value === "My Current Location" && userLocation) return userLocation;
+        if (input.value === "Your Location" && userLocation) return userLocation;
         if (input.dataset.lat && input.dataset.lon) return L.latLng(input.dataset.lat, input.dataset.lon);
         try {
             let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(input.value)}&limit=1`;
             if (userLocation) {
-                const viewbox = `${userLocation.lng-1},${userLocation.lat+1},${userLocation.lng+1},${userLocation.lat-1}`;
+                const viewbox = `${userLocation.lng - 1},${userLocation.lat + 1},${userLocation.lng + 1},${userLocation.lat - 1}`;
                 url += `&viewbox=${viewbox}&bounded=0`;
             }
             const response = await fetch(url);
@@ -453,7 +486,7 @@
             statArrival.innerText = arrivalTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             statDestName.innerText = endInput.value.split(',')[0].toUpperCase();
             statsPanel.style.display = 'block';
-            
+
             if (routes[0].instructions && routes[0].instructions.length > 0) {
                 turnInstructionPanel.style.display = 'flex';
                 const inst = routes[0].instructions[0];

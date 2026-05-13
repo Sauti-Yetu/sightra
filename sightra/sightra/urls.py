@@ -39,7 +39,7 @@ urlpatterns = [
     # Voice assistant
     path("voice_assistant/", voice_assistant, name="voice_assistant"),
     # Navigation
-    path('live-map', live_map, name="live-map"),
+    path('live-map/', live_map, name="live-map"),
     # Volunteer
     path("sightra-connect/", sightra_connect, name="sightra-connect"),
     path("live-call/", live_call, name="live-call"),
