@@ -17,7 +17,8 @@ def live_call(request):
 
 def get_livekit_token(request):
     room_name = request.GET.get("room", "sightra-call")
-    participant_name = request.GET.get("name", "User")
+    role = request.GET.get("role", "user")
+    participant_name = request.GET.get("name", f"{role.capitalize()}_{os.urandom(2).hex()}")
     
     api_key = os.getenv("LIVEKIT_API_KEY")
     api_secret = os.getenv("LIVEKIT_API_SECRET")
@@ -33,6 +34,10 @@ def get_livekit_token(request):
             room=room_name,
         ))
     
-    return JsonResponse({"token": token.to_jwt()})
+    return JsonResponse({
+        "token": token.to_jwt(),
+        "participantName": participant_name,
+        "roomName": room_name
+    })
 
 

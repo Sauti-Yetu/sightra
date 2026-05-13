@@ -47,13 +47,8 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transform: scaleX(-1); /* Mirror for local view usually, but for environment we might want it normal */
         }
         
-        .video-container.remote video {
-            transform: scaleX(1);
-        }
-
         .pulse-red {
             animation: pulse-red 2s infinite;
         }
@@ -64,7 +59,6 @@
             100% { box-shadow: 0 0 0 0 rgba(255, 75, 75, 0); }
         }
 
-        /* Hide scrollbars */
         ::-webkit-scrollbar { display: none; }
     </style>
 </head>
@@ -79,7 +73,7 @@
 
         <div id="connection-status" class="flex items-center gap-2 glass-panel px-4 py-1.5 rounded-full border-white/10">
             <div class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" id="status-dot"></div>
-            <span class="text-xs font-bold uppercase tracking-widest text-on-surface/80" id="status-text">Starting Camera...</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-on-surface/80" id="status-text">Initializing...</span>
         </div>
 
         <div class="flex items-center gap-4">
@@ -91,31 +85,34 @@
     </header>
 
     <main class="relative h-screen w-screen bg-black overflow-hidden">
-        <!-- Main Video (User's Environment / Local Feed) -->
-        <div id="local-video-container" class="video-container absolute inset-0 z-0 bg-surface-variant flex items-center justify-center">
-            <div class="text-center space-y-4 opacity-40" id="local-placeholder">
-                <span class="material-symbols-outlined text-6xl animate-pulse">videocam</span>
-                <p class="text-sm uppercase tracking-widest font-black">Waiting for camera access...</p>
+        <!-- Main Video Container -->
+        <div id="main-video-container" class="video-container absolute inset-0 z-0 bg-surface-variant flex items-center justify-center">
+            <video id="localVideo" class="w-full h-full object-cover" autoplay playsinline muted></video>
+            <div class="absolute inset-0 flex flex-col items-center justify-center bg-surface-variant z-10" id="local-placeholder">
+                <span class="material-symbols-outlined text-6xl animate-pulse text-primary">videocam</span>
+                <p class="text-sm uppercase tracking-widest font-black mt-4" id="placeholder-text">Waiting for camera...</p>
+                <button onclick="requestCameraAccess()" class="mt-6 px-8 py-3 bg-primary text-black rounded-full text-xs font-black uppercase tracking-widest hover:scale-105 transition-all">Enable Camera</button>
             </div>
         </div>
 
-        <!-- Floating Video (Remote Volunteer Feed) -->
-        <div class="absolute top-24 right-6 w-40 h-56 rounded-2xl overflow-hidden shadow-2xl border-2 border-white/10 z-20 glass-panel group transition-all duration-300 hover:scale-105" id="remote-video-wrapper">
-            <div id="remote-video-container" class="video-container remote w-full h-full bg-surface-variant flex items-center justify-center">
-                <div class="text-center space-y-2 opacity-40" id="remote-placeholder">
+        <!-- Floating Video Container -->
+        <div class="absolute top-24 right-6 w-40 h-56 rounded-2xl overflow-hidden shadow-2xl border-2 border-white/10 z-20 glass-panel group transition-all duration-300 hover:scale-105" id="pip-video-wrapper">
+            <div id="pip-video-container" class="video-container w-full h-full bg-surface-variant flex items-center justify-center">
+                <!-- If volunteer, local goes here. If user, remote goes here. -->
+                <div class="text-center space-y-2 opacity-40" id="pip-placeholder">
                     <span class="material-symbols-outlined text-4xl">person_search</span>
                 </div>
             </div>
             <div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
-                <p class="text-[10px] font-bold uppercase tracking-widest text-primary" id="remote-name">Waiting...</p>
+                <p class="text-[10px] font-bold uppercase tracking-widest text-primary" id="pip-name">Remote</p>
             </div>
         </div>
 
         <!-- Guidance Overlay -->
         <div class="absolute top-24 left-6 z-20 max-w-xs space-y-3" id="guidance-overlay">
             <div class="glass-panel p-4 rounded-2xl shadow-xl border-l-4 border-primary">
-                <p class="text-xs leading-relaxed text-on-surface/90 italic">
-                    "Streaming your environment to a volunteer. Keep your device steady for better assistance."
+                <p class="text-xs leading-relaxed text-on-surface/90 italic" id="guidance-text">
+                    "Streaming your environment to a volunteer. Keep your device steady."
                 </p>
             </div>
         </div>
@@ -123,117 +120,140 @@
         <!-- Call Controls -->
         <div class="absolute bottom-10 left-0 right-0 z-40 flex flex-col items-center gap-6">
             <div class="glass-panel p-4 rounded-full flex items-center gap-4 shadow-2xl backdrop-blur-2xl border-white/10">
-                <!-- Mic Toggle -->
                 <button id="mic-toggle" class="w-14 h-14 rounded-full flex items-center justify-center transition-all hover:bg-white/10 active:scale-90 group">
                     <span class="material-symbols-outlined text-2xl group-hover:text-primary" id="mic-icon">mic</span>
                 </button>
-
-                <!-- Camera Toggle -->
                 <button id="camera-toggle" class="w-14 h-14 rounded-full flex items-center justify-center transition-all hover:bg-white/10 active:scale-90 group">
                     <span class="material-symbols-outlined text-2xl group-hover:text-primary" id="camera-icon">videocam</span>
                 </button>
-
-                <!-- End Call -->
                 <button id="end-call" class="w-20 h-14 bg-error text-white rounded-full flex items-center justify-center shadow-lg shadow-error/30 hover:brightness-110 active:scale-95 transition-all">
                     <span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">call_end</span>
                 </button>
-
-                <!-- Info Toggle -->
                 <button class="w-14 h-14 rounded-full flex items-center justify-center transition-all hover:bg-white/10 active:scale-90">
                     <span class="material-symbols-outlined text-2xl">info</span>
                 </button>
             </div>
-
-            <!-- AI Vision Insight -->
             <div class="px-6 py-2 rounded-full glass-panel border-primary/20 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-primary animate-ping"></span>
-                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-primary" id="call-type">Live Stream Call</span>
+                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-primary" id="role-tag">USER MODE</span>
             </div>
         </div>
     </main>
 
-    <!-- Script for LiveKit Logic -->
     <script>
-        const { Room, RemoteParticipant, RoomEvent, VideoPresets, Track, createLocalVideoTrack } = LiveKitClient;
+        const urlParams = new URLSearchParams(window.location.search);
+        const role = urlParams.get('role') || 'user';
+        const isVolunteer = role === 'volunteer';
 
-        let room;
-        let startTime;
-        let timerInterval;
-        let localVideoTrack;
+        document.getElementById('role-tag').innerText = isVolunteer ? 'VOLUNTEER MODE' : 'USER MODE';
+        document.getElementById('guidance-text').innerText = isVolunteer ? 
+            "Viewing user's environment. Provide clear audio guidance." : 
+            "Streaming your environment to a volunteer. Keep your device steady.";
 
+        let room = null;
+        let localStream = null;
+        let startTime = null;
+        let timerInterval = null;
         const livekitUrl = "{{ livekit_url }}";
         const roomName = "sightra-call";
-        const participantName = "User_" + Math.floor(Math.random() * 1000);
 
-        async function startCall() {
+        async function requestCameraAccess() {
+            const placeholder = document.getElementById('local-placeholder');
+            const statusText = document.getElementById('placeholder-text');
+            
             try {
-                // 1. Start Camera Preview IMMEDIATELY
-                updateStatus('Starting Camera...', 'yellow');
-                localVideoTrack = await createLocalVideoTrack({
-                    facingMode: 'environment', // User environment
-                    resolution: VideoPresets.h720.resolution
-                });
+                // For volunteers, we use front camera. For users, environment camera.
+                const constraints = {
+                    video: { facingMode: isVolunteer ? "user" : "environment" },
+                    audio: true
+                };
                 
-                const container = document.getElementById('local-video-container');
-                container.innerHTML = '';
-                container.appendChild(localVideoTrack.attach());
-                document.getElementById('local-placeholder').classList.add('hidden');
+                localStream = await navigator.mediaDevices.getUserMedia(constraints);
+                const videoElement = document.getElementById('localVideo');
+                
+                if (isVolunteer) {
+                    // For volunteers, their own face goes to PiP, Remote (User) goes to Main.
+                    // But we start by showing their face in main until connected.
+                    videoElement.srcObject = localStream;
+                } else {
+                    // For users, environment goes to main.
+                    videoElement.srcObject = localStream;
+                }
+                
+                placeholder.classList.add('hidden');
+                updateStatus('Camera Ready', 'yellow');
+                initLiveKit();
+            } catch (err) {
+                console.error("Camera access failed:", err);
+                updateStatus('Camera Error', 'red');
+            }
+        }
 
-                // 2. Get Token and Connect
-                updateStatus('Connecting to Volunteer...', 'yellow');
-                const response = await fetch(`/api/volunteer/token/?room=${roomName}&name=${participantName}`);
+        async function initLiveKit() {
+            if (typeof LiveKitClient === 'undefined') return;
+            
+            try {
+                updateStatus('Connecting...', 'yellow');
+                const response = await fetch(`/api/volunteer/token/?room=${roomName}&role=${role}`);
                 const data = await response.json();
                 
-                if (data.error) throw new Error(data.error);
-                const token = data.token;
+                const { Room, RoomEvent } = LiveKitClient;
+                room = new Room({ adaptiveStream: true, dynacast: true });
 
-                room = new Room({
-                    adaptiveStream: true,
-                    dynacast: true,
+                room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
+                    if (track.kind === 'video') {
+                        const element = track.attach();
+                        
+                        if (isVolunteer) {
+                            // Volunteer sees the User (Remote) in Main, and themselves (Local) in PiP.
+                            // Move local video to PiP
+                            const pipContainer = document.getElementById('pip-video-container');
+                            const localVideo = document.getElementById('localVideo');
+                            
+                            // Re-attach local to PiP
+                            pipContainer.innerHTML = '';
+                            const newLocalVideo = document.createElement('video');
+                            newLocalVideo.srcObject = localStream;
+                            newLocalVideo.autoplay = true;
+                            newLocalVideo.muted = true;
+                            newLocalVideo.className = 'w-full h-full object-cover';
+                            pipContainer.appendChild(newLocalVideo);
+                            document.getElementById('pip-placeholder').classList.add('hidden');
+                            document.getElementById('pip-name').innerText = 'You';
+
+                            // Attach remote to Main
+                            const mainContainer = document.getElementById('main-video-container');
+                            mainContainer.innerHTML = '';
+                            element.className = 'w-full h-full object-cover';
+                            mainContainer.appendChild(element);
+                        } else {
+                            // User sees themselves (Local) in Main, and Volunteer (Remote) in PiP.
+                            const pipContainer = document.getElementById('pip-video-container');
+                            pipContainer.innerHTML = '';
+                            element.className = 'w-full h-full object-cover';
+                            pipContainer.appendChild(element);
+                            document.getElementById('pip-placeholder').classList.add('hidden');
+                            document.getElementById('pip-name').innerText = participant.identity || 'Volunteer';
+                        }
+                    } else if (track.kind === 'audio') {
+                        track.attach();
+                    }
                 });
 
-                room
-                    .on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
-                        if (track.kind === 'video') {
-                            const element = track.attach();
-                            const container = document.getElementById('remote-video-container');
-                            container.innerHTML = '';
-                            container.appendChild(element);
-                            document.getElementById('remote-placeholder').classList.add('hidden');
-                            document.getElementById('remote-name').innerText = participant.identity || 'Volunteer';
-                        } else if (track.kind === 'audio') {
-                            track.attach();
-                        }
-                    })
-                    .on(RoomEvent.TrackUnsubscribed, (track, publication, participant) => {
-                        track.detach();
-                        if (track.kind === 'video') {
-                            document.getElementById('remote-video-container').innerHTML = `
-                                <div class="text-center space-y-2 opacity-40" id="remote-placeholder">
-                                    <span class="material-symbols-outlined text-4xl">person_search</span>
-                                </div>
-                            `;
-                            document.getElementById('remote-name').innerText = 'Waiting...';
-                        }
-                    })
-                    .on(RoomEvent.Connected, () => {
-                        updateStatus('Connected Live', 'green');
-                        startTimer();
-                    })
-                    .on(RoomEvent.Disconnected, () => {
-                        updateStatus('Disconnected', 'red');
-                        stopTimer();
-                    });
+                room.on(RoomEvent.Connected, () => {
+                    updateStatus('Connected Live', 'green');
+                    startTimer();
+                });
 
-                await room.connect(livekitUrl, token);
+                await room.connect(livekitUrl, data.token);
                 
-                // 3. Publish Local Tracks
-                await room.localParticipant.publishTrack(localVideoTrack);
-                await room.localParticipant.setMicrophoneEnabled(true);
+                const videoTrack = localStream.getVideoTracks()[0];
+                const audioTrack = localStream.getAudioTracks()[0];
+                if (videoTrack) await room.localParticipant.publishTrack(videoTrack);
+                if (audioTrack) await room.localParticipant.publishTrack(audioTrack);
 
             } catch (error) {
-                console.error('Call initialization failed:', error);
-                updateStatus('Error: ' + error.message, 'red');
+                console.error('LiveKit connection failed:', error);
             }
         }
 
@@ -241,7 +261,6 @@
             const statusText = document.getElementById('status-text');
             const statusDot = document.getElementById('status-dot');
             statusText.innerText = text;
-            
             statusDot.className = 'w-2 h-2 rounded-full';
             if (color === 'green') statusDot.classList.add('bg-green-500');
             else if (color === 'red') statusDot.classList.add('bg-error', 'pulse-red');
@@ -252,41 +271,21 @@
             startTime = Date.now();
             timerInterval = setInterval(() => {
                 const elapsed = Date.now() - startTime;
-                const minutes = Math.floor(elapsed / 60000);
-                const seconds = Math.floor((elapsed % 60000) / 1000);
-                document.getElementById('call-timer').innerText = 
-                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                const min = Math.floor(elapsed / 60000).toString().padStart(2, '0');
+                const sec = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
+                document.getElementById('call-timer').innerText = `${min}:${sec}`;
             }, 1000);
         }
 
-        function stopTimer() {
-            clearInterval(timerInterval);
-        }
-
-        // Controls
-        document.getElementById('mic-toggle').addEventListener('click', async () => {
-            if (!room) return;
-            const enabled = room.localParticipant.isMicrophoneEnabled;
-            await room.localParticipant.setMicrophoneEnabled(!enabled);
-            document.getElementById('mic-icon').innerText = !enabled ? 'mic' : 'mic_off';
-            document.getElementById('mic-toggle').classList.toggle('text-error', enabled);
-        });
-
-        document.getElementById('camera-toggle').addEventListener('click', async () => {
-            if (!localVideoTrack) return;
-            const enabled = localVideoTrack.isEnabled;
-            localVideoTrack.setEnabled(!enabled);
-            document.getElementById('camera-icon').innerText = !enabled ? 'videocam' : 'videocam_off';
-            document.getElementById('camera-toggle').classList.toggle('text-error', enabled);
-            document.getElementById('local-video-container').style.opacity = !enabled ? '1' : '0.3';
-        });
+        function stopTimer() { clearInterval(timerInterval); }
 
         document.getElementById('end-call').addEventListener('click', () => {
             if (room) room.disconnect();
+            if (localStream) localStream.getTracks().forEach(t => t.stop());
             window.location.href = '/';
         });
 
-        window.addEventListener('load', startCall);
+        window.addEventListener('load', requestCameraAccess);
     </script>
 </body>
 
