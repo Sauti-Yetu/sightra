@@ -32,8 +32,8 @@ urlpatterns = [
     path("signin/", signin, name="signin"),
     path("signup/", signup, name="signup"),
     # Homepage
-    path("", index, name="index"),
-    path("landing-page/", landing_page, name="landing_page"),
+    path("dashboard", dashboard, name="dashboard"),
+    path("", landing_page, name="landing_page"),
     # Vision 
     path("vision/", vision, name="vision"),
     # Voice assistant
