@@ -1,0 +1,8 @@
+# Nura
+nura/frontend/node_modules/
+nura/frontend/dist/
+nura/frontend/dev-dist/
+nura/backend/.venv/
+nura/backend/.pytest_cache/
+nura/backend/**/__pycache__/
+*.tsbuildinfo

@@ -1,51 +1,12 @@
-# Sightra
+# Nura
 
-**Sightra** is an AI-powered assistive system designed for blind and visually-impaired users. It provides real-time environmental awareness, scene understanding, object detection, navigation cues, and natural language conversation about the user's surroundings.
+**See it. Hear it. Understand it.**
 
-## Features
-
-- **Real-time Environmental Awareness**: Provides continuous audio feedback about the user's surroundings.
-- **Scene Understanding**: Analyzes the environment and describes the scene in natural language.
-- **Object Detection**: Identifies objects in the vicinity and informs the user.
-- **Navigation Cues**: Offers guidance for safe movement and orientation.
-- **Natural Language Conversation**: Allows users to ask questions about their environment and get relevant answers.
-
-## Getting Started
-
-### Prerequisites
-
-- Python 3.8+
-- pip
-
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd sightra
-   ```
-
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-## Usage
-
-### Running the Application
+Nura is an AI visual screen reader. The product lives in [`nura/`](nura/README.md).
 
 ```bash
-python main.py
+cd nura/backend && uvicorn app.main:app --host 0.0.0.0 --port 8000
+cd nura/frontend && npm run dev
 ```
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Contact
-
-For questions or support, please open an issue or contact the development team.
+The previous Django prototype remains under `sightra/` and is not the Nura product.

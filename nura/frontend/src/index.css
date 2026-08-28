@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Atkinson Hyperlegible", "Segoe UI", sans-serif;
+  --font-display: "Outfit", "Atkinson Hyperlegible", sans-serif;
+  --color-background: #07080b;
+  --color-surface: #12141a;
+  --color-surface-elevated: #1a1d26;
+  --color-text-primary: #f5f7fa;
+  --color-text-secondary: #a8b0c0;
+  --color-accent: #4ee0b8;
+  --color-accent-soft: #16352e;
+  --color-danger: #ff6b6b;
+  --color-success: #4ee0b8;
+  --color-border: #2a2e3a;
+  --color-focus: #f5f7fa;
+}
+
+:root {
+  --background: #07080b;
+  --surface: #12141a;
+  --surface-elevated: #1a1d26;
+  --text-primary: #f5f7fa;
+  --text-secondary: #a8b0c0;
+  --accent: #4ee0b8;
+  --accent-soft: rgba(78, 224, 184, 0.16);
+  --danger: #ff6b6b;
+  --success: #4ee0b8;
+  --border: #2a2e3a;
+  --focus: #ffffff;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  min-height: 100dvh;
+  background: var(--background);
+  color: var(--text-primary);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 18px;
+  line-height: 1.45;
+  text-rendering: optimizeLegibility;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  min-height: 44px;
+}
+
+.nura-high-contrast {
+  --background: #000000;
+  --surface: #000000;
+  --surface-elevated: #111111;
+  --text-primary: #ffffff;
+  --text-secondary: #ffffff;
+  --accent: #00ffd0;
+  --accent-soft: #003d32;
+  --border: #ffffff;
+}
+
+.nura-text-large {
+  font-size: 20px;
+}
+
+.nura-text-xl {
+  font-size: 22px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.nura-reduced-motion *,
+.nura-reduced-motion *::before,
+.nura-reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+@keyframes nura-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.nura-loader {
+  animation: nura-pulse 1.6s ease-in-out infinite;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

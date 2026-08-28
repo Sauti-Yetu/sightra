@@ -134,6 +134,12 @@ celerybeat.pid
 # SageMath parsed files
 *.sage.py
 
+# Nura
+nura/frontend/node_modules/
+nura/frontend/dist/
+nura/backend/.venv/
+nura/backend/.pytest_cache/
+
 # Environments
 .env
 .envrc
