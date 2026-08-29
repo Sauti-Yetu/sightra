@@ -9,6 +9,7 @@ import httpx
 from app.config import Settings
 from app.providers.context import MemoryContextProvider
 from app.providers.currency import CurrencyService
+from app.providers.gemini import extract_text, generate_content
 from app.providers.ocr import VisionOCRProvider
 from app.providers.prompts import ask_prompt
 from app.providers.speech import ElevenLabsSpeechProvider
@@ -139,11 +140,10 @@ class VisualPipeline:
                 )
                 response.raise_for_status()
                 return response.json()["choices"][0]["message"]["content"]
-            response = httpx.post(
-                "https://generativelanguage.googleapis.com/v1beta/models/"
-                f"{self.settings.resolved_ai_model}:generateContent",
-                params={"key": self.settings.ai_api_key},
-                json={
+            data = generate_content(
+                self.settings.ai_api_key,
+                self.settings.resolved_ai_model,
+                {
                     "contents": [{"parts": [{"text": prompt}]}],
                     "generationConfig": {
                         "temperature": 0.2,
@@ -152,14 +152,9 @@ class VisualPipeline:
                 },
                 timeout=30.0,
             )
-            response.raise_for_status()
-            return (
-                response.json()
-                .get("candidates", [{}])[0]
-                .get("content", {})
-                .get("parts", [{}])[0]
-                .get("text", "")
-            )
+            return extract_text(data)
+        except UserFacingError:
+            raise
         except httpx.HTTPError as exc:
             logger.exception("Ask completion failed")
             raise UserFacingError(NETWORK_FAILURE, status_code=503) from exc

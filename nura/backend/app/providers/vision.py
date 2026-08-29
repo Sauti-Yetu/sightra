@@ -9,6 +9,7 @@ from typing import Any
 
 import httpx
 
+from app.providers.gemini import extract_text, generate_content
 from app.providers.prompts import analysis_prompt
 from app.schemas.common import AnalysisResult, ContentType, DocumentFields, CurrencyResult, ReadMode, Verbosity
 from app.utils.errors import NETWORK_FAILURE, UNCLEAR_IMAGE, UserFacingError
@@ -129,19 +130,16 @@ class GeminiVisionProvider:
     ) -> AnalysisResult:
         import base64
 
-        url = (
-            f"https://generativelanguage.googleapis.com/v1beta/models/"
-            f"{self.model}:generateContent"
-        )
+        encoded = base64.b64encode(image).decode("ascii")
         body = {
             "contents": [
                 {
                     "parts": [
                         {"text": analysis_prompt(mode, verbosity, question)},
                         {
-                            "inline_data": {
-                                "mime_type": "image/jpeg",
-                                "data": base64.b64encode(image).decode("ascii"),
+                            "inlineData": {
+                                "mimeType": "image/jpeg",
+                                "data": encoded,
                             }
                         },
                     ]
@@ -150,28 +148,13 @@ class GeminiVisionProvider:
             "generationConfig": {"temperature": 0.2, "responseMimeType": "application/json"},
         }
         try:
-            response = httpx.post(
-                url,
-                params={"key": self.api_key},
-                json=body,
-                timeout=45.0,
-            )
-            response.raise_for_status()
-            data = response.json()
-            text = (
-                data.get("candidates", [{}])[0]
-                .get("content", {})
-                .get("parts", [{}])[0]
-                .get("text", "")
-            )
+            data = generate_content(self.api_key, self.model, body)
+            text = extract_text(data)
             if not text:
                 raise UserFacingError(UNCLEAR_IMAGE, status_code=422)
             return result_from_payload(parse_json_object(text))
         except UserFacingError:
             raise
-        except httpx.HTTPError as exc:
-            logger.exception("Gemini vision request failed")
-            raise UserFacingError(NETWORK_FAILURE, status_code=503) from exc
         except (ValueError, KeyError, IndexError) as exc:
             logger.exception("Gemini vision parse failed")
             raise UserFacingError(UNCLEAR_IMAGE, status_code=422) from exc

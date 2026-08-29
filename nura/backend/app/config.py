@@ -62,7 +62,7 @@ class Settings(BaseSettings):
             return self.ai_model
         if self.ai_provider == "openai":
             return "gpt-4o-mini"
-        return "gemini-2.0-flash"
+        return "gemini-3.5-flash"
 
     @property
     def has_ai(self) -> bool:

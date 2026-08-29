@@ -124,6 +124,9 @@ def test_valid_image_without_ai_returns_user_error(client: TestClient) -> None:
     assert body["success"] is False
     assert "key" in body["error"].lower() or "configured" in body["error"].lower()
     assert "traceback" not in body["error"].lower()
+
+
+def test_analysis_result_schema() -> None:
     result = AnalysisResult(
         type="document",
         confidence=0.94,
@@ -136,3 +139,42 @@ def test_valid_image_without_ai_returns_user_error(client: TestClient) -> None:
     payload = result.model_dump()
     assert payload["title"] == "University Admission Letter"
     assert payload["confidence"] == 0.94
+
+
+def test_gemini_uses_header_auth() -> None:
+    from unittest.mock import MagicMock, patch
+
+    from app.providers.gemini import generate_content
+
+    response = MagicMock()
+    response.status_code = 200
+    response.is_success = True
+    response.json.return_value = {"candidates": [{"content": {"parts": [{"text": "{}"}]}}]}
+    with patch("app.providers.gemini.httpx.post", return_value=response) as post:
+        generate_content("test-placeholder", "gemini-2.5-flash", {"contents": []})
+    url = post.call_args.args[0]
+    headers = post.call_args.kwargs["headers"]
+    assert "generativelanguage.googleapis.com" in url
+    assert "gemini-2.5-flash" in url
+    assert "generateContent" in url
+    assert "x-goog-api-key" in headers
+    assert "params" not in post.call_args.kwargs or "key" not in (post.call_args.kwargs.get("params") or {})
+
+
+def test_gemini_falls_back_on_missing_model() -> None:
+    from unittest.mock import MagicMock, patch
+
+    from app.providers.gemini import generate_content
+
+    missing = MagicMock()
+    missing.status_code = 404
+    missing.is_success = False
+    ok = MagicMock()
+    ok.status_code = 200
+    ok.is_success = True
+    ok.json.return_value = {"candidates": [{"content": {"parts": [{"text": "ok"}]}}]}
+    with patch("app.providers.gemini.httpx.post", side_effect=[missing, ok]) as post:
+        payload = generate_content("test-placeholder", "not-a-real-model", {"contents": []})
+    assert payload["candidates"]
+    assert post.call_count == 2
+    assert "gemini-3.5-flash" in post.call_args.args[0]
