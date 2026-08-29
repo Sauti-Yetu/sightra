@@ -7,7 +7,7 @@ export function OfflineBanner() {
   return (
     <div
       role="status"
-      className="mx-4 mt-[max(0.5rem,env(safe-area-inset-top))] flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface-elevated)] px-4 py-3"
+      className="nura-panel mx-4 mt-[max(0.5rem,env(safe-area-inset-top))] flex items-start gap-3 rounded-2xl px-4 py-3"
     >
       <WifiOff aria-hidden="true" className="mt-0.5 h-5 w-5 text-[var(--danger)]" />
       <p>

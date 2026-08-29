@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Pause, Play, Repeat, Square } from 'lucide-react'
 import { synthesizeSpeech } from '../services/api'
 
@@ -138,7 +138,7 @@ export function AudioPlayer({
   const enabled = Boolean(src || spokenText || resolvedSrc)
 
   return (
-    <div className="rounded-3xl bg-[var(--surface-elevated)] p-4">
+    <div className="nura-panel rounded-[1.75rem] p-5">
       <audio
         ref={audioRef}
         className="sr-only"
@@ -147,40 +147,69 @@ export function AudioPlayer({
           onEnded?.()
         }}
       />
-      <p className="mb-3 font-bold">{loading ? 'Preparing voice…' : 'Voice'}</p>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div>
+          <p className="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[var(--accent)]">Voice</p>
+          <p className="font-display text-xl font-semibold">
+            {loading ? 'Preparing voice…' : playing ? 'Speaking' : 'Listen'}
+          </p>
+        </div>
+        <div className="flex h-10 items-end gap-1" aria-hidden="true">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <span
+              key={i}
+              className={['w-1.5 rounded-full bg-[var(--accent)]', playing ? 'nura-wave' : ''].join(' ')}
+              style={{
+                height: `${10 + (i % 3) * 8}px`,
+                animationDelay: `${i * 0.12}s`,
+                opacity: playing ? 1 : 0.35,
+              }}
+            />
+          ))}
+        </div>
+      </div>
       <div className="grid grid-cols-4 gap-2">
-        <button type="button" onClick={play} className="control-btn" aria-label="Play spoken result" disabled={!enabled || loading}>
+        <Control onClick={play} label="Play spoken result" disabled={!enabled || loading}>
           <Play aria-hidden="true" />
           Play
-        </button>
-        <button type="button" onClick={pause} className="control-btn" aria-label="Pause spoken result" disabled={!playing}>
+        </Control>
+        <Control onClick={pause} label="Pause spoken result" disabled={!playing}>
           <Pause aria-hidden="true" />
           Pause
-        </button>
-        <button type="button" onClick={repeat} className="control-btn" aria-label="Repeat spoken result" disabled={!enabled || loading}>
+        </Control>
+        <Control onClick={repeat} label="Repeat spoken result" disabled={!enabled || loading}>
           <Repeat aria-hidden="true" />
           Repeat
-        </button>
-        <button type="button" onClick={stop} className="control-btn" aria-label="Stop spoken result" disabled={!enabled}>
+        </Control>
+        <Control onClick={stop} label="Stop spoken result" disabled={!enabled}>
           <Square aria-hidden="true" />
           Stop
-        </button>
+        </Control>
       </div>
-      <style>{`
-        .control-btn {
-          display: flex;
-          min-height: 52px;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 0.2rem;
-          border-radius: 1rem;
-          background: var(--surface);
-          font-size: 0.8rem;
-          font-weight: 700;
-        }
-        .control-btn:disabled { opacity: 0.4; }
-      `}</style>
     </div>
+  )
+}
+
+function Control({
+  onClick,
+  label,
+  disabled,
+  children,
+}: {
+  onClick: () => void
+  label: string
+  disabled?: boolean
+  children: ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      disabled={disabled}
+      className="flex min-h-[3.4rem] flex-col items-center justify-center gap-1 rounded-2xl border border-white/10 bg-white/5 text-[0.75rem] font-bold disabled:opacity-35"
+    >
+      {children}
+    </button>
   )
 }

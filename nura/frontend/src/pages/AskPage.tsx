@@ -22,7 +22,7 @@ export function AskPage() {
 
   async function submit(question?: string, audioBlob?: Blob) {
     if (!session.lastResult) {
-      session.setError('I don\'t have a recent scan to answer from. Capture the visual information first.')
+      session.setError("I don't have a recent scan to answer from. Capture the visual information first.")
       return
     }
     setBusy(true)
@@ -41,7 +41,7 @@ export function AskPage() {
       setAudio(response.audio?.base64 ?? null)
       announce(spoken)
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'I couldn\'t hear that clearly. Please try speaking again.'
+      const message = error instanceof Error ? error.message : "I couldn't hear that clearly. Please try speaking again."
       session.setError(message)
       announce(message)
     } finally {
@@ -60,7 +60,11 @@ export function AskPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-4">
-      <AppHeader title="Ask" subtitle="Questions use your current scan. You do not need to capture again." backTo="/result" />
+      <AppHeader
+        title="Ask"
+        subtitle="Questions use your current scan. You do not need to capture again."
+        backTo="/result"
+      />
       {!session.lastResult ? (
         <ErrorState
           message="Capture visual information first, then ask a follow-up question."
@@ -69,7 +73,7 @@ export function AskPage() {
         />
       ) : (
         <div className="space-y-5">
-          <p className="rounded-3xl bg-[var(--surface)] p-4 text-[var(--text-secondary)]">
+          <p className="nura-panel rounded-[1.6rem] p-4 text-[var(--text-secondary)]">
             Current scan: {session.lastResult.title || session.lastResult.summary || 'Recent visual information'}
           </p>
           <AskInput
@@ -81,7 +85,7 @@ export function AskPage() {
           {recorder.error ? <ErrorState message={recorder.error} /> : null}
           {session.error ? <ErrorState message={session.error} /> : null}
           {answer ? (
-            <section className="space-y-3 rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface)] p-5">
+            <section className="nura-panel space-y-3 rounded-[1.75rem] p-5">
               <h2 className="font-display text-xl font-semibold">Answer</h2>
               <p className="text-lg leading-relaxed">{answer}</p>
               <AudioPlayer

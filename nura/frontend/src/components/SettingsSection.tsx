@@ -8,7 +8,7 @@ export function SettingsSection({
   children: ReactNode
 }) {
   return (
-    <section className="rounded-[1.75rem] border border-[var(--border)] bg-[var(--surface)] p-5">
+    <section className="nura-panel rounded-[1.75rem] p-5">
       <h2 className="mb-4 font-display text-xl font-semibold">{title}</h2>
       <div className="space-y-4">{children}</div>
     </section>

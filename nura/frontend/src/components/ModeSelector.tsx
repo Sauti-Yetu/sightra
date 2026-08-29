@@ -16,7 +16,11 @@ export function ModeSelector({
   onChange: (mode: ReadMode) => void
 }) {
   return (
-    <div role="radiogroup" aria-label="Reading mode" className="flex gap-2 overflow-x-auto pb-1">
+    <div
+      role="radiogroup"
+      aria-label="Reading mode"
+      className="nura-panel flex gap-1 overflow-x-auto rounded-full p-1"
+    >
       {modes.map((mode) => {
         const selected = mode.id === value
         return (
@@ -27,10 +31,10 @@ export function ModeSelector({
             aria-checked={selected}
             onClick={() => onChange(mode.id)}
             className={[
-              'inline-flex min-h-12 shrink-0 items-center gap-2 rounded-full px-4 text-sm font-bold',
+              'inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full px-3.5 text-sm font-bold transition',
               selected
                 ? 'bg-[var(--accent)] text-background'
-                : 'bg-[var(--surface-elevated)] text-[var(--text-primary)]',
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]',
             ].join(' ')}
           >
             <mode.icon aria-hidden="true" className="h-4 w-4" />

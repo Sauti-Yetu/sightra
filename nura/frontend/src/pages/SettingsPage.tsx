@@ -12,7 +12,7 @@ export function SettingsPage() {
   const clearHistory = useHistory((state) => state.clear)
 
   return (
-    <div className="mx-auto max-w-2xl space-y-4 px-4 py-4">
+    <div className="mx-auto max-w-2xl space-y-4 px-4 py-4 pb-8">
       <AppHeader title="Settings" subtitle="Voice, reading, privacy and accessibility" />
 
       <SettingsSection title="Voice">
@@ -23,6 +23,7 @@ export function SettingsPage() {
             max="1.2"
             step="0.1"
             aria-label="Speech speed"
+            className="w-28"
             value={settings.speechSpeed}
             onChange={(event) => settings.setSetting('speechSpeed', Number(event.target.value))}
           />
@@ -30,7 +31,7 @@ export function SettingsPage() {
         <SettingRow label="Response verbosity">
           <select
             aria-label="Response verbosity"
-            className="min-h-12 rounded-2xl bg-[var(--surface-elevated)] px-3"
+            className="min-h-12 rounded-2xl border border-white/10 bg-black/30 px-3"
             value={settings.verbosity}
             onChange={(event) => settings.setSetting('verbosity', event.target.value as Verbosity)}
           >
@@ -45,7 +46,7 @@ export function SettingsPage() {
         <SettingRow label="Default reading mode">
           <select
             aria-label="Default reading mode"
-            className="min-h-12 rounded-2xl bg-[var(--surface-elevated)] px-3"
+            className="min-h-12 rounded-2xl border border-white/10 bg-black/30 px-3"
             value={settings.defaultMode}
             onChange={(event) => settings.setSetting('defaultMode', event.target.value as ReadMode)}
           >
@@ -73,11 +74,15 @@ export function SettingsPage() {
 
       <SettingsSection title="Privacy">
         <SettingRow label="Do not retain images" description="Camera frames are not stored on this device">
-          <Toggle checked={!settings.retainImages} label="Do not retain images" onChange={(value) => settings.setSetting('retainImages', !value)} />
+          <Toggle
+            checked={!settings.retainImages}
+            label="Do not retain images"
+            onChange={(value) => settings.setSetting('retainImages', !value)}
+          />
         </SettingRow>
         <button
           type="button"
-          className="min-h-12 w-full rounded-2xl bg-[var(--surface-elevated)] font-bold"
+          className="min-h-12 w-full rounded-2xl border border-white/10 bg-white/5 font-bold"
           onClick={() => {
             clearHistory()
           }}
@@ -86,7 +91,7 @@ export function SettingsPage() {
         </button>
         <button
           type="button"
-          className="min-h-12 w-full rounded-2xl bg-[var(--surface-elevated)] font-bold"
+          className="min-h-12 w-full rounded-2xl border border-white/10 bg-white/5 font-bold"
           onClick={() => {
             void clearRemoteSession(session.sessionId)
             session.clearSession()
@@ -100,7 +105,7 @@ export function SettingsPage() {
         <SettingRow label="Text size">
           <select
             aria-label="Text size"
-            className="min-h-12 rounded-2xl bg-[var(--surface-elevated)] px-3"
+            className="min-h-12 rounded-2xl border border-white/10 bg-black/30 px-3"
             value={settings.textSize}
             onChange={(event) => settings.setSetting('textSize', event.target.value as TextSize)}
           >

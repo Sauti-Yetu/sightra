@@ -22,7 +22,7 @@ export function InstallPrompt() {
   if (!event || hidden) return null
 
   return (
-    <div className="mx-4 mb-3 flex items-center gap-3 rounded-3xl border border-[var(--border)] bg-[var(--surface-elevated)] p-4">
+    <div className="nura-panel mx-4 mb-3 flex items-center gap-3 rounded-3xl p-4">
       <Download aria-hidden="true" className="h-6 w-6 text-[var(--accent)]" />
       <p className="flex-1 font-bold">Install Nura on this device</p>
       <button

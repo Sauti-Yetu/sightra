@@ -2,32 +2,34 @@
 
 @theme {
   --font-sans: "Atkinson Hyperlegible", "Segoe UI", sans-serif;
-  --font-display: "Outfit", "Atkinson Hyperlegible", sans-serif;
-  --color-background: #07080b;
-  --color-surface: #12141a;
-  --color-surface-elevated: #1a1d26;
-  --color-text-primary: #f5f7fa;
-  --color-text-secondary: #a8b0c0;
-  --color-accent: #4ee0b8;
-  --color-accent-soft: #16352e;
-  --color-danger: #ff6b6b;
-  --color-success: #4ee0b8;
-  --color-border: #2a2e3a;
-  --color-focus: #f5f7fa;
+  --font-display: "Syne", "Outfit", "Atkinson Hyperlegible", sans-serif;
+  --color-background: #06070a;
+  --color-surface: #10131a;
+  --color-surface-elevated: #181c26;
+  --color-text-primary: #f4f6f8;
+  --color-text-secondary: #9aa3b5;
+  --color-accent: #5ef0c8;
+  --color-accent-soft: #12352e;
+  --color-danger: #ff6b7a;
+  --color-success: #5ef0c8;
+  --color-border: #2c3342;
+  --color-focus: #f4f6f8;
 }
 
 :root {
-  --background: #07080b;
-  --surface: #12141a;
-  --surface-elevated: #1a1d26;
-  --text-primary: #f5f7fa;
-  --text-secondary: #a8b0c0;
-  --accent: #4ee0b8;
-  --accent-soft: rgba(78, 224, 184, 0.16);
-  --danger: #ff6b6b;
-  --success: #4ee0b8;
-  --border: #2a2e3a;
+  --background: #06070a;
+  --surface: #10131a;
+  --surface-elevated: #181c26;
+  --text-primary: #f4f6f8;
+  --text-secondary: #9aa3b5;
+  --accent: #5ef0c8;
+  --accent-soft: rgba(94, 240, 200, 0.14);
+  --danger: #ff6b7a;
+  --success: #5ef0c8;
+  --border: rgba(255, 255, 255, 0.08);
   --focus: #ffffff;
+  --glow: rgba(94, 240, 200, 0.35);
+  --ink: #040507;
 }
 
 html,
@@ -43,8 +45,22 @@ body {
   margin: 0;
   font-family: var(--font-sans);
   font-size: 18px;
-  line-height: 1.45;
+  line-height: 1.5;
   text-rendering: optimizeLegibility;
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(94, 240, 200, 0.07), transparent 55%),
+    radial-gradient(800px 400px at 100% 100%, rgba(80, 110, 255, 0.05), transparent 50%),
+    var(--background);
+}
+
+body::before {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  opacity: 0.035;
+  z-index: 80;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 :focus-visible {
@@ -58,6 +74,38 @@ input,
 select,
 textarea {
   min-height: 44px;
+}
+
+.nura-panel {
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.012));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 18px 40px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(18px);
+}
+
+.nura-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 32px;
+  padding: 0 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.35);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.nura-chip-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--glow);
 }
 
 .nura-high-contrast {
@@ -101,15 +149,66 @@ textarea {
 @keyframes nura-pulse {
   0%,
   100% {
-    opacity: 0.55;
+    opacity: 0.45;
   }
   50% {
     opacity: 1;
   }
 }
 
+@keyframes nura-scan {
+  0% {
+    transform: translateY(-10%);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.85;
+  }
+  85% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateY(110%);
+    opacity: 0;
+  }
+}
+
+@keyframes nura-wave {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes nura-ring {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(1.18);
+    opacity: 0;
+  }
+}
+
 .nura-loader {
   animation: nura-pulse 1.6s ease-in-out infinite;
+}
+
+.nura-scanline {
+  animation: nura-scan 2.4s ease-in-out infinite;
+}
+
+.nura-wave {
+  transform-origin: center bottom;
+  animation: nura-wave 0.9s ease-in-out infinite;
+}
+
+.nura-ring {
+  animation: nura-ring 1.8s ease-out infinite;
 }
 
 .sr-only {
@@ -122,4 +221,10 @@ textarea {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+select,
+textarea,
+input[type="range"] {
+  accent-color: var(--accent);
 }

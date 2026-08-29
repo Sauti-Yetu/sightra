@@ -15,7 +15,7 @@ export function AskInput({
   const [value, setValue] = useState('')
   return (
     <form
-      className="space-y-3"
+      className="nura-panel space-y-3 rounded-[1.75rem] p-5"
       onSubmit={(event) => {
         event.preventDefault()
         const next = value.trim()
@@ -24,7 +24,7 @@ export function AskInput({
         setValue('')
       }}
     >
-      <label htmlFor="nura-ask" className="font-bold">
+      <label htmlFor="nura-ask" className="font-display text-lg font-semibold">
         Ask about this
       </label>
       <textarea
@@ -33,7 +33,7 @@ export function AskInput({
         disabled={disabled}
         onChange={(event) => setValue(event.target.value)}
         placeholder="When is the deadline?"
-        className="min-h-28 w-full rounded-3xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-lg"
+        className="min-h-28 w-full rounded-3xl border border-white/10 bg-black/25 px-4 py-3 text-lg"
       />
       <div className="flex flex-wrap gap-3">
         <button

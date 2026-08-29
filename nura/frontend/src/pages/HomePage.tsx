@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Mic, Upload } from 'lucide-react'
 import { AnalysisLoader } from '../components/AnalysisLoader'
+import { BrandMark } from '../components/BrandMark'
 import { CameraView } from '../components/CameraView'
 import { CaptureButton } from '../components/CaptureButton'
 import { ErrorState } from '../components/ErrorState'
 import { ModeSelector } from '../components/ModeSelector'
 import { PermissionPrompt } from '../components/PermissionPrompt'
+import { StatusChip } from '../components/StatusChip'
 import { useCamera } from '../hooks/useCamera'
 import { useOnline } from '../hooks/useOnline'
 import { announce } from '../accessibility/live'
@@ -96,14 +98,33 @@ export function HomePage() {
     }
   }
 
+  const modeHint =
+    mode === 'currency'
+      ? 'Hold a Kenyan note so the face of the bill fills the frame.'
+      : mode === 'sign'
+        ? 'Center the sign. Street names and room numbers read best up close.'
+        : mode === 'document'
+          ? 'Fill the frame with the page. Avoid glare on glossy paper.'
+          : 'Point your camera at text, signs or documents.'
+
   return (
-    <div className="mx-auto flex min-h-[calc(100dvh-5.5rem)] max-w-5xl flex-col px-4 pb-4 pt-3 lg:grid lg:grid-cols-[minmax(0,1.1fr)_minmax(18rem,0.9fr)] lg:gap-8 lg:pt-8">
+    <div className="mx-auto flex min-h-[calc(100dvh-5.5rem)] max-w-6xl flex-col px-4 pb-4 pt-3 lg:grid lg:grid-cols-[minmax(0,1.15fr)_20.5rem] lg:gap-8 lg:pt-6">
       <section className="flex min-h-0 flex-1 flex-col">
-        <header className="mb-3 text-center lg:text-left">
-          <p className="font-display text-xs font-semibold tracking-[0.28em] text-[var(--accent)]">NURA</p>
-          <h1 className="font-display text-3xl font-semibold tracking-tight">AI visual screen reader</h1>
-          <p className="mt-1 text-[var(--text-secondary)]">See it. Hear it. Understand it.</p>
+        <header className="mb-3 flex items-center justify-between gap-3 pt-[max(0.4rem,env(safe-area-inset-top))]">
+          <div className="flex items-center gap-3">
+            <BrandMark className="h-11 w-11" />
+            <div>
+              <p className="font-display text-[0.68rem] font-bold tracking-[0.32em] text-[var(--accent)]">NURA</p>
+              <h1 className="font-display text-xl font-semibold leading-none tracking-tight lg:text-2xl">
+                AI visual screen reader
+              </h1>
+            </div>
+          </div>
+          <StatusChip live={online && !session.loading} label={session.loading ? 'Reading' : online ? 'Ready' : 'Offline'} />
         </header>
+        <p className="mb-3 max-lg:sr-only font-display text-lg text-[var(--text-secondary)]">
+          See it. Hear it. Understand it.
+        </p>
 
         <div className="relative min-h-0 flex-1">
           {camera.permission === 'granted' ? (
@@ -111,11 +132,12 @@ export function HomePage() {
               videoRef={camera.videoRef}
               torchOn={camera.torchOn}
               torchAvailable={camera.torchAvailable}
+              scanning={session.loading}
               onSwitch={() => void camera.switchCamera()}
               onTorch={() => void camera.setTorch(!camera.torchOn)}
             />
           ) : (
-            <div className="h-[calc(100dvh-13.5rem)] rounded-[2rem] bg-[var(--surface)] lg:h-auto lg:aspect-video">
+            <div className="nura-panel h-[calc(100dvh-12.5rem)] rounded-[1.85rem] lg:h-auto lg:aspect-video">
               <PermissionPrompt
                 message={
                   camera.permission === 'unsupported'
@@ -127,7 +149,7 @@ export function HomePage() {
             </div>
           )}
           {session.loading ? <AnalysisLoader /> : null}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/80 to-transparent p-4 pt-16 lg:hidden">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black via-black/70 to-transparent p-4 pt-20 lg:hidden">
             <div className="pointer-events-auto space-y-3">
               <ModeSelector
                 value={mode}
@@ -145,7 +167,9 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="mt-4 flex flex-col gap-4 max-lg:hidden lg:mt-16">
+      <aside className="nura-panel mt-5 hidden flex-col justify-center gap-5 rounded-[1.85rem] p-6 lg:mt-16 lg:flex">
+        <p className="font-display text-2xl font-semibold leading-snug">See it. Hear it. Understand it.</p>
+        <p className="text-[var(--text-secondary)]">{modeHint}</p>
         <ModeSelector
           value={mode}
           onChange={(next) => {
@@ -154,55 +178,19 @@ export function HomePage() {
           }}
         />
         <CaptureButton onClick={() => void onRead()} disabled={session.loading || camera.permission !== 'granted'} />
-        <p className="text-[var(--text-secondary)]">Point your camera at text, signs or documents.</p>
         {session.error ? (
           <ErrorState message={session.error} actionLabel="Try again" onAction={() => session.setError(null)} />
         ) : null}
-        <div className="mt-2 flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={() => navigate('/ask')}
-            className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[var(--surface-elevated)] px-5 font-bold"
-          >
-            <Mic aria-hidden="true" className="h-4 w-4" />
-            Ask
-          </button>
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[var(--surface-elevated)] px-5 font-bold"
-          >
-            <Upload aria-hidden="true" className="h-4 w-4" />
-            Upload image
-          </button>
-        </div>
-      </section>
-      <div className="mt-3 flex flex-wrap justify-center gap-3 lg:hidden">
+        <SecondaryActions onAsk={() => navigate('/ask')} onUpload={() => fileRef.current?.click()} />
+      </aside>
+
+      <div className="mt-3 space-y-3 lg:hidden">
         {session.error ? (
-          <div className="w-full">
-            <ErrorState message={session.error} actionLabel="Try again" onAction={() => session.setError(null)} />
-          </div>
+          <ErrorState message={session.error} actionLabel="Try again" onAction={() => session.setError(null)} />
         ) : (
-          <p className="w-full text-center text-sm text-[var(--text-secondary)]">
-            Point your camera at text, signs or documents.
-          </p>
+          <p className="text-center text-sm text-[var(--text-secondary)]">{modeHint}</p>
         )}
-        <button
-          type="button"
-          onClick={() => navigate('/ask')}
-          className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[var(--surface-elevated)] px-5 font-bold"
-        >
-          <Mic aria-hidden="true" className="h-4 w-4" />
-          Ask
-        </button>
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[var(--surface-elevated)] px-5 font-bold"
-        >
-          <Upload aria-hidden="true" className="h-4 w-4" />
-          Upload image
-        </button>
+        <SecondaryActions onAsk={() => navigate('/ask')} onUpload={() => fileRef.current?.click()} />
       </div>
       <input
         ref={fileRef}
@@ -216,6 +204,29 @@ export function HomePage() {
           event.target.value = ''
         }}
       />
+    </div>
+  )
+}
+
+function SecondaryActions({ onAsk, onUpload }: { onAsk: () => void; onUpload: () => void }) {
+  return (
+    <div className="flex flex-wrap justify-center gap-3 lg:justify-start">
+      <button
+        type="button"
+        onClick={onAsk}
+        className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 font-bold"
+      >
+        <Mic aria-hidden="true" className="h-4 w-4" />
+        Ask
+      </button>
+      <button
+        type="button"
+        onClick={onUpload}
+        className="inline-flex min-h-12 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 font-bold"
+      >
+        <Upload aria-hidden="true" className="h-4 w-4" />
+        Upload image
+      </button>
     </div>
   )
 }
