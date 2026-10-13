@@ -13,6 +13,13 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 import os
 
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+except ImportError:
+    pass
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -57,6 +64,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "apps.accounts.middleware.SupabaseAuthMiddleware",
+    "apps.accounts.middleware.LoginRequiredMiddleware",
 ]
 
 ROOT_URLCONF = "sightra.urls"
@@ -124,7 +133,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+
+SIGHTTRA_REQUIRE_LOGIN = os.getenv("SIGHTTRA_REQUIRE_LOGIN", "false").lower() in (
+    "1",
+    "true",
+    "yes",
+)
+SIGHTTRA_SIGNIN_URL = "/signin/"
 
 # Celery Configuration Options
 CELERY_BROKER_URL = "redis://localhost:6379/0"
@@ -134,6 +151,4 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
 
-# Gemini API Key (ensure this is set in your environment variables for production)
-import os
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "your-gemini-api-key-here")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")

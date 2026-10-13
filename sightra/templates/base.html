@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0ea5a4" />
+  <title>{% block title %}Sightra{% endblock %}</title>
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="{% static 'icons/icon-192.png' %}" />
+  <script>
+    (function () {
+      const theme = localStorage.getItem('sightra_theme') || localStorage.getItem('theme') || 'light';
+      if (theme === 'dark') document.documentElement.classList.add('dark');
+    })();
+  </script>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' };
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lexend:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'css/sightra.css' %}" />
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}app-shell{% endblock %}">
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <div id="sr-live" class="sr-live" aria-live="polite" aria-atomic="true"></div>
+
+  {% block header %}
+  {% if not hide_app_header %}
+  <header class="app-header sticky top-0 z-40 border-b border-black/5 dark:border-white/5">
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
+      <a href="/dashboard" class="font-headline flex items-center gap-2 text-lg font-semibold tracking-tight">
+        <span class="material-symbols-outlined text-[var(--primary)]">visibility</span>
+        Sightra
+      </a>
+      <div class="flex items-center gap-2">
+        <button type="button" id="a11y-toggle" class="icon-btn" aria-label="Accessibility options">
+          <span class="material-symbols-outlined">accessibility_new</span>
+        </button>
+        <button type="button" id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode">
+          <span class="material-symbols-outlined" id="theme-toggle-icon">dark_mode</span>
+        </button>
+        {% if request.sightra_user %}
+        <a href="/signout/" class="btn-ghost text-sm">Sign out</a>
+        {% else %}
+        <a href="/signin/" class="btn-ghost text-sm">Sign in</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+  {% endif %}
+  {% endblock %}
+
+  <main id="main-content" class="{% block main_class %}mx-auto max-w-6xl px-4 pb-28 pt-4 md:pb-8{% endblock %}">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% include "partials/a11y_panel.html" %}
+  {% include "partials/install_prompt.html" %}
+
+  {% block bottom_nav %}
+  {% include "bottom_nav.html" %}
+  {% endblock %}
+
+  <script src="{% static 'js/sightra.js' %}"></script>
+  {% block page_scripts %}{% endblock %}
+</body>
+</html>

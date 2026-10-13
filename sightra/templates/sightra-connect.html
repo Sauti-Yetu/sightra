@@ -5,9 +5,12 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="theme-color" content="#0ea5a4" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="stylesheet" href="/static/css/sightra.css" />
     <script>
         (function () {
-            const theme = localStorage.getItem('theme') || 'light';
+            const theme = localStorage.getItem('sightra_theme') || localStorage.getItem('theme') || 'light';
             if (theme === 'dark') {
                 document.documentElement.classList.add('dark');
             } else {
@@ -334,6 +337,7 @@
     <div
         class="fixed bottom-0 left-0 w-[400px] h-[400px] bg-secondary-container/5 blur-[100px] -z-10 rounded-full pointer-events-none">
     </div>
+<script src="/static/js/sightra.js"></script>
 </body>
 
 </html>

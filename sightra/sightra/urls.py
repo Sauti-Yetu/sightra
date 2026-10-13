@@ -31,6 +31,10 @@ urlpatterns = [
     # Authentication 
     path("signin/", signin, name="signin"),
     path("signup/", signup, name="signup"),
+    path("signout/", signout, name="signout"),
+    path("offline/", offline_page, name="offline"),
+    path("sw.js", service_worker, name="service-worker"),
+    path("manifest.webmanifest", web_manifest, name="web-manifest"),
     # Homepage
     path("dashboard", dashboard, name="dashboard"),
     path("", landing_page, name="landing_page"),

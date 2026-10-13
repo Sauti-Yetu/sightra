@@ -5,10 +5,13 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta name="theme-color" content="#0ea5a4" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="stylesheet" href="/static/css/sightra.css" />
     <title>Sightra Spatial Navigation</title>
     <script>
         (function () {
-            const theme = localStorage.getItem('theme') || 'light';
+            const theme = localStorage.getItem('sightra_theme') || localStorage.getItem('theme') || 'light';
             if (theme === 'dark') {
                 document.documentElement.classList.add('dark');
             } else {
@@ -400,6 +403,7 @@
         </div>
     </main>
     {% include 'bottom_nav.html' %}
+<script src="/static/js/sightra.js"></script>
 </body>
 
 <!-- Leaflet & Routing JS -->

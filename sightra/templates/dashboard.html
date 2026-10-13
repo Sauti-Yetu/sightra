@@ -1,511 +1,58 @@
-<!DOCTYPE html>
+{% extends "base.html" %}
+{% block title %}Dashboard | Sightra{% endblock %}
+{% block content %}
+<section class="mb-8">
+  <p class="text-sm text-[var(--text-muted)]">Live assist hub</p>
+  <h1 id="greeting" class="font-headline mt-1 text-3xl font-semibold tracking-tight md:text-4xl">Welcome back</h1>
+  <p class="mt-2 max-w-2xl text-[var(--text-muted)]">Choose a tool to explore your environment, navigate, connect with volunteers, or adjust accessibility.</p>
+</section>
 
-<html lang="en">
-
-<head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Sightra</title>
-    <script>
-        (function () {
-            const theme = localStorage.getItem('theme') || 'light';
-            if (theme === 'dark') {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        })();
-    </script>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&amp;family=Inter:wght@300;400;500;600&amp;display=swap"
-        rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "on-surface-variant": "var(--color-on-surface-variant)",
-                        "tertiary-fixed-dim": "var(--color-tertiary-fixed-dim)",
-                        "secondary": "var(--color-secondary)",
-                        "primary": "var(--color-primary)",
-                        "on-background": "var(--color-on-background)",
-                        "surface": "var(--color-surface)",
-                        "error-container": "var(--color-error-container)",
-                        "surface-bright": "var(--color-surface-bright)",
-                        "outline-variant": "var(--color-outline-variant)",
-                        "on-primary": "var(--color-on-primary)",
-                        "on-primary-fixed-variant": "var(--color-on-primary-fixed-variant)",
-                        "primary-fixed-dim": "var(--color-primary-fixed-dim)",
-                        "on-secondary-fixed": "var(--color-on-secondary-fixed)",
-                        "on-error": "var(--color-on-error)",
-                        "on-primary-container": "var(--color-on-primary-container)",
-                        "surface-container-low": "var(--color-surface-container-low)",
-                        "surface-variant": "var(--color-surface-variant)",
-                        "surface-tint": "var(--color-surface-tint)",
-                        "secondary-container": "var(--color-secondary-container)",
-                        "on-tertiary-fixed-variant": "var(--color-on-tertiary-fixed-variant)",
-                        "tertiary": "var(--color-tertiary)",
-                        "on-tertiary": "var(--color-on-tertiary)",
-                        "secondary-fixed": "var(--color-secondary-fixed)",
-                        "on-tertiary-container": "var(--color-on-tertiary-container)",
-                        "on-error-container": "var(--color-on-error-container)",
-                        "on-primary-fixed": "var(--color-on-primary-fixed)",
-                        "surface-dim": "var(--color-surface-dim)",
-                        "outline": "var(--color-outline)",
-                        "on-tertiary-fixed": "var(--color-on-tertiary-fixed)",
-                        "inverse-on-surface": "var(--color-inverse-on-surface)",
-                        "secondary-fixed-dim": "var(--color-secondary-fixed-dim)",
-                        "tertiary-fixed": "var(--color-tertiary-fixed)",
-                        "tertiary-container": "var(--color-tertiary-container)",
-                        "surface-container-lowest": "var(--color-surface-container-lowest)",
-                        "inverse-surface": "var(--color-inverse-surface)",
-                        "surface-container-high": "var(--color-surface-container-high)",
-                        "on-secondary-fixed-variant": "var(--color-on-secondary-fixed-variant)",
-                        "error": "var(--color-error)",
-                        "background": "var(--color-background)",
-                        "surface-container-highest": "var(--color-surface-container-highest)",
-                        "primary-container": "var(--color-primary-container)",
-                        "surface-container": "var(--color-surface-container)",
-                        "inverse-primary": "var(--color-inverse-primary)",
-                        "on-secondary": "var(--color-on-secondary)",
-                        "on-surface": "var(--color-on-surface)",
-                        "primary-fixed": "var(--color-primary-fixed)",
-                        "on-secondary-container": "var(--color-on-secondary-container)"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
-                    "fontFamily": {
-                        "headline": ["Lexend"],
-                        "body": ["Inter"],
-                        "label": ["Inter"]
-                    }
-                },
-            },
-        }
-    </script>
-    <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-
-        :root {
-            /* Light Mode Default */
-            --color-background: #f8fafc;
-            --color-on-background: #0f172a;
-            --color-surface: #ffffff;
-            --color-on-surface: #0f172a;
-            --color-surface-bright: #ffffff;
-            --color-surface-dim: #f1f5f9;
-            --color-surface-container: #f1f5f9;
-            --color-surface-container-low: #f8fafc;
-            --color-surface-container-high: #e2e8f0;
-            --color-surface-container-highest: #cbd5e1;
-            --color-surface-container-lowest: #ffffff;
-            --color-surface-variant: #e2e8f0;
-            --color-on-surface-variant: #475569;
-            --color-outline: #64748b;
-            --color-outline-variant: #cbd5e1;
-            
-            --color-primary: #006875;
-            --color-on-primary: #ffffff;
-            --color-primary-container: #e0f7fa;
-            --color-on-primary-container: #002024;
-            --color-primary-fixed: #9cf0ff;
-            --color-primary-fixed-dim: #00daf3;
-
-            --color-secondary: #00e5ff;
-            --color-on-secondary: #00363d;
-            --color-secondary-container: #c3f400;
-            --color-on-secondary-container: #161e00;
-            --color-secondary-fixed: #c3f400;
-            --color-on-secondary-fixed: #161e00;
-            --color-secondary-fixed-dim: #abd600;
-            --color-on-secondary-fixed-variant: #3c4d00;
-
-            --color-error: #ba1a1a;
-            --color-on-error: #ffffff;
-            --color-error-container: #ffdad6;
-            --color-on-error-container: #410002;
-            
-            --color-inverse-surface: #1e293b;
-            --color-inverse-on-surface: #f8fafc;
-            --color-inverse-primary: #00e5ff;
-            
-            --color-tertiary: #b5a300;
-            --color-on-tertiary: #ffffff;
-            --color-tertiary-container: #fff59d;
-            --color-on-tertiary-container: #332d00;
-            --color-tertiary-fixed: #ffdf96;
-            --color-on-tertiary-fixed: #251a00;
-            --color-tertiary-fixed-dim: #f3bf26;
-            --color-on-tertiary-fixed-variant: #594400;
-        }
-
-        html.dark {
-            /* Dark Mode (from original config values) */
-            --color-background: #131313;
-            --color-on-background: #e5e2e1;
-            --color-surface: #131313;
-            --color-on-surface: #e5e2e1;
-            --color-surface-bright: #393939;
-            --color-surface-dim: #131313;
-            --color-surface-container: #201f1f;
-            --color-surface-container-low: #1c1b1b;
-            --color-surface-container-high: #2a2a2a;
-            --color-surface-container-highest: #353534;
-            --color-surface-container-lowest: #0e0e0e;
-            --color-surface-variant: #353534;
-            --color-on-surface-variant: #bac9cc;
-            --color-outline: #849396;
-            --color-outline-variant: #3b494c;
-            
-            --color-primary: #c3f5ff;
-            --color-on-primary: #00363d;
-            --color-primary-container: #00e5ff;
-            --color-on-primary-container: #00626e;
-            --color-primary-fixed: #9cf0ff;
-            --color-primary-fixed-dim: #00daf3;
-
-            --color-secondary: #ffffff;
-            --color-on-secondary: #283500;
-            --color-secondary-container: #c3f400;
-            --color-on-secondary-container: #556d00;
-            --color-secondary-fixed: #c3f400;
-            --color-on-secondary-fixed: #161e00;
-            --color-secondary-fixed-dim: #abd600;
-            --color-on-secondary-fixed-variant: #3c4d00;
-
-            --color-error: #ffb4ab;
-            --color-on-error: #690005;
-            --color-error-container: #93000a;
-            --color-on-error-container: #ffdad6;
-            
-            --color-inverse-surface: #e5e2e1;
-            --color-inverse-on-surface: #313030;
-            --color-inverse-primary: #006875;
-            
-            --color-tertiary: #ffeac0;
-            --color-on-tertiary: #3e2e00;
-            --color-tertiary-container: #fec931;
-            --color-on-tertiary-container: #6f5500;
-            --color-tertiary-fixed: #ffdf96;
-            --color-on-tertiary-fixed: #251a00;
-            --color-tertiary-fixed-dim: #f3bf26;
-            --color-on-tertiary-fixed-variant: #594400;
-        }
-
-        body {
-            background-color: var(--color-background);
-            color: var(--color-on-background);
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-        html.dark .glass-panel {
-            background: rgba(28, 27, 27, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-    </style>
-    <style>
-        body {
-            min-height: max(884px, 100dvh);
-        }
-    </style>
-</head>
-
-<body class="font-body selection:bg-primary-container selection:text-on-primary-container">
-    <!-- TopAppBar -->
-    <header
-        class="fixed top-0 w-full z-50 bg-white/80 dark:bg-[#131313]/80 backdrop-blur-xl border-b border-outline-variant/10 dark:border-[#00E5FF]/20 flex justify-between items-center px-6 h-16 w-full shadow-sm dark:shadow-[0_0_20px_rgba(0,229,255,0.1)]">
-        <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <span class="material-symbols-outlined text-[#00E5FF] text-2xl" data-icon="visibility">visibility</span>
-            <h1
-                class="font-['Lexend'] tracking-widest uppercase font-bold text-2xl font-black text-[#00E5FF] tracking-tighter">
-                Sightra</h1>
-        </a>
-
-        <div class="flex items-center gap-4">
-            <!-- Desktop Navigation -->
-            <nav class="hidden md:flex items-center gap-8" id="desktopNav">
-                <a href="/" data-target="/"
-                    class="nav-link flex items-center gap-2 text-on-surface-variant dark:text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
-                    <span class="material-symbols-outlined text-[20px]">home</span>
-                    Home
-                </a>
-                <a href="/vision/" data-target="/vision"
-                    class="nav-link flex items-center gap-2 text-on-surface-variant dark:text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
-                    <span class="material-symbols-outlined text-[20px]">visibility</span>
-                    Vision
-                </a>
-                <a href="/live-map/" data-target="/map"
-                    class="nav-link flex items-center gap-2 text-on-surface-variant dark:text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
-                    <span class="material-symbols-outlined text-[20px]">map</span>
-                    Map
-                </a>
-                <a href="/live-call/" data-target="/live-call"
-                    class="nav-link flex items-center gap-2 text-on-surface-variant dark:text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
-                    <span class="material-symbols-outlined text-[20px]">call</span>
-                    Sightra Connect
-                </a>
-                <a href="/voice_assistant/" data-target="/voice_assistant"
-                    class="nav-link flex items-center gap-2 text-on-surface-variant dark:text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
-                    <span class="material-symbols-outlined text-[20px]">mic</span>
-                    Voice
-                </a>
-                <a href="/settings/" data-target="/settings"
-                    class="nav-link flex items-center gap-2 text-on-surface-variant dark:text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
-                    <span class="material-symbols-outlined text-[20px]">settings</span>
-                    Settings
-                </a>
-            </nav>
-
-            <!-- Theme Toggle -->
-            <button id="theme-toggle" class="p-2 rounded-xl text-on-surface hover:bg-surface-container-high/50 active:scale-95 transition-all flex items-center justify-center" title="Toggle Theme">
-                <span class="material-symbols-outlined text-2xl" id="theme-toggle-icon">dark_mode</span>
-            </button>
-        </div>
-    </header>
-    <main class="pt-24 pb-32 px-6 max-w-7xl mx-auto space-y-10">
-        <!-- Welcome & System Status Section -->
-        <section class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
-            <div class="md:col-span-7 space-y-2">
-                <h2 id="greeting" class="font-headline text-4xl md:text-5xl font-extrabold tracking-tight">Good Morning,
-                    Jace.</h2>
-                <p class="text-on-surface-variant text-lg max-w-md">Your environment is mapped and ready for navigation.
-                </p>
-            </div>
-            <div
-                class="md:col-span-5 bg-surface-container-low p-6 rounded-xl border-l-4 border-secondary-container shadow-[0_0_40px_rgba(195,244,0,0.05)] flex items-center justify-between">
-                <div class="space-y-1">
-                    <span
-                        class="font-headline text-xs font-bold text-secondary-container uppercase tracking-widest">System
-                        Status</span>
-                    <p class="text-xl font-bold">All Sensors Active</p>
-                </div>
-                <div class="text-right">
-                    <div class="text-3xl font-black text-secondary-container font-headline">98%</div>
-                    <div class="text-[10px] text-on-surface-variant uppercase font-medium">AI Confidence</div>
-                </div>
-            </div>
-        </section>
-        <!-- Core Action Cards (Bento Grid Style) -->
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Vision Awareness -->
-            <div
-                class="group relative md:col-span-2 aspect-[16/10] md:aspect-auto md:h-80 bg-surface-container-high rounded-xl overflow-hidden cursor-pointer active:scale-[0.98] transition-transform duration-300">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10"></div>
-                <img alt="Real-time visual data feed"
-                    class="w-full h-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-60 transition-all duration-700"
-                    data-alt="Futuristic digital scan of a city street showing bounding boxes around cars and pedestrians in neon blue and green"
-                    src="https://userway.org/blog/wp-content/uploads/2022/01/Web-Accessibility-for-Visually-Impaired.jpg" />
-                <div class="absolute inset-0 p-8 flex flex-col justify-between z-20">
-                    <div class="flex justify-between items-start">
-                        <div
-                            class="w-14 h-14 bg-primary-container text-on-primary-container rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(0,229,255,0.4)]">
-                            <span class="material-symbols-outlined text-3xl"
-                                data-icon="center_focus_strong">center_focus_strong</span>
-                        </div>
-                        <span
-                            class="px-3 py-1 bg-primary-container/20 text-primary-container rounded-full text-[10px] font-bold uppercase tracking-tighter">Live
-                            Analysis</span>
-                    </div>
-                    <div class="space-y-1">
-                        <h3 class="font-headline text-3xl font-bold">Vision Awareness</h3>
-                        <p class="text-on-surface-variant">Real-time obstacle and scene detection for immediate spatial
-                            safety.</p>
-                    </div>
-                </div>
-            </div>
-            <!-- Smart Navigation -->
-            <div
-                class="group bg-surface-container-low rounded-xl p-8 flex flex-col justify-between cursor-pointer hover:bg-surface-container-high transition-all duration-300 border border-transparent hover:border-primary-container/30">
-                <div
-                    class="w-14 h-14 bg-surface-container-highest text-primary-container rounded-xl flex items-center justify-center">
-                    <span class="material-symbols-outlined text-3xl" data-icon="near_me">near_me</span>
-                </div>
-                <div class="space-y-3">
-                    <h3 class="font-headline text-2xl font-bold">Smart Navigation</h3>
-                    <p class="text-on-surface-variant text-sm">Voice-guided precise paths to your saved or new
-                        destinations.</p>
-                    <div
-                        class="pt-4 flex items-center gap-2 text-primary-container text-xs font-bold uppercase tracking-wider">
-                        Explore Paths <span class="material-symbols-outlined text-sm"
-                            data-icon="arrow_forward">arrow_forward</span>
-                    </div>
-                </div>
-            </div>
-            <!-- AI Assistant -->
-            <div
-                class="group md:col-span-3 bg-gradient-to-r from-surface-container-low to-surface-container-highest rounded-xl p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 border border-white/5">
-                <div class="flex items-center gap-6">
-                    <div class="relative">
-                        <div class="absolute inset-0 bg-secondary-container blur-xl opacity-20"></div>
-                        <div
-                            class="w-16 h-16 bg-secondary-container text-on-secondary-fixed rounded-full flex items-center justify-center relative z-10">
-                            <span class="material-symbols-outlined text-4xl" data-icon="psychology">psychology</span>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="font-headline text-2xl font-bold">AI Assistant</h3>
-                        <p class="text-on-surface-variant max-w-sm">Ask questions about objects, text, or the atmosphere
-                            of your surroundings.</p>
-                    </div>
-                </div>
-                <div class="flex gap-3">
-                    <a href="/voice_assistant/"
-                        class="px-8 h-14 bg-secondary-container text-on-secondary-fixed font-bold rounded-xl flex items-center justify-center gap-2 hover:scale-105 transition-transform">
-                        <span class="material-symbols-outlined" data-icon="mic">mic</span>
-                        Start Conversation
-                    </a>
-                </div>
-            </div>
-        </section>
-        <!-- Lower Section: Recent Activity -->
-        <!-- <section class="space-y-6">
-            <div class="flex justify-between items-end">
-                <h2 class="font-headline text-2xl font-bold">Recent Activity</h2>
-                <button class="text-primary text-sm font-medium hover:underline">View History</button>
-            </div>
-            <div class="space-y-3"> -->
-        <!-- Activity Item 1 -->
-        <!-- <div
-                    class="group flex items-center justify-between p-5 bg-surface-container-low rounded-xl hover:bg-surface-container-high transition-colors">
-                    <div class="flex items-center gap-5">
-                        <div
-                            class="w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center text-[#00E5FF]">
-                            <span class="material-symbols-outlined" data-icon="door_front">door_front</span>
-                        </div>
-                        <div>
-                            <p class="font-bold text-lg">Blue Door</p>
-                            <p class="text-on-surface-variant text-sm">Stationary Object Identified</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="font-headline text-xl font-black text-primary-container">2m</p>
-                        <p class="text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">Distance</p>
-                    </div>
-                </div> -->
-        <!-- Activity Item 2 -->
-        <!-- <div
-                    class="group flex items-center justify-between p-5 bg-surface-container-low rounded-xl hover:bg-surface-container-high transition-colors">
-                    <div class="flex items-center gap-5">
-                        <div
-                            class="w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center text-secondary-container">
-                            <span class="material-symbols-outlined" data-icon="directions_car">directions_car</span>
-                        </div>
-                        <div>
-                            <p class="font-bold text-lg">Moving Vehicle</p>
-                            <p class="text-on-surface-variant text-sm">Approaching from Northwest</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="font-headline text-xl font-black text-secondary-container">10m</p>
-                        <p class="text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">Distance</p>
-                    </div>
-                </div> -->
-        <!-- Activity Item 3 -->
-        <!-- <div
-                    class="group flex items-center justify-between p-5 bg-surface-container-low rounded-xl hover:bg-surface-container-high transition-colors opacity-70">
-                    <div class="flex items-center gap-5">
-                        <div
-                            class="w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center text-on-surface-variant">
-                            <span class="material-symbols-outlined" data-icon="stairs">stairs</span>
-                        </div>
-                        <div>
-                            <p class="font-bold text-lg">Staircase (Up)</p>
-                            <p class="text-on-surface-variant text-sm">Detected 3 minutes ago</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="font-headline text-xl font-black text-on-surface-variant">15m</p>
-                        <p class="text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">Distance</p>
-                    </div>
-                </div>
-            </div>
-        </section> -->
-    </main>
-
-    <!-- Footer -->
-    <footer class="w-full max-w-7xl mx-auto px-6 pb-24 text-center text-xs md:text-sm text-on-surface-variant/60">
-        <div class="flex flex-wrap justify-center gap-4 font-medium">
-            <a href="#" class="hover:text-[#00E5FF] transition-colors">Privacy Policy</a>
-            <span class="opacity-40">&bull;</span>
-            <a href="#" class="hover:text-[#00E5FF] transition-colors">Terms of Service</a>
-            <span class="opacity-40">&bull;</span>
-            <a href="#" class="hover:text-[#00E5FF] transition-colors">Your Data Rights</a>
-        </div>
-        <p class="mt-4 opacity-50">&copy; {% now "Y" %} sightra.net. All rights reserved.</p>
-    </footer>
-
-    <!-- BottomNavBar -->
-    {% include 'bottom_nav.html' %}
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const greetingElement = document.getElementById('greeting');
-            const hour = new Date().getHours();
-            let greetingText = "";
-
-            if (hour >= 5 && hour < 12) {
-                greetingText = "Good Morning";
-            } else if (hour >= 12 && hour < 17) {
-                greetingText = "Good Afternoon";
-            } else if (hour >= 17 && hour < 22) {
-                greetingText = "Good Evening";
-            } else {
-                greetingText = "Late Night";
-            }
-
-            if (greetingElement) {
-                greetingElement.textContent = `${greetingText}, Jace.`;
-            }
-
-            // Theme Toggle Logic
-            const themeToggleBtn = document.getElementById('theme-toggle');
-            const themeToggleIcon = document.getElementById('theme-toggle-icon');
-
-            function updateToggleUI(isDark) {
-                if (themeToggleIcon) {
-                    themeToggleIcon.textContent = isDark ? 'light_mode' : 'dark_mode';
-                }
-            }
-
-            const isDark = document.documentElement.classList.contains('dark');
-            updateToggleUI(isDark);
-
-            if (themeToggleBtn) {
-                themeToggleBtn.addEventListener('click', () => {
-                    const currentIsDark = document.documentElement.classList.contains('dark');
-                    if (currentIsDark) {
-                        document.documentElement.classList.remove('dark');
-                        localStorage.setItem('theme', 'light');
-                        updateToggleUI(false);
-                    } else {
-                        document.documentElement.classList.add('dark');
-                        localStorage.setItem('theme', 'dark');
-                        updateToggleUI(true);
-                    }
-                    window.dispatchEvent(new Event('themechange'));
-                });
-            }
-        });
-    </script>
-</body>
-
-</html>
+<section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  <a href="/vision/" class="card group p-5 transition hover:-translate-y-0.5">
+    <span class="material-symbols-outlined text-3xl text-[var(--primary)]">visibility</span>
+    <h2 class="font-headline mt-3 text-lg font-semibold">Live vision</h2>
+    <p class="mt-1 text-sm text-[var(--text-muted)]">Camera scene analysis and spoken guidance.</p>
+  </a>
+  <a href="/live-map/" class="card group p-5 transition hover:-translate-y-0.5">
+    <span class="material-symbols-outlined text-3xl text-[var(--primary)]">explore</span>
+    <h2 class="font-headline mt-3 text-lg font-semibold">Live map</h2>
+    <p class="mt-1 text-sm text-[var(--text-muted)]">Spatial navigation and route cues.</p>
+  </a>
+  <a href="/voice_assistant/" class="card group p-5 transition hover:-translate-y-0.5">
+    <span class="material-symbols-outlined text-3xl text-[var(--primary)]">mic</span>
+    <h2 class="font-headline mt-3 text-lg font-semibold">Voice assistant</h2>
+    <p class="mt-1 text-sm text-[var(--text-muted)]">Ask questions about your surroundings.</p>
+  </a>
+  <a href="/live-call/" class="card group p-5 transition hover:-translate-y-0.5">
+    <span class="material-symbols-outlined text-3xl text-[var(--primary)]">video_call</span>
+    <h2 class="font-headline mt-3 text-lg font-semibold">Sightra Connect</h2>
+    <p class="mt-1 text-sm text-[var(--text-muted)]">Real-time volunteer video support.</p>
+  </a>
+  <a href="/sightra-connect/" class="card group p-5 transition hover:-translate-y-0.5">
+    <span class="material-symbols-outlined text-3xl text-[var(--primary)]">handshake</span>
+    <h2 class="font-headline mt-3 text-lg font-semibold">Volunteer hub</h2>
+    <p class="mt-1 text-sm text-[var(--text-muted)]">Find help and connection options.</p>
+  </a>
+  <a href="/settings/" class="card group p-5 transition hover:-translate-y-0.5">
+    <span class="material-symbols-outlined text-3xl text-[var(--primary)]">tune</span>
+    <h2 class="font-headline mt-3 text-lg font-semibold">Settings</h2>
+    <p class="mt-1 text-sm text-[var(--text-muted)]">Theme, accessibility, and preferences.</p>
+  </a>
+</section>
+{% endblock %}
+{% block page_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const el = document.getElementById('greeting');
+    if (!el) return;
+    const hour = new Date().getHours();
+    let g = 'Hello';
+    if (hour >= 5 && hour < 12) g = 'Good morning';
+    else if (hour >= 12 && hour < 17) g = 'Good afternoon';
+    else if (hour >= 17 && hour < 22) g = 'Good evening';
+    else g = 'Good evening';
+    const email = "{% if request.sightra_user %}{{ request.sightra_user.email|escapejs }}{% endif %}";
+    el.textContent = email ? `${g}, ${email.split('@')[0]}.` : `${g}.`;
+  });
+</script>
+{% endblock %}

@@ -1,58 +1,28 @@
-<!-- BottomNavBar -->
-<nav id="bottomNav"
-    class="fixed bottom-0 left-0 w-full md:hidden flex justify-around items-center pb-6 pt-3 px-4 bg-surface/80 dark:bg-[#131313]/80 backdrop-blur-xl z-50 border-t border-outline-variant/10 dark:border-[#00E5FF]/10 shadow-[0_-10px_40px_rgba(0,229,255,0.08)] rounded-t-3xl">
-    <a class="nav-link flex flex-col items-center justify-center text-on-surface-variant dark:text-[#BAC9CC] hover:text-primary dark:hover:text-[#C3F400] px-2 sm:px-6 py-2 transition-all active:scale-90 duration-300 ease-out"
-        href="/" data-target="/">
-        <span class="material-symbols-outlined text-2xl" data-icon="home">home</span>
-        <span class="font-['Lexend'] text-[10px] font-medium tracking-wide">Home</span>
+<nav class="bottom-nav fixed bottom-0 left-0 right-0 z-40 border-t border-black/5 md:hidden dark:border-white/5" aria-label="Primary">
+  <div class="mx-auto flex max-w-lg items-stretch justify-around px-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
+    <a href="/dashboard" data-nav-target="/dashboard" class="flex flex-1 flex-col items-center gap-0.5 px-1 py-2 text-[10px] font-medium text-[var(--text-muted)]">
+      <span class="material-symbols-outlined text-[22px]">home</span>
+      Home
     </a>
-    <a class="nav-link flex flex-col items-center justify-center text-on-surface-variant dark:text-[#BAC9CC] hover:text-primary dark:hover:text-[#C3F400] px-2 sm:px-6 py-2 transition-all active:scale-90 duration-300 ease-out"
-        href="/vision/" data-target="/vision">
-        <span class="material-symbols-outlined text-2xl" data-icon="visibility">visibility</span>
-        <span class="font-['Lexend'] text-[10px] font-medium tracking-wide">Vision</span>
+    <a href="/vision/" data-nav-target="/vision" class="flex flex-1 flex-col items-center gap-0.5 px-1 py-2 text-[10px] font-medium text-[var(--text-muted)]">
+      <span class="material-symbols-outlined text-[22px]">visibility</span>
+      Vision
     </a>
-    <a class="nav-link flex flex-col items-center justify-center text-on-surface-variant dark:text-[#BAC9CC] hover:text-primary dark:hover:text-[#C3F400] px-2 sm:px-6 py-2 transition-all active:scale-90 duration-300 ease-out"
-        href="/live-map" data-target="/live-map">
-        <span class="material-symbols-outlined text-2xl" data-icon="explore">explore</span>
-        <span class="font-['Lexend'] text-[10px] font-medium tracking-wide">Map</span>
+    <a href="/live-map/" data-nav-target="/live-map" class="flex flex-1 flex-col items-center gap-0.5 px-1 py-2 text-[10px] font-medium text-[var(--text-muted)]">
+      <span class="material-symbols-outlined text-[22px]">explore</span>
+      Map
     </a>
-    <a class="nav-link flex flex-col items-center justify-center text-on-surface-variant dark:text-[#BAC9CC] hover:text-primary dark:hover:text-[#C3F400] px-2 sm:px-6 py-2 transition-all active:scale-90 duration-300 ease-out"
-        href="/live-call/" data-target="/live-call">
-        <span class="material-symbols-outlined text-2xl" data-icon="call">call</span>
-        <span class="font-['Lexend'] text-[10px] font-medium tracking-wide">Connect</span>
+    <a href="/live-call/" data-nav-target="/live-call" class="flex flex-1 flex-col items-center gap-0.5 px-1 py-2 text-[10px] font-medium text-[var(--text-muted)]">
+      <span class="material-symbols-outlined text-[22px]">call</span>
+      Connect
     </a>
-    <a class="nav-link flex flex-col items-center justify-center text-on-surface-variant dark:text-[#BAC9CC] hover:text-primary dark:hover:text-[#C3F400] px-2 sm:px-6 py-2 transition-all active:scale-90 duration-300 ease-out"
-        href="/voice_assistant/" data-target="/voice_assistant">
-        <span class="material-symbols-outlined text-2xl" data-icon="mic"
-            style="font-variation-settings: 'FILL' 1;">mic</span>
-        <span class="font-['Lexend'] text-[10px] font-medium tracking-wide">Voice</span>
+    <a href="/voice_assistant/" data-nav-target="/voice_assistant" class="flex flex-1 flex-col items-center gap-0.5 px-1 py-2 text-[10px] font-medium text-[var(--text-muted)]">
+      <span class="material-symbols-outlined text-[22px]">mic</span>
+      Voice
     </a>
-    <a class="nav-link flex flex-col items-center justify-center text-on-surface-variant dark:text-[#BAC9CC] hover:text-primary dark:hover:text-[#C3F400] px-2 sm:px-6 py-2 transition-all active:scale-90 duration-300 ease-out"
-        href="/settings/" data-target="/settings">
-        <span class="material-symbols-outlined text-2xl" data-icon="settings">settings</span>
-        <span class="font-['Lexend'] text-[10px] font-medium tracking-wide">Settings</span>
+    <a href="/settings/" data-nav-target="/settings" class="flex flex-1 flex-col items-center gap-0.5 px-1 py-2 text-[10px] font-medium text-[var(--text-muted)]">
+      <span class="material-symbols-outlined text-[22px]">settings</span>
+      Settings
     </a>
+  </div>
 </nav>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const path = window.location.pathname;
-        const bottomLinks = document.querySelectorAll('#bottomNav .nav-link');
-        const desktopLinks = document.querySelectorAll('#desktopNav .nav-link');
-
-        bottomLinks.forEach(link => {
-            const target = link.getAttribute('data-target');
-            if (path === target || (target !== '/' && path.startsWith(target))) {
-                link.classList.remove('text-on-surface-variant', 'dark:text-[#BAC9CC]', 'hover:text-primary', 'dark:hover:text-[#C3F400]');
-                link.classList.add('bg-primary-container', 'text-on-primary-container', 'rounded-2xl', 'scale-110');
-            }
-        });
-
-        desktopLinks.forEach(link => {
-            const target = link.getAttribute('data-target');
-            if (path === target || (target !== '/' && path.startsWith(target))) {
-                link.classList.remove('text-on-surface-variant', 'dark:text-[#BAC9CC]');
-                link.classList.add('text-primary', 'border-b-2', 'border-primary', 'pb-1');
-            }
-        });
-    });
-</script>

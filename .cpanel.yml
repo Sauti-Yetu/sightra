@@ -4,6 +4,7 @@ deployment:
     - export DEPLOYPATH=/home/sightran/sightra-main/sightra/
     - /bin/cp -R sightra/apps $DEPLOYPATH
     - /bin/cp -R sightra/templates $DEPLOYPATH
+    - /bin/cp -R sightra/static $DEPLOYPATH
     - /bin/cp -R sightra/sightra $DEPLOYPATH
     - /bin/cp -R sightra/public $DEPLOYPATH
     - /bin/cp sightra/manage.py $DEPLOYPATH

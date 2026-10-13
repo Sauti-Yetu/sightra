@@ -1,0 +1,140 @@
+const video = document.getElementById('cameraElement');
+const canvas = document.getElementById('canvasElement');
+const scanBtn = document.getElementById('scanBtn');
+const scanLabel = document.getElementById('scanLabel');
+let isScanning = false;
+let streamRef = null;
+let captureIntervalId = null;
+let isFetchInFlight = false;
+let pendingSpeech = null;
+const CAPTURE_INTERVAL_MS = 1500;
+
+async function startCamera() {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    alert('Camera access is not available. Use HTTPS and allow camera permissions.');
+    return;
+  }
+  try {
+    streamRef = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+    });
+    video.srcObject = streamRef;
+    await video.play();
+  } catch (err) {
+    try {
+      streamRef = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = streamRef;
+      await video.play();
+    } catch (fallbackErr) {
+      console.error(fallbackErr);
+      alert('Please enable camera access for Sightra.');
+    }
+  }
+}
+
+function stopCamera() {
+  if (streamRef) {
+    streamRef.getTracks().forEach((track) => track.stop());
+    streamRef = null;
+    video.srcObject = null;
+  }
+}
+
+startCamera();
+
+scanBtn?.addEventListener('click', () => {
+  isScanning = !isScanning;
+  if (isScanning) {
+    if (!streamRef) startCamera();
+    scanLabel.textContent = 'Stop sight scan';
+    scanBtn.classList.add('ring-red-400/80');
+    startCaptureLoop();
+    window.SightraUI?.announce('Sight scan started');
+  } else {
+    scanLabel.textContent = 'Initiate sight scan';
+    scanBtn.classList.remove('ring-red-400/80');
+    stopCaptureLoop();
+    window.speechSynthesis?.cancel();
+    clearDynamicUI();
+    stopCamera();
+    window.SightraUI?.announce('Sight scan stopped');
+  }
+});
+
+function startCaptureLoop() {
+  captureAndAnalyze();
+  captureIntervalId = setInterval(() => {
+    if (!isFetchInFlight) captureAndAnalyze();
+  }, CAPTURE_INTERVAL_MS);
+}
+
+function stopCaptureLoop() {
+  if (captureIntervalId !== null) {
+    clearInterval(captureIntervalId);
+    captureIntervalId = null;
+  }
+  isFetchInFlight = false;
+}
+
+function clearDynamicUI() {
+  document.getElementById('dynamic-boxes').innerHTML = '';
+  document.getElementById('dynamic-alerts').innerHTML = '';
+}
+
+async function captureAndAnalyze() {
+  if (!isScanning) return;
+  isFetchInFlight = true;
+  canvas.width = video.videoWidth || 640;
+  canvas.height = video.videoHeight || 480;
+  if (canvas.width > 0 && canvas.height > 0) {
+    canvas.getContext('2d').drawImage(video, 0, 0);
+  }
+  const frameData = canvas.toDataURL('image/jpeg', 0.4);
+  try {
+    const response = await fetch('/api/navigation/stream/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        frame_data: frameData,
+        text_prompt: 'Describe any obstacles or pathways ahead.',
+      }),
+    });
+    const data = await response.json();
+    if (!isScanning) {
+      isFetchInFlight = false;
+      return;
+    }
+    updateDynamicUI(data.metadata);
+    if (data.analysis_text) speakNonBlocking(data.analysis_text);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    isFetchInFlight = false;
+  }
+}
+
+function speakNonBlocking(text) {
+  if (!text || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  window.speechSynthesis.speak(utt);
+}
+
+function updateDynamicUI(metadata) {
+  const boxesContainer = document.getElementById('dynamic-boxes');
+  const alertsContainer = document.getElementById('dynamic-alerts');
+  clearDynamicUI();
+  if (!metadata?.objects) return;
+  metadata.objects.forEach((obj) => {
+    const confPercent = Math.round((obj.confidence || 0) * 100) + '%';
+    const [x, y, w, h] = obj.box || [40, 40, 80, 80];
+    boxesContainer.insertAdjacentHTML(
+      'beforeend',
+      `<div class="absolute rounded-xl ring-2 ring-teal-300/70" style="left:${x}px;top:${y}px;width:${w * 2}px;height:${h * 2}px"></div>`
+    );
+    alertsContainer.insertAdjacentHTML(
+      'beforeend',
+      `<div class="max-w-[140px] rounded-xl bg-black/50 p-3 text-xs text-white backdrop-blur-md">${obj.label} · ${confPercent}</div>`
+    );
+  });
+}
