@@ -23,7 +23,7 @@ from apps.core.views import *
 from apps.audio.views import *
 from apps.vision.views import *
 from apps.settings.views import *
-from apps.accounts.views import *
+from apps.accounts.views import signin, signup, signout
 from apps.volunteer.views import *
 from apps.navigation.views import *
 
@@ -33,6 +33,7 @@ urlpatterns = [
     # Authentication 
     path("signin/", signin, name="signin"),
     path("signup/", signup, name="signup"),
+    path("signout/", signout, name="signout"),
     # Homepage
     path("dashboard/", dashboard, name="dashboard"),
     path("dashboard", dashboard),

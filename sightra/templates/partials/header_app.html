@@ -1,11 +1,11 @@
 <header class="app-header" role="banner">
-  <a href="{% block logo_href %}/dashboard{% endblock %}" class="app-logo" aria-label="Sightra home">
+  <a href="{% block logo_href %}/dashboard/{% endblock %}" class="app-logo" aria-label="Sightra home">
     <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
     <span>Sightra</span>
   </a>
 
   <nav class="desktop-nav" aria-label="Main navigation">
-    <a href="/dashboard" class="desktop-nav__link" data-nav-target="/dashboard">
+    <a href="/dashboard/" class="desktop-nav__link" data-nav-target="/dashboard">
       <span class="material-symbols-outlined" aria-hidden="true">home</span>
       Home
     </a>
@@ -32,6 +32,15 @@
   </nav>
 
   <div class="flex items-center gap-2">
+    {% if supabase_user %}
+    <span class="hidden sm:inline text-sm font-medium" style="color: var(--color-text-secondary);" title="{{ supabase_user.email }}">
+      {{ supabase_user.display_name|default:supabase_user.email }}
+    </span>
+    <form method="post" action="{% url 'signout' %}" class="m-0">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-secondary text-sm py-2 px-3 min-h-0" aria-label="Sign out">Sign out</button>
+    </form>
+    {% endif %}
     <button type="button" class="btn-icon" data-theme-toggle aria-label="Toggle dark mode">
       <span class="material-symbols-outlined" data-theme-icon aria-hidden="true">dark_mode</span>
     </button>

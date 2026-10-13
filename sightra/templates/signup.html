@@ -15,7 +15,13 @@
     <p class="mt-2" style="color: var(--color-text-secondary);">Join Sightra and start exploring with confidence.</p>
   </header>
 
-  <form class="card space-y-5" method="post" action="/dashboard" aria-label="Sign up form">
+  {% if error %}
+  <div class="card mb-4" role="alert" style="border-color: var(--color-danger);">
+    <p class="m-0 font-semibold" style="color: var(--color-danger);">{{ error }}</p>
+  </div>
+  {% endif %}
+
+  <form class="card space-y-5" method="post" action="{% url 'signup' %}" aria-label="Sign up form">
     {% csrf_token %}
     <div class="form-group">
       <label class="form-label" for="name">Full name</label>

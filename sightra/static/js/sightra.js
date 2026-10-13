@@ -17,9 +17,28 @@
       (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   }
 
+  function getCsrfToken() {
+    var match = document.cookie.match(/csrftoken=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : '';
+  }
+
+  function syncThemePreference(theme) {
+    if (!getCsrfToken()) return;
+    try {
+      var body = new URLSearchParams({ theme: theme });
+      fetch('/api/accounts/theme/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCsrfToken(), 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body.toString(),
+        credentials: 'same-origin',
+      }).catch(function () {});
+    } catch (e) {}
+  }
+
   function applyTheme(theme) {
     document.documentElement.classList.toggle('dark', theme === 'dark');
     localStorage.setItem(STORAGE_KEYS.theme, theme);
+    syncThemePreference(theme);
     document.querySelectorAll('[data-theme-icon]').forEach(function (el) {
       el.textContent = theme === 'dark' ? 'light_mode' : 'dark_mode';
     });

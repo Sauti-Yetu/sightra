@@ -15,8 +15,15 @@
     <p class="mt-2" style="color: var(--color-text-secondary);">Access your Sightra assistive companion.</p>
   </header>
 
-  <form class="card space-y-5" method="post" action="/dashboard" aria-label="Sign in form">
+  {% if error %}
+  <div class="card mb-4" role="alert" style="border-color: var(--color-danger);">
+    <p class="m-0 font-semibold" style="color: var(--color-danger);">{{ error }}</p>
+  </div>
+  {% endif %}
+
+  <form class="card space-y-5" method="post" action="{% url 'signin' %}{% if next %}?next={{ next|urlencode }}{% endif %}" aria-label="Sign in form">
     {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}" />
     <div class="form-group">
       <label class="form-label" for="email">Email address</label>
       <input class="form-input" id="email" name="email" type="email" autocomplete="email" required aria-required="true" />

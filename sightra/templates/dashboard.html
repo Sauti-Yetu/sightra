@@ -17,7 +17,7 @@
           Sightra is ready
         </p>
         <h1 id="assist-heading" class="font-headline text-3xl md:text-4xl font-black m-0">
-          <span id="greeting">Good day</span>
+          <span id="greeting">Good day</span>{% if supabase_user %}, {{ supabase_user.display_name|default:supabase_user.email|truncatechars:24 }}{% endif %}
         </h1>
         <p class="mt-2 text-lg" style="color: var(--color-text-secondary);">
           Choose an action below to get assistance. Everything is voice-friendly and keyboard accessible.
