@@ -6,7 +6,6 @@ let isScanning = false;
 let streamRef = null;
 let captureIntervalId = null;
 let isFetchInFlight = false;
-let pendingSpeech = null;
 const CAPTURE_INTERVAL_MS = 1500;
 
 async function startCamera() {
@@ -47,12 +46,14 @@ scanBtn?.addEventListener('click', () => {
   if (isScanning) {
     if (!streamRef) startCamera();
     scanLabel.textContent = 'Stop sight scan';
-    scanBtn.classList.add('ring-red-400/80');
+    scanLabel.classList.add('vision-scan-label-active');
+    scanLabel.classList.remove('text-[var(--brand-cyan)]');
     startCaptureLoop();
     window.SightraUI?.announce('Sight scan started');
   } else {
     scanLabel.textContent = 'Initiate sight scan';
-    scanBtn.classList.remove('ring-red-400/80');
+    scanLabel.classList.remove('vision-scan-label-active');
+    scanLabel.classList.add('text-[var(--brand-cyan)]');
     stopCaptureLoop();
     window.speechSynthesis?.cancel();
     clearDynamicUI();
@@ -77,13 +78,20 @@ function stopCaptureLoop() {
 }
 
 function clearDynamicUI() {
-  document.getElementById('dynamic-boxes').innerHTML = '';
-  document.getElementById('dynamic-alerts').innerHTML = '';
+  const boxes = document.getElementById('dynamic-boxes');
+  const alerts = document.getElementById('dynamic-alerts');
+  boxes.querySelectorAll('.det-box').forEach((el) => el.remove());
+  alerts.innerHTML = '';
+}
+
+function reticleHtml() {
+  return document.getElementById('vision-reticle')?.outerHTML || '';
 }
 
 async function captureAndAnalyze() {
   if (!isScanning) return;
   isFetchInFlight = true;
+  const t0 = performance.now();
   canvas.width = video.videoWidth || 640;
   canvas.height = video.videoHeight || 480;
   if (canvas.width > 0 && canvas.height > 0) {
@@ -100,6 +108,8 @@ async function captureAndAnalyze() {
       }),
     });
     const data = await response.json();
+    const proc = document.getElementById('proc-readout');
+    if (proc) proc.textContent = `${Math.round(performance.now() - t0)}ms`;
     if (!isScanning) {
       isFetchInFlight = false;
       return;
@@ -116,25 +126,48 @@ async function captureAndAnalyze() {
 function speakNonBlocking(text) {
   if (!text || !window.speechSynthesis) return;
   window.speechSynthesis.cancel();
-  const utt = new SpeechSynthesisUtterance(text);
-  window.speechSynthesis.speak(utt);
+  window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
 }
 
 function updateDynamicUI(metadata) {
   const boxesContainer = document.getElementById('dynamic-boxes');
   const alertsContainer = document.getElementById('dynamic-alerts');
   clearDynamicUI();
-  if (!metadata?.objects) return;
+  if (!metadata?.objects?.length) return;
+
   metadata.objects.forEach((obj) => {
-    const confPercent = Math.round((obj.confidence || 0) * 100) + '%';
-    const [x, y, w, h] = obj.box || [40, 40, 80, 80];
-    boxesContainer.insertAdjacentHTML(
-      'beforeend',
-      `<div class="absolute rounded-xl ring-2 ring-teal-300/70" style="left:${x}px;top:${y}px;width:${w * 2}px;height:${h * 2}px"></div>`
-    );
+    const label = (obj.label || 'object').toUpperCase();
+    const conf = obj.confidence ?? 0.5;
+    const confPercent = Math.round(conf * 100) + '%';
+    const isObstacle = label !== 'DOOR';
+    const [x, y, w, h] = obj.box || [80, 120, 60, 60];
+    const scale = Math.max(video.clientWidth / (video.videoWidth || 640), 0.5);
+    const dx = x * scale;
+    const dy = y * scale;
+    const dw = Math.max(w * scale * 2.2, 48);
+    const dh = Math.max(h * scale * 2.2, 48);
+
+    const box = document.createElement('div');
+    box.className = 'det-box absolute pointer-events-none';
+    box.innerHTML = `
+      <div class="absolute rounded-sm border-2 ${isObstacle ? 'border-[var(--brand-lime)]/70' : 'border-[var(--brand-cyan)]/70'}" style="left:${dx}px;top:${dy}px;width:${dw}px;height:${dh}px">
+        <div class="absolute -top-9 left-0 flex items-center gap-1 rounded bg-black/50 px-2 py-1 text-[10px] backdrop-blur-md">
+          <span class="font-headline font-bold tracking-widest ${isObstacle ? 'text-[var(--brand-lime)]' : 'text-[var(--brand-cyan)]'}">${label}</span>
+        </div>
+        ${isObstacle ? '<div class="absolute inset-0 animate-pulse bg-[var(--brand-lime)]/10"></div>' : ''}
+        <div class="absolute -left-1 -top-1 h-3 w-3 border-l-2 border-t-2 border-[var(--brand-cyan)]"></div>
+        <div class="absolute -right-1 -top-1 h-3 w-3 border-r-2 border-t-2 border-[var(--brand-cyan)]"></div>
+        <div class="absolute -bottom-1 -left-1 h-3 w-3 border-b-2 border-l-2 border-[var(--brand-cyan)]"></div>
+        <div class="absolute -bottom-1 -right-1 h-3 w-3 border-b-2 border-r-2 border-[var(--brand-cyan)]"></div>
+      </div>`;
+    boxesContainer.appendChild(box);
+
     alertsContainer.insertAdjacentHTML(
       'beforeend',
-      `<div class="max-w-[140px] rounded-xl bg-black/50 p-3 text-xs text-white backdrop-blur-md">${obj.label} · ${confPercent}</div>`
+      `<div class="vision-hud-card max-w-[140px] rounded-xl p-4">
+        <p class="font-headline text-[10px] font-black tracking-widest text-[var(--brand-lime)]">${label}</p>
+        <p class="mt-1 text-[10px] leading-tight text-white/80">Detected with ${confPercent} confidence.</p>
+      </div>`
     );
   });
 }

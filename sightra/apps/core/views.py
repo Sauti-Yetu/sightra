@@ -10,6 +10,10 @@ def dashboard(request):
 
 
 def landing_page(request):
+    if getattr(request, "sightra_user", None):
+        from django.shortcuts import redirect
+
+        return redirect("/dashboard")
     return render(request, "landing-page.html")
 
 

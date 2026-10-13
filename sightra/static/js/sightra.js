@@ -71,7 +71,7 @@
   }
 
   function initTheme() {
-    const saved = localStorage.getItem(STORAGE_THEME) || "light";
+    const saved = localStorage.getItem(STORAGE_THEME) || localStorage.getItem("theme") || "dark";
     applyTheme(saved);
     const btn = document.getElementById("theme-toggle");
     if (btn) {
@@ -118,7 +118,7 @@
 
   function initNav() {
     const path = window.location.pathname.replace(/\/$/, "") || "/";
-    document.querySelectorAll("[data-nav-target]").forEach((link) => {
+    document.querySelectorAll("[data-nav-target], .sidebar-link[data-nav-target]").forEach((link) => {
       const target = link.getAttribute("data-nav-target");
       const normalized = target === "/" ? "/" : target.replace(/\/$/, "");
       const active =

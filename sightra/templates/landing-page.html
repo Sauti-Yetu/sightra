@@ -1,25 +1,59 @@
 {% extends "base.html" %}
-{% block title %}Sightra — Assistive awareness{% endblock %}
+{% load static %}
+{% block title %}Sightra — AI assistive awareness for independent mobility{% endblock %}
+{% block extra_head %}
+<meta name="description" content="Sightra helps blind and visually impaired users understand their surroundings with live vision, navigation cues, voice assistance, and volunteer connection." />
+<meta name="keywords" content="Sightra, assistive technology, visual impairment, navigation, AI vision, accessibility" />
+<meta name="application-name" content="Sightra" />
+<meta property="og:title" content="Sightra — See your world with confidence" />
+<meta property="og:description" content="Real-time scene understanding and navigation support designed for accessibility first." />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="{% static 'img/landing-assistive.jpg' %}" />
+<meta name="twitter:card" content="summary_large_image" />
+{% endblock %}
 {% block bottom_nav %}{% endblock %}
+{% block body_class %}app-shell landing-page{% endblock %}
 {% block content %}
-<section class="grid items-center gap-10 py-8 md:grid-cols-2 md:py-16">
-  <div>
-    <p class="text-sm font-medium uppercase tracking-wider text-[var(--primary)]">Assistive AI</p>
-    <h1 class="font-headline mt-3 text-4xl font-semibold leading-tight md:text-5xl">See your world with confidence</h1>
-    <p class="mt-4 text-lg text-[var(--text-muted)]">Sightra delivers live scene understanding, navigation cues, voice assistance, and volunteer connection—designed for accessibility first.</p>
-    <div class="mt-8 flex flex-wrap gap-3">
-      <a href="/signup/" class="btn-primary">Get started</a>
-      <a href="/signin/" class="btn-ghost ring-1 ring-black/5 dark:ring-white/10">Sign in</a>
-      <a href="/dashboard" class="btn-ghost">Open dashboard</a>
+<section class="relative overflow-hidden rounded-3xl bg-[var(--surface)] shadow-[var(--shadow)]">
+  <div class="grid gap-0 md:grid-cols-2">
+    <div class="flex flex-col justify-center p-8 md:p-12">
+      <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--brand-cyan)]">Sightra</p>
+      <h1 class="font-headline mt-3 text-4xl font-bold leading-tight md:text-5xl">Independent mobility, powered by sight</h1>
+      <p class="mt-4 max-w-lg text-[var(--text-muted)]">A mobile-first assistive app for scene awareness, safe navigation, and human support when you need it.</p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href="/signup/" class="btn-primary">Get started</a>
+        <a href="/signin/" class="btn-secondary">Sign in</a>
+      </div>
+      <dl class="mt-10 grid grid-cols-3 gap-4 text-center text-xs md:text-sm">
+        <div><dt class="font-headline text-lg font-bold text-[var(--brand-lime)]">Live</dt><dd class="text-[var(--text-muted)]">Vision AI</dd></div>
+        <div><dt class="font-headline text-lg font-bold text-[var(--brand-cyan)]">PWA</dt><dd class="text-[var(--text-muted)]">Installable</dd></div>
+        <div><dt class="font-headline text-lg font-bold text-[var(--text)]">A11y</dt><dd class="text-[var(--text-muted)]">Built-in</dd></div>
+      </dl>
+    </div>
+    <div class="relative min-h-[280px] bg-[var(--bg-muted)] md:min-h-full">
+      <img src="{% static 'img/landing-assistive.jpg' %}" alt="Person using assistive technology outdoors" class="h-full w-full object-cover" loading="eager" />
     </div>
   </div>
-  <div class="card-soft p-8">
-    <ul class="space-y-4 text-sm">
-      <li class="flex gap-3"><span class="material-symbols-outlined text-[var(--primary)]">visibility</span> Live vision with spoken guidance</li>
-      <li class="flex gap-3"><span class="material-symbols-outlined text-[var(--primary)]">explore</span> Map-based navigation support</li>
-      <li class="flex gap-3"><span class="material-symbols-outlined text-[var(--primary)]">mic</span> Natural voice assistant</li>
-      <li class="flex gap-3"><span class="material-symbols-outlined text-[var(--primary)]">install_mobile</span> Installable PWA for mobile</li>
+</section>
+
+<section class="mt-12 grid gap-8 md:grid-cols-2 md:items-center">
+  <div class="order-2 md:order-1">
+    <img src="{% static 'img/landing-mobility.png' %}" alt="Smart mobility and navigation interface" class="w-full rounded-2xl shadow-[var(--shadow)]" loading="lazy" />
+  </div>
+  <div class="order-1 md:order-2">
+    <h2 class="font-headline text-2xl font-semibold">Built for real-world movement</h2>
+    <p class="mt-3 text-[var(--text-muted)]">Sightra combines camera perception, spoken guidance, and optional volunteer video so you can move through spaces with more confidence.</p>
+    <ul class="mt-6 space-y-3 text-sm">
+      <li class="flex gap-3"><span class="material-symbols-outlined text-[var(--brand-cyan)]">check_circle</span> Obstacle-aware vision scanning</li>
+      <li class="flex gap-3"><span class="material-symbols-outlined text-[var(--brand-cyan)]">check_circle</span> Map and route assistance</li>
+      <li class="flex gap-3"><span class="material-symbols-outlined text-[var(--brand-cyan)]">check_circle</span> Voice questions about your environment</li>
     </ul>
   </div>
+</section>
+
+<section class="mt-12 rounded-3xl bg-[var(--brand-cyan-soft)] px-8 py-10 text-center dark:bg-[var(--surface)]">
+  <h2 class="font-headline text-2xl font-semibold">Ready when you are</h2>
+  <p class="mx-auto mt-2 max-w-xl text-sm text-[var(--text-muted)]">Create a free account to access your dashboard, save preferences, and install Sightra on your phone.</p>
+  <a href="/signup/" class="btn-primary mt-6 inline-block">Create account</a>
 </section>
 {% endblock %}

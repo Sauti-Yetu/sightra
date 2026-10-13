@@ -3,6 +3,7 @@ import json
 from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
@@ -23,6 +24,8 @@ def _auth_error_message(payload: dict) -> str:
 
 
 def signin(request):
+    if getattr(request, "sightra_user", None):
+        return redirect(request.GET.get("next") or "/dashboard")
     if request.method == "POST":
         email = (request.POST.get("email") or "").strip()
         password = request.POST.get("password") or ""
@@ -36,6 +39,8 @@ def signin(request):
 
 
 def signup(request):
+    if getattr(request, "sightra_user", None):
+        return redirect("/dashboard")
     if request.method == "POST":
         email = (request.POST.get("email") or "").strip()
         password = request.POST.get("password") or ""
@@ -53,6 +58,32 @@ def signup(request):
 def signout(request):
     SessionService.clear(request)
     return redirect("/signin/")
+
+
+def auth_google(request):
+    redirect_to = request.build_absolute_uri(reverse("auth-callback"))
+    url = supabase_client.oauth_authorize_url("google", redirect_to)
+    if not url:
+        messages.error(request, "Google sign-in is not configured.")
+        return redirect("/signin/")
+    return redirect(url)
+
+
+def auth_callback(request):
+    return render(request, "auth_callback.html", {"next": request.GET.get("next", "/dashboard")})
+
+
+@csrf_exempt
+@require_POST
+def auth_oauth_session(request):
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
+    if not payload.get("access_token"):
+        return JsonResponse({"success": False, "error": "Missing access token"}, status=400)
+    SessionService.set_from_auth_response(request, payload)
+    return JsonResponse({"success": True, "redirect": payload.get("redirect") or "/dashboard"})
 
 
 @require_GET

@@ -1,28 +1,36 @@
 :root {
   --bg: #ffffff;
-  --bg-muted: #f6f7f9;
+  --bg-muted: #f8fafc;
   --surface: #ffffff;
-  --text: #111827;
-  --text-muted: #6b7280;
-  --primary: #0ea5a4;
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --primary: #00a8b8;
   --primary-soft: #e6fafa;
-  --primary-strong: #0f766e;
+  --primary-strong: #007a86;
+  --brand-cyan: #00e5ff;
+  --brand-cyan-soft: #e0fbff;
+  --brand-cyan-glow: rgba(0, 229, 255, 0.35);
+  --brand-lime: #9acd00;
   --shadow: 0 8px 30px rgba(17, 24, 39, 0.06);
   --radius: 1rem;
-  --ring: rgba(14, 165, 164, 0.25);
+  --ring: rgba(0, 229, 255, 0.25);
 }
 
 html.dark {
-  --bg: #0b0f14;
-  --bg-muted: #121820;
-  --surface: #151b24;
-  --text: #f3f4f6;
-  --text-muted: #9ca3af;
-  --primary: #2dd4bf;
-  --primary-soft: #134e4a;
-  --primary-strong: #5eead4;
-  --shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
-  --ring: rgba(45, 212, 191, 0.35);
+  --bg: #131313;
+  --bg-muted: #1c1b1b;
+  --surface: #201f1f;
+  --text: #e5e2e1;
+  --text-muted: #bac9cc;
+  --primary: #00e5ff;
+  --primary-soft: rgba(0, 229, 255, 0.12);
+  --primary-strong: #c3f5ff;
+  --brand-cyan: #00e5ff;
+  --brand-cyan-soft: rgba(0, 229, 255, 0.15);
+  --brand-cyan-glow: rgba(0, 229, 255, 0.45);
+  --brand-lime: #c3f400;
+  --shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+  --ring: rgba(0, 229, 255, 0.35);
 }
 
 html[data-a11y-contrast="high"] {
@@ -87,6 +95,56 @@ body {
 
 .btn-primary:hover {
   transform: translateY(-1px);
+}
+
+.btn-secondary {
+  border-radius: 999px;
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 12%, transparent);
+}
+
+.btn-google {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 12%, transparent);
+}
+
+.brand-logo {
+  color: var(--brand-cyan);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.bottom-nav a.is-active,
+.sidebar-link.is-active {
+  color: var(--brand-cyan);
+  background: var(--brand-cyan-soft);
+}
+
+html.dark .bottom-nav a.is-active {
+  color: #131313;
+  background: var(--brand-cyan);
+}
+
+.vision-hud-card {
+  background: rgba(32, 31, 31, 0.72);
+  border-right: 3px solid var(--brand-lime);
+  backdrop-filter: blur(12px);
+}
+
+.vision-scan-label-active {
+  color: #ffb4ab;
+  letter-spacing: 0.35em;
 }
 
 .btn-ghost {

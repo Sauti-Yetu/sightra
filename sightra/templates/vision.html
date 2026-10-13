@@ -8,25 +8,65 @@
   <video id="cameraElement" class="h-full w-full object-cover" autoplay playsinline muted></video>
   <canvas id="canvasElement" class="hidden"></canvas>
 </div>
-<div class="vision-overlay-ui relative z-10 flex h-[100dvh] flex-col">
-  <header class="interactive flex items-center justify-between px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))]">
-    <a href="/dashboard" class="font-headline flex items-center gap-2 rounded-full bg-black/40 px-3 py-2 text-sm text-white backdrop-blur-md">
-      <span class="material-symbols-outlined text-base">arrow_back</span> Sightra
+<div class="vision-overlay-ui relative z-10 flex h-[100dvh] flex-col text-white">
+  <header class="interactive flex items-center justify-between px-5 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))]">
+    <a href="/dashboard" class="font-headline brand-logo flex items-center gap-2 text-xl font-black">
+      <span class="material-symbols-outlined text-[var(--brand-cyan)]">visibility</span>
+      Sightra
     </a>
-    <span class="rounded-full bg-black/40 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/90 backdrop-blur-md">Live</span>
+    <div class="flex items-center gap-4">
+      <span class="h-2 w-2 rounded-full bg-[var(--brand-lime)] shadow-[0_0_10px_var(--brand-lime)]"></span>
+      <span class="material-symbols-outlined text-[var(--brand-cyan)] text-sm">gps_fixed</span>
+    </div>
   </header>
-  <main id="dynamic-boxes" class="relative flex-1 overflow-hidden"></main>
-  <footer class="interactive pb-[max(5.5rem,env(safe-area-inset-bottom))] pt-4">
-    <div class="flex flex-col items-center gap-3">
-      <span id="scanLabel" class="text-[10px] font-semibold uppercase tracking-[0.35em] text-white/90">Initiate sight scan</span>
-      <button id="scanBtn" type="button" class="relative flex h-20 w-20 items-center justify-center rounded-full bg-white/15 backdrop-blur-md ring-2 ring-white/30 transition hover:scale-105" aria-label="Toggle sight scan">
-        <span class="material-symbols-outlined text-4xl text-white" style="font-variation-settings:'FILL' 1">visibility</span>
+
+  <main id="dynamic-boxes" class="relative mt-14 flex-1 overflow-hidden">
+    <div id="vision-reticle" class="absolute inset-0 flex items-center justify-center pointer-events-none">
+      <div class="relative h-48 w-48">
+        <div class="absolute left-0 top-0 h-8 w-8 border-l-2 border-t-2 border-[var(--brand-cyan)]/40"></div>
+        <div class="absolute right-0 top-0 h-8 w-8 border-r-2 border-t-2 border-[var(--brand-cyan)]/40"></div>
+        <div class="absolute bottom-0 left-0 h-8 w-8 border-b-2 border-l-2 border-[var(--brand-cyan)]/40"></div>
+        <div class="absolute bottom-0 right-0 h-8 w-8 border-b-2 border-r-2 border-[var(--brand-cyan)]/40"></div>
+        <div class="absolute left-1/2 top-1/2 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--brand-cyan)] shadow-[0_0_15px_var(--brand-cyan)]"></div>
+      </div>
+    </div>
+  </main>
+
+  <aside class="interactive pointer-events-none absolute left-4 top-1/2 z-20 -translate-y-1/2 space-y-8">
+    <div>
+      <p class="text-[8px] font-headline uppercase tracking-widest text-white/60">Depth range</p>
+      <div class="relative mt-1 h-32 w-1 overflow-hidden rounded-full bg-white/10">
+        <div class="absolute bottom-0 w-full bg-[var(--brand-cyan)]" style="height:75%"></div>
+      </div>
+      <p id="depth-readout" class="font-mono text-[10px] text-[var(--brand-cyan)]">12.4m</p>
+    </div>
+    <div>
+      <p class="text-[8px] font-headline uppercase tracking-widest text-white/60">Proc load</p>
+      <div class="mt-1 flex gap-0.5">
+        <div class="h-4 w-1.5 bg-[var(--brand-cyan)]"></div>
+        <div class="h-4 w-1.5 bg-[var(--brand-cyan)]"></div>
+        <div class="h-4 w-1.5 bg-[var(--brand-cyan)]"></div>
+        <div class="h-4 w-1.5 bg-white/15"></div>
+      </div>
+      <p id="proc-readout" class="font-mono text-[10px] text-white/60">42ms</p>
+    </div>
+  </aside>
+
+  <aside id="dynamic-alerts" class="interactive absolute right-4 top-1/2 z-20 flex max-h-[65vh] -translate-y-1/2 flex-col gap-4 overflow-y-auto"></aside>
+
+  <footer class="interactive pb-[max(5.5rem,env(safe-area-inset-bottom))] pt-2">
+    <div class="flex flex-col items-center gap-4">
+      <span id="scanLabel" class="text-[10px] font-black uppercase tracking-[0.4em] text-[var(--brand-cyan)]">Initiate sight scan</span>
+      <button id="scanBtn" type="button" class="interactive group relative flex h-24 w-24 items-center justify-center rounded-full" aria-label="Toggle sight scan">
+        <span class="absolute inset-0 rounded-full border-4 border-[var(--brand-cyan)]/25 group-hover:border-[var(--brand-cyan)]/45"></span>
+        <span class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--brand-cyan)]/15 shadow-[0_0_30px_var(--brand-cyan-glow)] backdrop-blur-md">
+          <span class="material-symbols-outlined text-4xl text-[var(--brand-cyan)]" style="font-variation-settings:'FILL' 1">visibility</span>
+        </span>
       </button>
     </div>
   </footer>
-  <aside id="dynamic-alerts" class="interactive absolute right-3 top-1/2 flex max-h-[50vh] -translate-y-1/2 flex-col gap-3 overflow-y-auto"></aside>
 </div>
-<div class="pointer-events-none fixed inset-0 z-[5] shadow-[inset_0_0_80px_rgba(0,0,0,0.35)]"></div>
+<div class="pointer-events-none fixed inset-0 z-[5] shadow-[inset_0_0_50px_rgba(0,0,0,0.5)]"></div>
 {% include "bottom_nav.html" %}
 {% endblock %}
 {% block page_scripts %}

@@ -69,6 +69,19 @@ def sign_in_with_password(email: str, password: str) -> dict[str, Any]:
     )
 
 
+def oauth_authorize_url(provider: str, redirect_to: str) -> str | None:
+    base, apikey = _settings()
+    if not base or not apikey:
+        return None
+    from urllib.parse import quote
+
+    return (
+        f"{base}/auth/v1/authorize?provider={quote(provider)}"
+        f"&redirect_to={quote(redirect_to, safe='')}"
+        f"&apikey={quote(apikey)}"
+    )
+
+
 def refresh_session(refresh_token: str) -> dict[str, Any]:
     return _request(
         "POST",

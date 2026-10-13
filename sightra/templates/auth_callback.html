@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Signing in… | Sightra{% endblock %}
+{% block bottom_nav %}{% endblock %}
+{% block content %}
+<section class="mx-auto mt-16 max-w-md text-center">
+  <p class="font-headline text-lg font-semibold">Completing sign-in…</p>
+  <p id="auth-callback-status" class="mt-2 text-sm text-[var(--text-muted)]">Please wait.</p>
+</section>
+{% endblock %}
+{% block page_scripts %}
+<script>
+  (async function () {
+    const status = document.getElementById('auth-callback-status');
+    const next = "{{ next|escapejs }}";
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const query = new URLSearchParams(window.location.search);
+    const access_token = hash.get('access_token') || query.get('access_token');
+    const refresh_token = hash.get('refresh_token') || query.get('refresh_token');
+    if (!access_token) {
+      status.textContent = 'Sign-in could not be completed. Return to sign in and try again.';
+      return;
+    }
+    try {
+      const res = await fetch('/api/accounts/auth/oauth/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({
+          access_token,
+          refresh_token,
+          expires_in: hash.get('expires_in') || 3600,
+          redirect: next,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        window.location.href = data.redirect || next || '/dashboard';
+        return;
+      }
+      status.textContent = data.error || 'Sign-in failed.';
+    } catch (e) {
+      status.textContent = 'Network error during sign-in.';
+    }
+  })();
+</script>
+{% endblock %}

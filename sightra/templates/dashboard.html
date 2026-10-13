@@ -1,44 +1,60 @@
 {% extends "base.html" %}
 {% block title %}Dashboard | Sightra{% endblock %}
+{% block main_class %}mx-auto flex max-w-6xl gap-8 px-4 pb-28 pt-4 md:pb-8{% endblock %}
 {% block content %}
-<section class="mb-8">
-  <p class="text-sm text-[var(--text-muted)]">Live assist hub</p>
-  <h1 id="greeting" class="font-headline mt-1 text-3xl font-semibold tracking-tight md:text-4xl">Welcome back</h1>
-  <p class="mt-2 max-w-2xl text-[var(--text-muted)]">Choose a tool to explore your environment, navigate, connect with volunteers, or adjust accessibility.</p>
-</section>
+{% include "partials/app_sidebar.html" %}
+<div class="min-w-0 flex-1">
+  <section class="mb-8">
+    <h1 id="greeting" class="font-headline text-3xl font-bold tracking-tight md:text-4xl">Good afternoon.</h1>
+    <p class="mt-2 text-[var(--text-muted)]">Your environment is mapped and ready for navigation.</p>
+  </section>
 
-<section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-  <a href="/vision/" class="card group p-5 transition hover:-translate-y-0.5">
-    <span class="material-symbols-outlined text-3xl text-[var(--primary)]">visibility</span>
-    <h2 class="font-headline mt-3 text-lg font-semibold">Live vision</h2>
-    <p class="mt-1 text-sm text-[var(--text-muted)]">Camera scene analysis and spoken guidance.</p>
-  </a>
-  <a href="/live-map/" class="card group p-5 transition hover:-translate-y-0.5">
-    <span class="material-symbols-outlined text-3xl text-[var(--primary)]">explore</span>
-    <h2 class="font-headline mt-3 text-lg font-semibold">Live map</h2>
-    <p class="mt-1 text-sm text-[var(--text-muted)]">Spatial navigation and route cues.</p>
-  </a>
-  <a href="/voice_assistant/" class="card group p-5 transition hover:-translate-y-0.5">
-    <span class="material-symbols-outlined text-3xl text-[var(--primary)]">mic</span>
-    <h2 class="font-headline mt-3 text-lg font-semibold">Voice assistant</h2>
-    <p class="mt-1 text-sm text-[var(--text-muted)]">Ask questions about your surroundings.</p>
-  </a>
-  <a href="/live-call/" class="card group p-5 transition hover:-translate-y-0.5">
-    <span class="material-symbols-outlined text-3xl text-[var(--primary)]">video_call</span>
-    <h2 class="font-headline mt-3 text-lg font-semibold">Sightra Connect</h2>
-    <p class="mt-1 text-sm text-[var(--text-muted)]">Real-time volunteer video support.</p>
-  </a>
-  <a href="/sightra-connect/" class="card group p-5 transition hover:-translate-y-0.5">
-    <span class="material-symbols-outlined text-3xl text-[var(--primary)]">handshake</span>
-    <h2 class="font-headline mt-3 text-lg font-semibold">Volunteer hub</h2>
-    <p class="mt-1 text-sm text-[var(--text-muted)]">Find help and connection options.</p>
-  </a>
-  <a href="/settings/" class="card group p-5 transition hover:-translate-y-0.5">
-    <span class="material-symbols-outlined text-3xl text-[var(--primary)]">tune</span>
-    <h2 class="font-headline mt-3 text-lg font-semibold">Settings</h2>
-    <p class="mt-1 text-sm text-[var(--text-muted)]">Theme, accessibility, and preferences.</p>
-  </a>
-</section>
+  <section class="card mb-6 flex overflow-hidden">
+    <div class="w-1.5 shrink-0 bg-[var(--brand-lime)]"></div>
+    <div class="flex flex-1 flex-wrap items-center justify-between gap-4 p-5">
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--brand-lime)]">System status</p>
+        <p class="font-headline mt-1 text-lg font-semibold">All sensors active</p>
+        <p class="mt-1 text-xs text-[var(--text-muted)]">Account · {% if request.sightra_user %}{{ request.sightra_user.email }}{% else %}Guest{% endif %}</p>
+      </div>
+      <div class="text-right">
+        <p class="font-headline text-3xl font-black text-[var(--brand-lime)]">98%</p>
+        <p class="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">AI confidence</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card relative overflow-hidden p-6">
+    <div class="relative z-10 max-w-md">
+      <div class="mb-4 inline-flex rounded-2xl bg-[var(--brand-cyan-soft)] p-3 shadow-[0_0_30px_var(--brand-cyan-glow)]">
+        <span class="material-symbols-outlined text-3xl text-[var(--brand-cyan)]">center_focus_strong</span>
+      </div>
+      <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--brand-cyan)]">Live analysis</p>
+      <h2 class="font-headline mt-1 text-2xl font-bold">Vision awareness</h2>
+      <p class="mt-2 text-sm text-[var(--text-muted)]">Real-time obstacle and scene detection for immediate spatial safety.</p>
+      <a href="/vision/" class="btn-primary mt-6 inline-flex items-center gap-2">Open vision <span class="material-symbols-outlined text-base">arrow_forward</span></a>
+    </div>
+    <div class="pointer-events-none absolute inset-y-0 right-0 w-1/2 opacity-20 dark:opacity-30" aria-hidden="true">
+      <div class="h-full w-full bg-gradient-to-l from-[var(--brand-cyan)]/30 to-transparent"></div>
+    </div>
+  </section>
+
+  <section class="mt-6 grid gap-4 sm:grid-cols-2">
+    <div class="card-soft p-5">
+      <h3 class="font-headline text-sm font-semibold">Quick actions</h3>
+      <ul class="mt-3 space-y-2 text-sm">
+        <li><a href="/live-map/" class="text-[var(--brand-cyan)] hover:underline">Start navigation</a></li>
+        <li><a href="/voice_assistant/" class="text-[var(--brand-cyan)] hover:underline">Ask voice assistant</a></li>
+        <li><a href="/live-call/" class="text-[var(--brand-cyan)] hover:underline">Connect with volunteer</a></li>
+      </ul>
+    </div>
+    <div class="card-soft p-5">
+      <h3 class="font-headline text-sm font-semibold">Your preferences</h3>
+      <p class="mt-2 text-sm text-[var(--text-muted)]">Theme, contrast, and voice feedback sync when signed in.</p>
+      <a href="/settings/" class="mt-3 inline-block text-sm font-medium text-[var(--brand-cyan)]">Manage settings →</a>
+    </div>
+  </section>
+</div>
 {% endblock %}
 {% block page_scripts %}
 <script>
@@ -46,13 +62,20 @@
     const el = document.getElementById('greeting');
     if (!el) return;
     const hour = new Date().getHours();
-    let g = 'Hello';
+    let g = 'Good evening';
     if (hour >= 5 && hour < 12) g = 'Good morning';
     else if (hour >= 12 && hour < 17) g = 'Good afternoon';
-    else if (hour >= 17 && hour < 22) g = 'Good evening';
-    else g = 'Good evening';
     const email = "{% if request.sightra_user %}{{ request.sightra_user.email|escapejs }}{% endif %}";
-    el.textContent = email ? `${g}, ${email.split('@')[0]}.` : `${g}.`;
+    const name = email ? email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : '';
+    el.textContent = name ? `${g}, ${name}.` : `${g}.`;
+    document.querySelectorAll('.sidebar-link[data-nav-target]').forEach((link) => {
+      const target = link.getAttribute('data-nav-target');
+      const path = window.location.pathname.replace(/\/$/, '') || '/';
+      const normalized = target === '/' ? '/' : target.replace(/\/$/, '');
+      if (path === normalized || (normalized !== '/' && path.startsWith(normalized))) {
+        link.classList.add('is-active');
+      }
+    });
   });
 </script>
 {% endblock %}
