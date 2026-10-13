@@ -1,0 +1,8 @@
+{% load static %}
+<div id="network-banner" class="network-banner network-banner--online" role="status" aria-live="polite">
+  <span data-network-text>You're connected.</span>
+</div>
+{% include 'partials/install_prompt.html' %}
+<div id="sr-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+<link rel="stylesheet" href="{% static 'css/sightra.css' %}" />
+<script src="{% static 'js/sightra.js' %}" defer></script>

@@ -1,0 +1,61 @@
+{% load static %}
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="description" content="Sightra — AI-powered visual assistance companion for people with visual impairment." />
+<meta name="theme-color" content="#006875" />
+<meta name="color-scheme" content="light dark" />
+{% include 'partials/pwa_meta.html' %}
+<script>
+  (function () {
+    var theme = localStorage.getItem('sightra-theme') || localStorage.getItem('theme') || 'light';
+    if (theme === 'dark') document.documentElement.classList.add('dark');
+    try {
+      var a11y = JSON.parse(localStorage.getItem('sightra-a11y') || '{}');
+      var html = document.documentElement;
+      if (a11y.highContrast) html.classList.add('a11y-high-contrast');
+      if (a11y.textSize === 'large') html.classList.add('a11y-large-text');
+      if (a11y.textSize === 'extra-large') html.classList.add('a11y-extra-large-text');
+      if (a11y.largeTargets) html.classList.add('a11y-large-targets');
+    } catch (e) {}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          primary: 'var(--color-primary)',
+          'primary-container': 'var(--color-primary-container)',
+          'on-primary-container': 'var(--color-on-primary-container)',
+          secondary: 'var(--color-secondary)',
+          'secondary-container': 'var(--color-secondary-container)',
+          background: 'var(--color-background)',
+          surface: 'var(--color-surface)',
+          'on-surface': 'var(--color-on-surface)',
+          'on-surface-variant': 'var(--color-on-surface-variant)',
+          'surface-container': 'var(--color-surface-container)',
+          'surface-container-low': 'var(--color-surface-container-low)',
+          'surface-container-high': 'var(--color-surface-container-high)',
+          'surface-container-highest': 'var(--color-surface-container-highest)',
+          outline: 'var(--color-outline)',
+          'outline-variant': 'var(--color-outline-variant)',
+          error: 'var(--color-error)',
+          'error-container': 'var(--color-error-container)',
+          'on-error-container': 'var(--color-on-error-container)',
+          accent: 'var(--color-accent-bright)',
+        },
+        fontFamily: {
+          headline: ['Lexend', 'sans-serif'],
+          body: ['Inter', 'sans-serif'],
+        },
+      },
+    },
+  };
+</script>
+<link rel="stylesheet" href="{% static 'css/sightra.css' %}" />

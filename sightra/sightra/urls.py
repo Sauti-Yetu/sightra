@@ -17,6 +17,8 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from apps.core.views import *
 from apps.audio.views import *
 from apps.vision.views import *
@@ -32,8 +34,12 @@ urlpatterns = [
     path("signin/", signin, name="signin"),
     path("signup/", signup, name="signup"),
     # Homepage
-    path("dashboard", dashboard, name="dashboard"),
+    path("dashboard/", dashboard, name="dashboard"),
+    path("dashboard", dashboard),
     path("", landing_page, name="landing_page"),
+    path("offline/", offline_page, name="offline"),
+    path("sw.js", service_worker, name="service_worker"),
+    path("manifest.webmanifest", web_manifest, name="web_manifest"),
     # Vision 
     path("vision/", vision, name="vision"),
     # Voice assistant
@@ -54,3 +60,6 @@ urlpatterns = [
     path("api/core/", include("apps.core.urls")),
     path("api/settings/", include("apps.settings.urls")),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])

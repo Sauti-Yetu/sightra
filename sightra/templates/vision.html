@@ -1,488 +1,213 @@
-<!DOCTYPE html>
+{% extends 'base.html' %}
 
-<html class="dark" lang="en">
+{% block title %}Live Vision — Sightra{% endblock %}
 
-<head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <!-- <meta http-equiv="Permissions-Policy" content="camera=(self); microphone=(self)"> -->
-    <title>SIGHTRA | Live Perception</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&amp;family=Inter:wght@100..900&amp;display=swap"
-        rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "on-error": "#690005",
-                        "inverse-surface": "#e5e2e1",
-                        "secondary-fixed": "#c3f400",
-                        "on-secondary": "#283500",
-                        "tertiary": "#ffeac0",
-                        "on-tertiary-container": "#6f5500",
-                        "surface-variant": "#353534",
-                        "on-surface-variant": "#bac9cc",
-                        "surface-container": "#201f1f",
-                        "secondary": "#ffffff",
-                        "tertiary-fixed-dim": "#f3bf26",
-                        "on-primary-container": "#00626e",
-                        "inverse-primary": "#006875",
-                        "surface": "#131313",
-                        "on-background": "#e5e2e1",
-                        "inverse-on-surface": "#313030",
-                        "on-secondary-container": "#556d00",
-                        "background": "#131313",
-                        "on-surface": "#e5e2e1",
-                        "primary-fixed": "#9cf0ff",
-                        "on-primary": "#00363d",
-                        "surface-tint": "#00daf3",
-                        "secondary-container": "#c3f400",
-                        "on-secondary-fixed": "#161e00",
-                        "surface-container-high": "#2a2a2a",
-                        "tertiary-container": "#fec931",
-                        "primary-container": "#00e5ff",
-                        "on-secondary-fixed-variant": "#3c4d00",
-                        "surface-container-low": "#1c1b1b",
-                        "error": "#ffb4ab",
-                        "on-primary-fixed": "#001f24",
-                        "surface-bright": "#393939",
-                        "secondary-fixed-dim": "#abd600",
-                        "primary": "#c3f5ff",
-                        "on-tertiary": "#3e2e00",
-                        "on-primary-fixed-variant": "#004f58",
-                        "surface-container-lowest": "#0e0e0e",
-                        "primary-fixed-dim": "#00daf3",
-                        "outline": "#849396",
-                        "surface-dim": "#131313",
-                        "outline-variant": "#3b494c",
-                        "tertiary-fixed": "#ffdf96",
-                        "on-tertiary-fixed-variant": "#594400",
-                        "surface-container-highest": "#353534",
-                        "on-error-container": "#ffdad6",
-                        "error-container": "#93000a",
-                        "on-tertiary-fixed": "#251a00"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
-                    },
-                    "fontFamily": {
-                        "headline": ["Lexend"],
-                        "body": ["Inter"],
-                        "label": ["Inter"]
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
+{% block html_attrs %} class="dark"{% endblock %}
 
-        .scanline {
-            background: linear-gradient(to bottom, transparent 0%, rgba(0, 229, 255, 0.05) 50%, transparent 100%);
-            background-size: 100% 4px;
-        }
+{% block body_class %}overflow-hidden{% endblock %}
 
-        .reticle-corner {
-            width: 20px;
-            height: 20px;
-            border-color: #00E5FF;
-        }
+{% block header %}
+  {% include 'partials/header_app.html' %}
+{% endblock %}
 
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
+{% block main_class %}app-main app-main--full p-0 relative overflow-hidden{% endblock %}
 
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-    </style>
-    <style>
-        body {
-            min-height: max(884px, 100dvh);
-        }
-    </style>
-</head>
+{% block bottom_nav %}
+  {% include 'bottom_nav.html' %}
+{% endblock %}
 
-<body
-    class="bg-background text-on-surface font-body overflow-hidden selection:bg-primary-container selection:text-on-primary-container">
-    <!-- Live Camera Feed (Background Canvas) -->
-    <div class="fixed inset-0 z-0 bg-black">
-        <video id="cameraElement" class="w-full h-full object-cover" autoplay playsinline muted></video>
-        <canvas id="canvasElement" style="display:none;"></canvas>
+{% block content %}
+<!-- Camera feed -->
+<div class="fixed inset-0 z-0 bg-black" aria-hidden="true">
+  <video id="cameraElement" class="w-full h-full object-cover" autoplay playsinline muted></video>
+  <canvas id="canvasElement" class="hidden"></canvas>
+</div>
+
+<!-- Status announcer for screen readers -->
+<div id="camera-status" class="camera-status" role="status" aria-live="polite">
+  Camera inactive
+</div>
+
+<div class="relative z-10 h-[100dvh] flex flex-col pointer-events-none">
+  <div id="dynamic-boxes" class="flex-1 relative overflow-hidden mt-16 mb-28" aria-hidden="true">
+    <div class="absolute inset-0 flex items-center justify-center">
+      <div class="relative w-48 h-48 flex items-center justify-center">
+        <div class="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2" style="border-color: var(--color-accent); opacity: 0.4;"></div>
+        <div class="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2" style="border-color: var(--color-accent); opacity: 0.4;"></div>
+        <div class="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2" style="border-color: var(--color-accent); opacity: 0.4;"></div>
+        <div class="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2" style="border-color: var(--color-accent); opacity: 0.4;"></div>
+      </div>
     </div>
-    <!-- UI Overlay Layer -->
-    <div class="relative z-10 h-screen flex flex-col justify-between">
-        <!-- Shared Component: TopAppBar -->
-        <header
-            class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-neutral-950/80 backdrop-blur-xl shadow-[0_0_40px_rgba(0,229,255,0.08)]">
-            <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                <span class="material-symbols-outlined text-[#00E5FF] text-2xl" data-icon="visibility">visibility</span>
-                <h1
-                    class="font-['Lexend'] tracking-widest uppercase font-bold text-2xl font-black text-[#00E5FF] tracking-tighter">
-                    Sightra</h1>
-            </a>
+  </div>
 
-            <!-- Desktop Navigation -->
-            <nav class="hidden md:flex items-center gap-8" id="desktopNav">
-                <a href="/" data-target="/"
-                    class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
-                    <span class="material-symbols-outlined text-[20px]">home</span>
-                    Home
-                </a>
-                <a href="/vision/" data-target="/vision"
-                    class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
-                    <span class="material-symbols-outlined text-[20px]">visibility</span>
-                    Vision
-                </a>
-                <a href="/live-map/" data-target="/map"
-                    class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
-                    <span class="material-symbols-outlined text-[20px]">map</span>
-                    Map
-                </a>
-                <a href="/voice_assistant/" data-target="/voice_assistant"
-                    class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
-                    <span class="material-symbols-outlined text-[20px]">mic</span>
-                    Voice
-                </a>
-                <a href="/settings/" data-target="/settings"
-                    class="nav-link flex items-center gap-2 text-[#BAC9CC] hover:text-[#00E5FF] transition-colors font-medium text-sm">
-                    <span class="material-symbols-outlined text-[20px]">settings</span>
-                    Settings
-                </a>
-            </nav>
+  <!-- Scan control -->
+  <div class="absolute bottom-28 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 pointer-events-auto z-20">
+    <p id="scanLabel" class="font-headline text-sm font-bold uppercase tracking-widest" style="color: var(--color-accent);">
+      Tap to start camera scan
+    </p>
+    <button id="scanBtn" type="button"
+      class="w-20 h-20 rounded-full flex items-center justify-center border-4 transition-all"
+      style="border-color: var(--color-accent); background: rgba(0,229,255,0.15); min-width: 5rem; min-height: 5rem;"
+      aria-label="Start or stop sight scan"
+      aria-pressed="false">
+      <span class="material-symbols-outlined text-4xl" style="color: var(--color-accent); font-variation-settings: 'FILL' 1;">visibility</span>
+    </button>
+  </div>
 
-            <!-- AI Status Indicators -->
-            <div class="flex items-center gap-6">
-                <div class="flex items-center gap-2">
-                    <div class="w-2 h-2 rounded-full bg-secondary-container shadow-[0_0_10px_#C3F400]"></div>
-                    <!-- <span
-                        class="font-headline text-[10px] tracking-[0.2em] font-bold text-secondary-fixed uppercase">ONLINE</span> -->
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-cyan-400 text-sm" data-icon="gps_fixed">gps_fixed</span>
-                    <span
-                        class="font-headline text-[10px] tracking-[0.2em] font-bold text-on-surface-variant uppercase hidden md:inline">GPS
-                        LOCKED</span>
-                </div>
-                <!-- <span class="material-symbols-outlined text-cyan-400 hover:opacity-80 transition-opacity"
-                    data-icon="battery_charging_full">battery_charging_full</span> -->
-            </div>
-        </header>
-        <!-- Perception Bounding Boxes (Main Canvas) -->
-        <main id="dynamic-boxes" class="flex-1 relative mt-16 mb-24 overflow-hidden pointer-events-none">
-            <!-- Center Viewport Guide (Static fallback) -->
-            <div class="absolute inset-0 flex items-center justify-center">
-                <div class="relative w-48 h-48 flex items-center justify-center">
-                    <div class="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-primary/30"></div>
-                    <div class="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-primary/30"></div>
-                    <div class="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-primary/30"></div>
-                    <div class="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-primary/30"></div>
-                    <div class="w-1 h-1 bg-primary-container rounded-full shadow-[0_0_15px_#00E5FF]"></div>
-                </div>
-            </div>
-        </main>
-        <!-- SIGHT Trigger & Navigation -->
-        <footer class="relative z-20">
-            <!-- Large Trigger Button -->
-            <div class="absolute bottom-28 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4">
-                <span id="scanLabel"
-                    class="font-headline text-[10px] tracking-[0.4em] font-black text-primary-container animate-pulse uppercase">INITIATE
-                    SIGHT SCAN</span>
-                <button id="scanBtn"
-                    class="group relative w-24 h-24 rounded-full flex items-center justify-center transition-all duration-500 hover:scale-110 active:scale-95 pointer-events-auto">
-                    <!-- Outer Ring -->
-                    <div
-                        class="absolute inset-0 rounded-full border-4 border-primary-container/20 group-hover:border-primary-container/40 transition-all">
-                    </div>
-                    <!-- Inner Circle -->
-                    <div
-                        class="w-16 h-16 rounded-full bg-primary-container/10 backdrop-blur-2xl flex items-center justify-center shadow-[0_0_30px_rgba(0,229,255,0.3)] group-hover:bg-primary-container/20 group-hover:shadow-[0_0_50px_rgba(0,229,255,0.5)] transition-all">
-                        <span class="material-symbols-outlined text-primary-container text-4xl" data-icon="visibility"
-                            style="font-variation-settings: 'FILL' 1;">visibility</span>
-                    </div>
-                </button>
-            </div>
-        </footer>
-        <!-- HUD Side Metrics -->
-        <aside class="fixed left-6 top-1/2 -translate-y-1/2 flex flex-col gap-8 pointer-events-none">
-            <div class="space-y-1">
-                <p class="text-[8px] font-headline text-on-surface-variant tracking-widest uppercase">Depth Range</p>
-                <div class="h-32 w-1 bg-surface-container-high rounded-full overflow-hidden relative">
-                    <div class="absolute bottom-0 w-full h-3/4 bg-primary-container shadow-[0_0_10px_#00E5FF]"></div>
-                </div>
-                <p class="font-mono text-[10px] text-primary-container">12.4m</p>
-            </div>
-            <div class="space-y-1">
-                <p class="text-[8px] font-headline text-on-surface-variant tracking-widest uppercase">Proc Load</p>
-                <div class="flex gap-0.5">
-                    <div class="w-1.5 h-4 bg-primary-container"></div>
-                    <div class="w-1.5 h-4 bg-primary-container"></div>
-                    <div class="w-1.5 h-4 bg-primary-container"></div>
-                    <div class="w-1.5 h-4 bg-surface-container-high"></div>
-                </div>
-                <p class="font-mono text-[10px] text-on-surface-variant">42ms</p>
-            </div>
-        </aside>
-        <!-- Right Side Alerts -->
-        <aside id="dynamic-alerts"
-            class="fixed right-6 top-1/2 -translate-y-1/2 flex flex-col items-end gap-6 max-h-[65vh] overflow-y-auto hide-scrollbar pointer-events-auto">
-            <!-- Dynamic alerts go here -->
-        </aside>
-    </div>
-    <!-- UI Overlay for Vignette -->
-    <div class="fixed inset-0 pointer-events-none shadow-[inset_0_0_50px_rgba(0,0,0,0.5)] z-20"></div>
+  <!-- Detection alerts (visual supplement) -->
+  <aside id="dynamic-alerts" class="fixed right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3 max-h-[50vh] overflow-y-auto hide-scrollbar pointer-events-auto z-20" aria-live="polite" aria-label="Detected objects"></aside>
+</div>
+{% endblock %}
 
-    <script>
-        const video = document.getElementById('cameraElement');
-        const canvas = document.getElementById('canvasElement');
-        const scanBtn = document.getElementById('scanBtn');
-        const scanLabel = document.getElementById('scanLabel');
-        let isScanning = false;
-        let streamRef = null;
-        let captureIntervalId = null;
-        let isFetchInFlight = false;   // prevent parallel requests
-        let pendingSpeech = null;      // next utterance queued while TTS plays
+{% block extra_js %}
+<script>
+(function () {
+  var video = document.getElementById('cameraElement');
+  var canvas = document.getElementById('canvasElement');
+  var scanBtn = document.getElementById('scanBtn');
+  var scanLabel = document.getElementById('scanLabel');
+  var cameraStatus = document.getElementById('camera-status');
+  var isScanning = false;
+  var streamRef = null;
+  var captureIntervalId = null;
+  var isFetchInFlight = false;
+  var pendingSpeech = null;
+  var CAPTURE_INTERVAL_MS = 1500;
 
-        // --- How often to capture a new frame (ms). Independent of TTS. ---
-        const CAPTURE_INTERVAL_MS = 1500;
+  function setStatus(msg) {
+    if (cameraStatus) cameraStatus.textContent = msg;
+    if (window.Sightra) Sightra.announce(msg);
+  }
 
-        async function startCamera() {
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                const errorMsg = "Camera access is not available. Please ensure you are using HTTPS and that your browser supports camera access.";
-                console.error(errorMsg);
-                alert(errorMsg);
-                return;
-            }
+  async function startCamera() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setStatus('Camera not available. Use HTTPS and a supported browser.');
+      return;
+    }
+    try {
+      streamRef = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+      });
+      video.srcObject = streamRef;
+      await video.play();
+      setStatus('Camera active');
+    } catch (err) {
+      try {
+        streamRef = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = streamRef;
+        await video.play();
+        setStatus('Camera active');
+      } catch (e) {
+        setStatus('Camera access denied. Enable camera permission in settings.');
+      }
+    }
+  }
 
-            try {
-                // Try environment camera first (rear camera on mobile)
-                streamRef = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        facingMode: "environment",
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    }
-                });
-                video.srcObject = streamRef;
-                await video.play();
-            } catch (err) {
-                console.warn("Environment camera failed, trying default camera...", err);
-                try {
-                    streamRef = await navigator.mediaDevices.getUserMedia({ video: true });
-                    video.srcObject = streamRef;
-                    await video.play();
-                } catch (fallbackErr) {
-                    console.error("Error accessing camera: ", fallbackErr);
-                    alert("Please enable camera access for SIGHTRA to work properly. If you are on mobile, ensure no other app is using the camera.");
-                }
-            }
-        }
+  function stopCamera() {
+    if (streamRef) {
+      streamRef.getTracks().forEach(function (t) { t.stop(); });
+      streamRef = null;
+      video.srcObject = null;
+    }
+    setStatus('Camera inactive');
+  }
 
-        function stopCamera() {
-            if (streamRef) {
-                streamRef.getTracks().forEach(track => track.stop());
-                streamRef = null;
-                video.srcObject = null;
-            }
-        }
+  startCamera();
 
-        startCamera();
+  scanBtn.addEventListener('click', function () {
+    isScanning = !isScanning;
+    scanBtn.setAttribute('aria-pressed', isScanning ? 'true' : 'false');
 
-        scanBtn.addEventListener('click', () => {
-            isScanning = !isScanning;
+    if (isScanning) {
+      if (!streamRef) startCamera();
+      scanLabel.textContent = 'Tap to stop scan';
+      setStatus('Sightra is analyzing your surroundings.');
+      startCaptureLoop();
+    } else {
+      scanLabel.textContent = 'Tap to start camera scan';
+      stopCaptureLoop();
+      window.speechSynthesis.cancel();
+      clearDynamicUI();
+      stopCamera();
+      setStatus('Scan stopped. Camera inactive.');
+    }
+  });
 
-            if (isScanning) {
-                if (!streamRef) startCamera();
-                scanLabel.innerText = "STOP SIGHT SCAN";
-                scanLabel.classList.replace('text-primary-container', 'text-error');
-                scanBtn.querySelector('.backdrop-blur-2xl').classList.replace('bg-primary-container/10', 'bg-error/20');
-                scanBtn.querySelector('.material-symbols-outlined').style.color = '#ffb4ab';
-                startCaptureLoop();
-            } else {
-                scanLabel.innerText = "INITIATE SIGHT SCAN";
-                scanLabel.classList.replace('text-error', 'text-primary-container');
-                scanBtn.querySelector('.backdrop-blur-2xl').classList.replace('bg-error/20', 'bg-primary-container/10');
-                scanBtn.querySelector('.material-symbols-outlined').style.color = '';
-                stopCaptureLoop();
-                window.speechSynthesis.cancel();
-                clearDynamicUI();
-                stopCamera();
-            }
-        });
+  function startCaptureLoop() {
+    captureAndAnalyze();
+    captureIntervalId = setInterval(function () {
+      if (!isFetchInFlight) captureAndAnalyze();
+    }, CAPTURE_INTERVAL_MS);
+  }
 
-        // ---------------------------------------------------------------
-        // Continuous capture loop — fires every CAPTURE_INTERVAL_MS.
-        // Completely independent of TTS so the UI refreshes in near-real-time.
-        // ---------------------------------------------------------------
-        function startCaptureLoop() {
-            captureAndAnalyze();  // fire immediately
-            captureIntervalId = setInterval(() => {
-                if (!isFetchInFlight) captureAndAnalyze();
-            }, CAPTURE_INTERVAL_MS);
-        }
+  function stopCaptureLoop() {
+    if (captureIntervalId !== null) {
+      clearInterval(captureIntervalId);
+      captureIntervalId = null;
+    }
+    isFetchInFlight = false;
+  }
 
-        function stopCaptureLoop() {
-            if (captureIntervalId !== null) {
-                clearInterval(captureIntervalId);
-                captureIntervalId = null;
-            }
-            isFetchInFlight = false;
-        }
+  function clearDynamicUI() {
+    document.getElementById('dynamic-boxes').innerHTML = '<div class="absolute inset-0 flex items-center justify-center"><div class="relative w-48 h-48"></div></div>';
+    document.getElementById('dynamic-alerts').innerHTML = '';
+  }
 
-        function clearDynamicUI() {
-            document.getElementById('dynamic-boxes').innerHTML = `
-            <div class="absolute inset-0 flex items-center justify-center">
-                <div class="relative w-48 h-48 flex items-center justify-center">
-                    <div class="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-primary/30"></div>
-                    <div class="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-primary/30"></div>
-                    <div class="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-primary/30"></div>
-                    <div class="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-primary/30"></div>
-                    <div class="w-1 h-1 bg-primary-container rounded-full shadow-[0_0_15px_#00E5FF]"></div>
-                </div>
-            </div>`;
-            document.getElementById('dynamic-alerts').innerHTML = '';
-        }
+  async function captureAndAnalyze() {
+    if (!isScanning) return;
+    isFetchInFlight = true;
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    if (canvas.width > 0 && canvas.height > 0) {
+      canvas.getContext('2d').drawImage(video, 0, 0);
+    }
+    var frameData = canvas.toDataURL('image/jpeg', 0.4);
 
-        async function captureAndAnalyze() {
-            if (!isScanning) return;
-            isFetchInFlight = true;
+    try {
+      var response = await fetch('/api/navigation/stream/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ frame_data: frameData, text_prompt: 'Describe any obstacles or pathways ahead.' })
+      });
+      var data = await response.json();
+      if (!isScanning) { isFetchInFlight = false; return; }
+      updateDynamicUI(data.metadata);
+      if (data.analysis_text) {
+        setStatus('Detection complete.');
+        speakNonBlocking(data.analysis_text);
+      }
+    } catch (err) {
+      setStatus('Something went wrong while connecting to Sightra. Try again.');
+    } finally {
+      isFetchInFlight = false;
+    }
+  }
 
-            // Draw current frame to canvas
-            canvas.width = video.videoWidth || 640;
-            canvas.height = video.videoHeight || 480;
-            if (canvas.width > 0 && canvas.height > 0) {
-                canvas.getContext('2d').drawImage(video, 0, 0);
-            }
+  function speakNonBlocking(text) {
+    if (!text) return;
+    if (window.Sightra) {
+      Sightra.speak(text);
+    } else if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      var utt = new SpeechSynthesisUtterance(text);
+      window.speechSynthesis.speak(utt);
+    }
+  }
 
-            // Compress to JPEG at 0.4 quality — smaller = faster upload to server
-            const frameData = canvas.toDataURL('image/jpeg', 0.4);
+  function updateDynamicUI(metadata) {
+    var boxesContainer = document.getElementById('dynamic-boxes');
+    var alertsContainer = document.getElementById('dynamic-alerts');
+    clearDynamicUI();
+    if (!metadata || !metadata.objects) return;
 
-            try {
-                const response = await fetch('/api/navigation/stream/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        frame_data: frameData,
-                        text_prompt: "Describe any obstacles or pathways ahead."
-                    })
-                });
-
-                const data = await response.json();
-
-                if (!isScanning) { isFetchInFlight = false; return; }
-
-                // Immediately replace stale bounding boxes with current frame results
-                updateDynamicUI(data.metadata);
-
-                // Speak — but do NOT block the next capture on this.
-                // If TTS is still running, interrupt with the newer, fresher description.
-                if (data.analysis_text) {
-                    speakNonBlocking(data.analysis_text);
-                }
-            } catch (err) {
-                console.error("Error sending frame: ", err);
-            } finally {
-                isFetchInFlight = false;
-            }
-        }
-
-        // Speaks text without blocking capture. If speech is in progress it is
-        // queued and replaces the previous pending utterance (only latest wins).
-        function speakNonBlocking(text) {
-            if (!text) return;
-            // If nothing is speaking, speak immediately.
-            if (!window.speechSynthesis.speaking) {
-                const utt = new SpeechSynthesisUtterance(text);
-                pendingSpeech = null;
-                window.speechSynthesis.speak(utt);
-            } else {
-                // Store as pending — when current TTS ends the latest result speaks.
-                pendingSpeech = text;
-                // Attach a one-shot onend listener to the currently queued utterance
-                // so we pick up the most recent pending description.
-                if (!window._sightraTTSHooked) {
-                    window._sightraTTSHooked = true;
-                    const checkPending = () => {
-                        window._sightraTTSHooked = false;
-                        if (pendingSpeech && isScanning) {
-                            const utt2 = new SpeechSynthesisUtterance(pendingSpeech);
-                            pendingSpeech = null;
-                            utt2.onend = checkPending;
-                            window.speechSynthesis.speak(utt2);
-                        }
-                    };
-                    // Cancel current and replace immediately if scene changed significantly
-                    window.speechSynthesis.cancel();
-                    const utt3 = new SpeechSynthesisUtterance(text);
-                    pendingSpeech = null;
-                    utt3.onend = checkPending;
-                    window.speechSynthesis.speak(utt3);
-                }
-            }
-        }
-
-        function updateDynamicUI(metadata) {
-            const boxesContainer = document.getElementById('dynamic-boxes');
-            const alertsContainer = document.getElementById('dynamic-alerts');
-
-            clearDynamicUI(); // Reset center guide
-
-            if (!metadata || !metadata.objects) return;
-
-            metadata.objects.forEach((obj, idx) => {
-                const isObstacle = obj.label !== 'door';
-                const theme = isObstacle ? 'secondary' : 'primary';
-                const confPercent = Math.round(obj.confidence * 100) + '%';
-
-                // Mapped coordinates (assuming standard [x,y,w,h])
-                const [x, y, w, h] = obj.box;
-                // Exaggerating sizing for visual effect if the mock values are too small
-                const displayW = w * 2.5;
-                const displayH = h * 2.5;
-
-                const boxHtml = `
-                <div class="absolute border-2 border-${theme}-container/40 rounded-lg transition-all duration-300"
-                     style="left: ${x}px; top: ${y}px; width: ${displayW}px; height: ${displayH}px;">
-                    <div class="absolute -top-10 ${isObstacle ? 'right-0 border-r-2 flex-row-reverse' : 'left-0 border-l-2'} bg-${theme}-container/20 backdrop-blur-md px-3 py-1 rounded-sm flex items-center gap-2 border-${theme}-container">
-                        ${isObstacle ? '<span class="text-[10px] font-mono text-secondary-fixed mr-2">DETECTED</span>' : ''}
-                        <span class="font-headline text-xs font-bold tracking-widest text-${theme}-container uppercase">${obj.label}</span>
-                        ${isObstacle ? '<span class="material-symbols-outlined text-secondary-container text-xs" data-icon="warning">warning</span>' : `<span class="text-[10px] font-mono text-primary-fixed ml-2">${confPercent}</span>`}
-                    </div>
-                    ${isObstacle ? '<div class="absolute inset-0 bg-secondary-container/5 animate-pulse"></div>' : `
-                        <div class="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-primary-container"></div>
-                        <div class="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 border-primary-container"></div>
-                        <div class="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-primary-container"></div>
-                        <div class="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-primary-container"></div>
-                    `}
-                </div>`;
-                boxesContainer.insertAdjacentHTML('beforeend', boxHtml);
-
-                const alertHtml = `
-                <div class="bg-surface-container-low/60 backdrop-blur-md p-4 rounded-xl border-r-4 border-${theme}-container max-w-[120px] animate-fade-in-right">
-                    <p class="font-headline text-[10px] font-black text-${theme}-container mb-1 tracking-widest">${obj.label.toUpperCase()}</p>
-                    <p class="font-body text-[10px] leading-tight text-on-surface-variant">Detected with ${confPercent} confidence.</p>
-                </div>`;
-                alertsContainer.insertAdjacentHTML('beforeend', alertHtml);
-            });
-        }
-    </script>
-    <!-- BottomNavBar -->
-    {% include 'bottom_nav.html' %}
-</body>
-
-</html>
+    metadata.objects.forEach(function (obj) {
+      var confPercent = Math.round(obj.confidence * 100) + '%';
+      var alertHtml = '<div class="card p-3 max-w-[140px] text-sm" style="background: rgba(0,0,0,0.7); color: white; border-color: var(--color-accent);">' +
+        '<p class="font-bold m-0">' + obj.label + '</p>' +
+        '<p class="m-0 text-xs opacity-80">' + confPercent + ' confidence</p></div>';
+      alertsContainer.insertAdjacentHTML('beforeend', alertHtml);
+    });
+  }
+})();
+</script>
+{% endblock %}

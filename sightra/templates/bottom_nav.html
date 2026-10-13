@@ -1,58 +1,27 @@
-<!-- BottomNavBar -->
-<nav id="bottomNav"
-    class="fixed bottom-0 left-0 w-full md:hidden flex justify-around items-center pb-6 pt-3 px-4 bg-surface/80 dark:bg-[#131313]/80 backdrop-blur-xl z-50 border-t border-outline-variant/10 dark:border-[#00E5FF]/10 shadow-[0_-10px_40px_rgba(0,229,255,0.08)] rounded-t-3xl">
-    <a class="nav-link flex flex-col items-center justify-center text-on-surface-variant dark:text-[#BAC9CC] hover:text-primary dark:hover:text-[#C3F400] px-2 sm:px-6 py-2 transition-all active:scale-90 duration-300 ease-out"
-        href="/" data-target="/">
-        <span class="material-symbols-outlined text-2xl" data-icon="home">home</span>
-        <span class="font-['Lexend'] text-[10px] font-medium tracking-wide">Home</span>
-    </a>
-    <a class="nav-link flex flex-col items-center justify-center text-on-surface-variant dark:text-[#BAC9CC] hover:text-primary dark:hover:text-[#C3F400] px-2 sm:px-6 py-2 transition-all active:scale-90 duration-300 ease-out"
-        href="/vision/" data-target="/vision">
-        <span class="material-symbols-outlined text-2xl" data-icon="visibility">visibility</span>
-        <span class="font-['Lexend'] text-[10px] font-medium tracking-wide">Vision</span>
-    </a>
-    <a class="nav-link flex flex-col items-center justify-center text-on-surface-variant dark:text-[#BAC9CC] hover:text-primary dark:hover:text-[#C3F400] px-2 sm:px-6 py-2 transition-all active:scale-90 duration-300 ease-out"
-        href="/live-map" data-target="/live-map">
-        <span class="material-symbols-outlined text-2xl" data-icon="explore">explore</span>
-        <span class="font-['Lexend'] text-[10px] font-medium tracking-wide">Map</span>
-    </a>
-    <a class="nav-link flex flex-col items-center justify-center text-on-surface-variant dark:text-[#BAC9CC] hover:text-primary dark:hover:text-[#C3F400] px-2 sm:px-6 py-2 transition-all active:scale-90 duration-300 ease-out"
-        href="/live-call/" data-target="/live-call">
-        <span class="material-symbols-outlined text-2xl" data-icon="call">call</span>
-        <span class="font-['Lexend'] text-[10px] font-medium tracking-wide">Connect</span>
-    </a>
-    <a class="nav-link flex flex-col items-center justify-center text-on-surface-variant dark:text-[#BAC9CC] hover:text-primary dark:hover:text-[#C3F400] px-2 sm:px-6 py-2 transition-all active:scale-90 duration-300 ease-out"
-        href="/voice_assistant/" data-target="/voice_assistant">
-        <span class="material-symbols-outlined text-2xl" data-icon="mic"
-            style="font-variation-settings: 'FILL' 1;">mic</span>
-        <span class="font-['Lexend'] text-[10px] font-medium tracking-wide">Voice</span>
-    </a>
-    <a class="nav-link flex flex-col items-center justify-center text-on-surface-variant dark:text-[#BAC9CC] hover:text-primary dark:hover:text-[#C3F400] px-2 sm:px-6 py-2 transition-all active:scale-90 duration-300 ease-out"
-        href="/settings/" data-target="/settings">
-        <span class="material-symbols-outlined text-2xl" data-icon="settings">settings</span>
-        <span class="font-['Lexend'] text-[10px] font-medium tracking-wide">Settings</span>
-    </a>
+<!-- Bottom navigation — mobile only -->
+<nav class="bottom-nav" aria-label="Mobile navigation">
+  <a href="/dashboard" class="bottom-nav__link" data-nav-target="/dashboard">
+    <span class="material-symbols-outlined" aria-hidden="true">home</span>
+    <span>Home</span>
+  </a>
+  <a href="/vision/" class="bottom-nav__link" data-nav-target="/vision">
+    <span class="material-symbols-outlined" aria-hidden="true">photo_camera</span>
+    <span>Vision</span>
+  </a>
+  <a href="/live-map/" class="bottom-nav__link" data-nav-target="/live-map">
+    <span class="material-symbols-outlined" aria-hidden="true">near_me</span>
+    <span>Navigate</span>
+  </a>
+  <a href="/voice_assistant/" class="bottom-nav__link" data-nav-target="/voice_assistant">
+    <span class="material-symbols-outlined" aria-hidden="true">mic</span>
+    <span>Voice</span>
+  </a>
+  <a href="/sightra-connect/" class="bottom-nav__link" data-nav-target="/sightra-connect">
+    <span class="material-symbols-outlined" aria-hidden="true">support_agent</span>
+    <span>Help</span>
+  </a>
+  <a href="/settings/" class="bottom-nav__link" data-nav-target="/settings">
+    <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+    <span>Settings</span>
+  </a>
 </nav>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const path = window.location.pathname;
-        const bottomLinks = document.querySelectorAll('#bottomNav .nav-link');
-        const desktopLinks = document.querySelectorAll('#desktopNav .nav-link');
-
-        bottomLinks.forEach(link => {
-            const target = link.getAttribute('data-target');
-            if (path === target || (target !== '/' && path.startsWith(target))) {
-                link.classList.remove('text-on-surface-variant', 'dark:text-[#BAC9CC]', 'hover:text-primary', 'dark:hover:text-[#C3F400]');
-                link.classList.add('bg-primary-container', 'text-on-primary-container', 'rounded-2xl', 'scale-110');
-            }
-        });
-
-        desktopLinks.forEach(link => {
-            const target = link.getAttribute('data-target');
-            if (path === target || (target !== '/' && path.startsWith(target))) {
-                link.classList.remove('text-on-surface-variant', 'dark:text-[#BAC9CC]');
-                link.classList.add('text-primary', 'border-b-2', 'border-primary', 'pb-1');
-            }
-        });
-    });
-</script>

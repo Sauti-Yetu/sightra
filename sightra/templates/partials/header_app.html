@@ -1,0 +1,39 @@
+<header class="app-header" role="banner">
+  <a href="{% block logo_href %}/dashboard{% endblock %}" class="app-logo" aria-label="Sightra home">
+    <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+    <span>Sightra</span>
+  </a>
+
+  <nav class="desktop-nav" aria-label="Main navigation">
+    <a href="/dashboard" class="desktop-nav__link" data-nav-target="/dashboard">
+      <span class="material-symbols-outlined" aria-hidden="true">home</span>
+      Home
+    </a>
+    <a href="/vision/" class="desktop-nav__link" data-nav-target="/vision">
+      <span class="material-symbols-outlined" aria-hidden="true">photo_camera</span>
+      Vision
+    </a>
+    <a href="/live-map/" class="desktop-nav__link" data-nav-target="/live-map">
+      <span class="material-symbols-outlined" aria-hidden="true">near_me</span>
+      Navigate
+    </a>
+    <a href="/voice_assistant/" class="desktop-nav__link" data-nav-target="/voice_assistant">
+      <span class="material-symbols-outlined" aria-hidden="true">mic</span>
+      Voice
+    </a>
+    <a href="/sightra-connect/" class="desktop-nav__link" data-nav-target="/sightra-connect">
+      <span class="material-symbols-outlined" aria-hidden="true">support_agent</span>
+      Help
+    </a>
+    <a href="/settings/" class="desktop-nav__link" data-nav-target="/settings">
+      <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+      Settings
+    </a>
+  </nav>
+
+  <div class="flex items-center gap-2">
+    <button type="button" class="btn-icon" data-theme-toggle aria-label="Toggle dark mode">
+      <span class="material-symbols-outlined" data-theme-icon aria-hidden="true">dark_mode</span>
+    </button>
+  </div>
+</header>

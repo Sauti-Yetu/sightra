@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en"{% block html_attrs %}{% endblock %}>
+<head>
+  {% include 'partials/head.html' %}
+  <title>{% block title %}Sightra{% endblock %}</title>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <div id="network-banner" class="network-banner network-banner--online" role="status" aria-live="polite">
+    <span data-network-text>You're connected.</span>
+  </div>
+
+  {% block header %}{% endblock %}
+
+  <main id="main-content" tabindex="-1" class="{% block main_class %}app-main{% endblock %}" role="main">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block footer %}{% endblock %}
+
+  {% block bottom_nav %}{% endblock %}
+
+  {% include 'partials/install_prompt.html' %}
+
+  <div id="sr-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="{% static 'js/sightra.js' %}" defer></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
