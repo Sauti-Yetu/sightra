@@ -46,7 +46,9 @@ class NavigationStreamView(APIView):
             "message": "Analysis completed successfully",
             "analysis_text": analysis_text,
             "audio_url": audio_info.get("audio_url"),
-            "metadata": analysis_result.get("vision_metadata")
+            "metadata": analysis_result.get("vision_metadata"),
+            "warnings": analysis_result.get("warnings") or [],
+            "hazard_alert": analysis_result.get("hazard_alert"),
         }, status=status.HTTP_200_OK)
 
 class RouteGuidanceView(APIView):

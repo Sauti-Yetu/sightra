@@ -115,7 +115,12 @@ async function captureAndAnalyze() {
       return;
     }
     updateDynamicUI(data.metadata);
-    if (data.analysis_text) speakNonBlocking(data.analysis_text);
+    const toSpeak = data.hazard_alert && data.analysis_text
+      ? (data.analysis_text.toLowerCase().includes('urgent') || data.analysis_text.toLowerCase().includes('caution')
+          ? data.analysis_text
+          : data.hazard_alert + ' ' + data.analysis_text)
+      : (data.hazard_alert || data.analysis_text);
+    if (toSpeak) speakNonBlocking(toSpeak);
   } catch (err) {
     console.error(err);
   } finally {
