@@ -5,6 +5,7 @@ django-filter>=23.5
 python-dotenv>=1.0.0
 PyJWT>=2.8.0
 cryptography>=42.0.0
+certifi>=2024.0.0
 
 # Celery & Background Tasks
 celery>=5.3.6

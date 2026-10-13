@@ -5,11 +5,22 @@ from __future__ import annotations
 import json
 import logging
 import os
+import ssl
 import urllib.error
 import urllib.request
 from typing import Any
 
 logger = logging.getLogger(__name__)
+
+
+def _ssl_context() -> ssl.SSLContext:
+    """Reliable HTTPS on macOS/Python builds missing system CA bundles."""
+    try:
+        import certifi
+
+        return ssl.create_default_context(cafile=certifi.where())
+    except ImportError:
+        return ssl.create_default_context()
 
 
 def _settings() -> tuple[str, str]:
@@ -38,7 +49,7 @@ def _request(method: str, path: str, payload: dict | None = None) -> dict[str, A
         method=method,
     )
     try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
+        with urllib.request.urlopen(req, timeout=30, context=_ssl_context()) as resp:
             body = resp.read().decode("utf-8")
             return json.loads(body) if body else {}
     except urllib.error.HTTPError as exc:

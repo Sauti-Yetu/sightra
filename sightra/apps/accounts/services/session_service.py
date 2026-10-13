@@ -11,6 +11,7 @@ import jwt
 from django.http import HttpRequest
 
 from . import supabase_client
+from .supabase_client import _ssl_context
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ def _decode_token(access_token: str) -> dict[str, Any] | None:
         except jwt.PyJWTError:
             return None
     try:
-        jwk_client = jwt.PyJWKClient(jwks)
+        jwk_client = jwt.PyJWKClient(jwks, ssl_context=_ssl_context())
         signing_key = jwk_client.get_signing_key_from_jwt(access_token)
         return jwt.decode(
             access_token,
