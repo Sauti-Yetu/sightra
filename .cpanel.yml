@@ -6,6 +6,5 @@ deployment:
     - /bin/cp -R sightra/templates $DEPLOYPATH
     - /bin/cp -R sightra/static $DEPLOYPATH
     - /bin/cp -R sightra/sightra $DEPLOYPATH
-    - /bin/cp -R sightra/public $DEPLOYPATH
     - /bin/cp sightra/manage.py $DEPLOYPATH
     - /bin/cp sightra/requirements.txt $DEPLOYPATH
