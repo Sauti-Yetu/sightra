@@ -15,7 +15,7 @@ from .priorities import (
 logger = logging.getLogger(__name__)
 
 # Tunable via environment (place custom weights e.g. yolo11s.pt in sightra/ or project root)
-YOLO_MODEL_PATH = os.getenv("YOLO_MODEL_PATH", "yolo11n.pt")
+YOLO_MODEL_PATH = os.getenv("YOLO_MODEL_PATH", "models/weights/yolo26n.pt")
 YOLO_IMGSZ = int(os.getenv("YOLO_IMGSZ", "512"))
 YOLO_MAX_DET = int(os.getenv("YOLO_MAX_DET", "24"))
 YOLO_IOU = float(os.getenv("YOLO_IOU", "0.5"))
@@ -24,15 +24,19 @@ YOLO_BASE_CONF = float(os.getenv("YOLO_CONF", "0.35"))
 
 def _resolve_model_path() -> str:
     """Find weights file without requiring a fixed cwd."""
+    base = Path(__file__).resolve().parents[2]
+    name = Path(YOLO_MODEL_PATH)
     candidates = [
-        Path(YOLO_MODEL_PATH),
-        Path(__file__).resolve().parents[2] / YOLO_MODEL_PATH,
-        Path.cwd() / YOLO_MODEL_PATH,
+        name,
+        base / name,
+        base / "models" / "weights" / name.name,
+        Path.cwd() / name,
+        Path.cwd() / "models" / "weights" / name.name,
     ]
     for p in candidates:
         if p.is_file():
             return str(p)
-    return YOLO_MODEL_PATH
+    return str(name)
 
 
 class YoloObjectDetector:

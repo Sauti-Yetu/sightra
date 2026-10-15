@@ -15,7 +15,7 @@ redis>=5.0.1
 google-generativeai>=0.4.0
 
 # Vision Open Source Models
-ultralytics>=8.1.0  # YOLO
+ultralytics>=8.3.0  # YOLO26 (yolo26n.pt)
 opencv-python-headless>=4.9.0
 torch>=2.2.0
 torchvision>=0.17.0
