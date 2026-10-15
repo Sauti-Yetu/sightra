@@ -1,7 +1,7 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/sightran/sightra-main/sightra/
+    - export DEPLOYPATH=/home2/sightran/sightra-main/sightra/
     - /bin/cp -R sightra/apps $DEPLOYPATH
     - /bin/cp -R sightra/templates $DEPLOYPATH
     - /bin/cp -R sightra/static $DEPLOYPATH
