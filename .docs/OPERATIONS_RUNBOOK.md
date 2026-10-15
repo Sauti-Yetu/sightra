@@ -26,7 +26,8 @@ For DevOps and on-call engineers deploying and operating Sightra.
    pip install -r requirements.txt
    python manage.py migrate --noinput
    ```
-5. Confirm `models/weights/yolo26n.pt` exists.
+5. **Static assets:** Production uses **WhiteNoise** (see `settings.py`). After deploy, verify `https://sightra.net/static/css/sightra.css` returns **200** (not Django 404 HTML).
+6. Confirm `models/weights/yolo26n.pt` exists.
 6. Restart Python/Passenger application.
 7. Smoke test: `/`, `/signin/`, authenticated `/vision/`, one POST to `/api/navigation/stream/`.
 

@@ -58,6 +58,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -135,6 +136,11 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# cPanel/Passenger: serve CSS/JS/images without a separate nginx static mapping.
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_MAX_AGE = 604800
 
 SIGHTTRA_REQUIRE_LOGIN = os.getenv("SIGHTTRA_REQUIRE_LOGIN", "false").lower() in (
     "1",
