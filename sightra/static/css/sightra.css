@@ -236,3 +236,53 @@ html.dark .bottom-nav a.is-active {
 .vision-overlay-ui .interactive {
   pointer-events: auto;
 }
+
+.privacy-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.privacy-modal[hidden] {
+  display: none;
+}
+
+.privacy-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.privacy-modal-panel {
+  position: relative;
+  z-index: 1;
+  max-height: min(90vh, 40rem);
+  overflow-y: auto;
+  width: 100%;
+}
+
+.legal-document .legal-prose ul {
+  margin: 0.75rem 0 0.75rem 1.25rem;
+  list-style: disc;
+}
+
+.legal-document .legal-prose a {
+  color: var(--primary-strong);
+  text-decoration: underline;
+}
+
+.legal-document .legal-prose p {
+  margin-bottom: 0.75rem;
+}
+
+.legal-footer a {
+  text-decoration: underline;
+}
+
+.legal-footer a:hover {
+  color: var(--primary-strong);
+}

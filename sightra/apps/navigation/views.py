@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from apps.core.tasks import analyze_frame_context
 from apps.audio.tasks import generate_audio_feedback
+from apps.privacy.services.consent_service import has_camera_consent, has_privacy_notice_ack
 from django.shortcuts import render
 import time
 
@@ -21,6 +22,16 @@ class NavigationStreamView(APIView):
 
         if not frame_data:
             return Response({"error": "frame_data is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not has_privacy_notice_ack(request) or not has_camera_consent(request):
+            return Response(
+                {
+                    "error": "consent_required",
+                    "message": "Privacy acknowledgement and camera analysis consent are required before processing.",
+                    "code": "consent_required",
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         # 2. Trigger asynchronous analysis pipeline (simulated sync wait for UI demonstration)
         # In a real deployed high-throughput system you could return a job_id 

@@ -59,11 +59,14 @@
 
   {% include "partials/a11y_panel.html" %}
   {% include "partials/install_prompt.html" %}
+  {% include "partials/privacy_onboarding_modal.html" %}
+  {% include "partials/legal_footer.html" %}
 
   {% block bottom_nav %}
   {% include "bottom_nav.html" %}
   {% endblock %}
 
+  <script src="{% static 'js/privacy-consent.js' %}"></script>
   <script src="{% static 'js/sightra.js' %}"></script>
   {% block page_scripts %}{% endblock %}
 </body>

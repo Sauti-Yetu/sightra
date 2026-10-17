@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ doc.title }} | Sightra{% endblock %}
+{% block main_class %}mx-auto max-w-3xl px-4 pb-28 pt-8 md:pb-12 legal-document{% endblock %}
+{% block content %}
+<p class="text-sm"><a href="/legal/" class="text-[var(--primary-strong)]">← Privacy &amp; Legal</a></p>
+<h1 class="font-headline mt-4 text-3xl font-semibold">{{ doc.title }}</h1>
+{% for section in doc.sections %}
+<section class="mt-8">
+  <h2 class="font-headline text-xl font-semibold">{{ section.heading }}</h2>
+  <div class="legal-prose mt-3 text-[var(--text-muted)]">{{ section.body|safe }}</div>
+</section>
+{% endfor %}
+<div class="legal-prose mt-10 border-t border-black/5 pt-6 dark:border-white/10">{{ doc.footer|safe }}</div>
+{% endblock %}

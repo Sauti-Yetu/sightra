@@ -21,7 +21,7 @@ class AudioService:
         Converts text to speech using an offline TTS engine (pyttsx3) or a fallback mechanism.
         Returns the absolute path to the generated audio file.
         """
-        logger.info(f"Generating TTS for text: {text}")
+        logger.info("Generating TTS (%s characters)", len(text or ""))
         if self.tts_engine:
             self.tts_engine.save_to_file(text, output_file_path)
             self.tts_engine.runAndWait()

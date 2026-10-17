@@ -24,6 +24,7 @@ from apps.settings.views import *
 from apps.accounts.views import *
 from apps.volunteer.views import *
 from apps.navigation.views import *
+from apps.privacy import views as privacy_views
 
 
 urlpatterns = [
@@ -52,6 +53,10 @@ urlpatterns = [
     path("api/volunteer/token/", get_livekit_token, name="get-livekit-token"),
     # User settings
     path("settings/", settings_view, name="settings"),
+    path("settings/privacy/", privacy_views.privacy_settings, name="privacy-settings"),
+    path("legal/", privacy_views.legal_index, name="legal-index"),
+    path("legal/rights/", privacy_views.privacy_rights, name="privacy-rights"),
+    path("legal/<slug:slug>/", privacy_views.legal_document, name="legal-document"),
     # APIs
     path("api/accounts/", include("apps.accounts.urls")),
     path("api/audio/", include("apps.audio.urls")),
@@ -59,4 +64,5 @@ urlpatterns = [
     path("api/navigation/", include("apps.navigation.urls")),
     path("api/core/", include("apps.core.urls")),
     path("api/settings/", include("apps.settings.urls")),
+    path("api/privacy/", include("apps.privacy.urls")),
 ]

@@ -1,0 +1,42 @@
+<div id="privacy-onboarding-modal" class="privacy-modal" hidden role="dialog" aria-modal="true" aria-labelledby="privacy-onboarding-title">
+  <div class="privacy-modal-backdrop" aria-hidden="true"></div>
+  <div class="privacy-modal-panel card max-w-lg p-6">
+    <h2 id="privacy-onboarding-title" class="font-headline text-xl font-semibold">Your privacy choices</h2>
+    <p class="mt-2 text-sm text-[var(--text-muted)]">
+      Sightra processes camera and AI data to provide assistive guidance. Please review
+      <a href="/legal/privacy-policy/" class="font-medium text-[var(--primary-strong)]">Privacy Policy</a>,
+      <a href="/legal/ai-transparency/" class="font-medium text-[var(--primary-strong)]">AI Transparency</a>, and
+      <a href="/legal/terms-of-use/" class="font-medium text-[var(--primary-strong)]">Terms of Use</a>.
+    </p>
+    <form id="privacy-onboarding-form" class="mt-6 space-y-4 text-sm">
+      <label class="flex gap-3">
+        <input id="po-privacy-ack" type="checkbox" required class="mt-1" />
+        <span>I have read the privacy information (this is not consent to every optional use).</span>
+      </label>
+      <label class="flex gap-3">
+        <input id="po-core-accept" type="checkbox" required class="mt-1" />
+        <span>I agree to processing necessary to provide Sightra’s assistive features I choose to use.</span>
+      </label>
+      <fieldset class="rounded-xl border border-black/5 p-4 dark:border-white/10">
+        <legend class="px-1 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Optional (off by default)</legend>
+        <label class="mt-2 flex gap-3">
+          <input id="po-opt-history" type="checkbox" class="mt-1" />
+          <span>Save interaction history on my account for convenience.</span>
+        </label>
+        <label class="mt-2 flex gap-3">
+          <input id="po-opt-research" type="checkbox" class="mt-1" />
+          <span>Allow anonymised feedback to help improve Sightra.</span>
+        </label>
+        <label class="mt-2 flex gap-3">
+          <input id="po-opt-ai-train" type="checkbox" class="mt-1" />
+          <span>Use my data to train or fine-tune AI models (not enabled in product today).</span>
+        </label>
+        <label class="mt-2 flex gap-3">
+          <input id="po-opt-analytics" type="checkbox" class="mt-1" />
+          <span>Optional analytics (not used in the current app build).</span>
+        </label>
+      </fieldset>
+      <button type="submit" class="btn-primary w-full">Save and continue</button>
+    </form>
+  </div>
+</div>

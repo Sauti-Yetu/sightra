@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "apps.core",
     "apps.settings",
     "apps.volunteer",
+    "apps.privacy",
 ]
 
 MIDDLEWARE = [

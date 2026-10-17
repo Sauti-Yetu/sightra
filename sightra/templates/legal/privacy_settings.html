@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Privacy settings | Sightra{% endblock %}
+{% block main_class %}mx-auto flex max-w-6xl gap-8 px-4 pb-28 pt-4 md:pb-8{% endblock %}
+{% block content %}
+{% include "partials/app_sidebar.html" %}
+<div class="min-w-0 flex-1">
+  <h1 class="font-headline text-3xl font-semibold">Privacy settings</h1>
+  <p class="mt-2 text-sm text-[var(--text-muted)]">Policy version {{ policy_version }}. <a href="/legal/">View legal documents</a>.</p>
+
+  <form id="privacy-settings-form" class="mt-8 space-y-6">
+    <section class="card p-6">
+      <h2 class="font-headline text-lg font-semibold">Feature permissions</h2>
+      <p class="mt-1 text-sm text-[var(--text-muted)]">Browser camera, microphone, or GPS prompts are separate; these record your in-app consent.</p>
+      <label class="mt-4 flex gap-3 text-sm">
+        <input type="checkbox" data-consent-category="camera_environmental_analysis" data-withdraw="true"
+          {% if status.decisions.camera_environmental_analysis == "granted" %}checked{% endif %} />
+        <span>Camera-based environmental analysis (Live Vision)</span>
+      </label>
+      <label class="mt-3 flex gap-3 text-sm">
+        <input type="checkbox" data-consent-category="microphone_voice_input" data-withdraw="true"
+          {% if status.decisions.microphone_voice_input == "granted" %}checked{% endif %} />
+        <span>Microphone / voice assistant features</span>
+      </label>
+      <label class="mt-3 flex gap-3 text-sm">
+        <input type="checkbox" data-consent-category="location_navigation" data-withdraw="true"
+          {% if status.decisions.location_navigation == "granted" %}checked{% endif %} />
+        <span>Location-based map and navigation</span>
+      </label>
+    </section>
+
+    <section class="card p-6">
+      <h2 class="font-headline text-lg font-semibold">Optional processing</h2>
+      <label class="mt-4 flex gap-3 text-sm">
+        <input type="checkbox" data-consent-category="optional_interaction_history" data-withdraw="true"
+          {% if status.decisions.optional_interaction_history == "granted" %}checked{% endif %} />
+        <span>Interaction history on my account (disabled in product until implemented)</span>
+      </label>
+      <label class="mt-3 flex gap-3 text-sm">
+        <input type="checkbox" data-consent-category="research_product_improvement" data-withdraw="true"
+          {% if status.decisions.research_product_improvement == "granted" %}checked{% endif %} />
+        <span>Research and product-improvement feedback</span>
+      </label>
+      <label class="mt-3 flex gap-3 text-sm">
+        <input type="checkbox" data-consent-category="ai_model_secondary_use" data-withdraw="true"
+          {% if status.decisions.ai_model_secondary_use == "granted" %}checked{% endif %} />
+        <span>AI model training / secondary use (not active)</span>
+      </label>
+      <label class="mt-3 flex gap-3 text-sm">
+        <input type="checkbox" data-consent-category="optional_analytics" data-withdraw="true"
+          {% if status.decisions.optional_analytics == "granted" %}checked{% endif %} />
+        <span>Analytics (not active in current build)</span>
+      </label>
+    </section>
+
+    <p class="text-sm text-[var(--text-muted)]">Withdrawing consent stops related processing where technically feasible. Core account sign-in may still require minimal processing.</p>
+    <a href="/legal/rights/" class="btn-secondary inline-block">Export or delete data</a>
+  </form>
+</div>
+{% endblock %}

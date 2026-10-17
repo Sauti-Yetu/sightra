@@ -39,12 +39,19 @@ function stopCamera() {
   }
 }
 
-startCamera();
-
-scanBtn?.addEventListener('click', () => {
+scanBtn?.addEventListener('click', async () => {
+  if (!isScanning) {
+    const ready = await window.SightraPrivacy?.ensureOnboarding?.();
+    if (ready === false) return;
+    const camOk = await window.SightraPrivacy?.requireFeatureConsent?.(
+      window.SightraPrivacy.CONSENT_CAMERA,
+      'Live Vision sends camera frames to Sightra for analysis. Allow camera environmental analysis?'
+    );
+    if (!camOk) return;
+  }
   isScanning = !isScanning;
   if (isScanning) {
-    if (!streamRef) startCamera();
+    if (!streamRef) await startCamera();
     scanLabel.textContent = 'Stop sight scan';
     scanLabel.classList.add('vision-scan-label-active');
     scanLabel.classList.remove('text-[var(--brand-cyan)]');
@@ -101,6 +108,7 @@ async function captureAndAnalyze() {
   try {
     const response = await fetch('/api/navigation/stream/', {
       method: 'POST',
+      credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         frame_data: frameData,
@@ -108,6 +116,14 @@ async function captureAndAnalyze() {
       }),
     });
     const data = await response.json();
+    if (response.status === 403 && data.code === 'consent_required') {
+      window.SightraPrivacy?.ensureOnboarding?.();
+      isScanning = false;
+      scanLabel.textContent = 'Initiate sight scan';
+      stopCaptureLoop();
+      isFetchInFlight = false;
+      return;
+    }
     const proc = document.getElementById('proc-readout');
     if (proc) proc.textContent = `${Math.round(performance.now() - t0)}ms`;
     if (!isScanning) {

@@ -25,7 +25,12 @@
   const transcriptEl = document.getElementById('voice-transcript');
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  listenBtn?.addEventListener('click', () => {
+  listenBtn?.addEventListener('click', async () => {
+    const micOk = await window.SightraPrivacy?.requireFeatureConsent?.(
+      window.SightraPrivacy?.CONSENT_MIC,
+      'Voice assistant uses your microphone in the browser. Allow microphone consent for Sightra?'
+    );
+    if (!micOk) return;
     if (!SpeechRecognition) {
       statusEl.textContent = 'Speech recognition is not supported in this browser.';
       return;

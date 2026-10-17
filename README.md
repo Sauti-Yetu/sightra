@@ -8,6 +8,8 @@
 
 For company technical reporting, governance, safety, and user manuals, see [`.docs/TECHNICAL_REPORT.md`](.docs/TECHNICAL_REPORT.md) and [`.docs/README.md`](.docs/README.md).
 
+Privacy engineering audit and compliance gap analysis: [`docs/privacy-data-flow-audit.md`](docs/privacy-data-flow-audit.md), [`docs/compliance-verification-report.md`](docs/compliance-verification-report.md). In-app **Privacy & Legal** centre: `/legal/`.
+
 ---
 
 ## Table of contents

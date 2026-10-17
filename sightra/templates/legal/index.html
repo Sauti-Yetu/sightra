@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Privacy &amp; Legal | Sightra{% endblock %}
+{% block main_class %}mx-auto max-w-3xl px-4 pb-28 pt-8 md:pb-12{% endblock %}
+{% block content %}
+<h1 class="font-headline text-3xl font-semibold">Privacy &amp; Legal</h1>
+<p class="mt-2 text-[var(--text-muted)]">Plain-language information about data, AI, and your choices. Version {{ policy_version }}.</p>
+<ul class="mt-8 space-y-3">
+  {% for slug, doc in policies.items %}
+  <li>
+    <a href="/legal/{{ slug }}/" class="card flex items-center justify-between p-4 hover:ring-2 hover:ring-[var(--ring)]">
+      <span class="font-medium">{{ doc.title }}</span>
+      <span class="material-symbols-outlined text-[var(--text-muted)]">chevron_right</span>
+    </a>
+  </li>
+  {% endfor %}
+  <li>
+    <a href="/legal/rights/" class="card flex items-center justify-between p-4 hover:ring-2 hover:ring-[var(--ring)]">
+      <span class="font-medium">Privacy rights &amp; data requests</span>
+      <span class="material-symbols-outlined text-[var(--text-muted)]">chevron_right</span>
+    </a>
+  </li>
+</ul>
+{% if request.sightra_user %}
+<p class="mt-8"><a href="/settings/privacy/" class="btn-primary inline-block">Manage privacy settings</a></p>
+{% endif %}
+{% endblock %}

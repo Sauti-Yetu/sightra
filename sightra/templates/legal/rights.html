@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Privacy rights | Sightra{% endblock %}
+{% block main_class %}mx-auto max-w-3xl px-4 pb-28 pt-8 md:pb-12{% endblock %}
+{% block content %}
+<h1 class="font-headline text-3xl font-semibold">Privacy rights &amp; data requests</h1>
+<p class="mt-3 text-[var(--text-muted)]">Exercise rights under Kenyan data protection law. Engineering tools below export or delete data stored in Sightra’s application database.</p>
+
+{% if request.sightra_user %}
+<section class="card mt-8 p-6">
+  <h2 class="font-headline text-lg font-semibold">Download my data</h2>
+  <p class="mt-2 text-sm text-[var(--text-muted)]">JSON export of preferences and consent records held on this server.</p>
+  <button type="button" id="btn-export-data" class="btn-primary mt-4">Download export</button>
+  <pre id="export-output" class="mt-4 hidden max-h-64 overflow-auto rounded-xl bg-[var(--bg-muted)] p-4 text-xs" tabindex="0"></pre>
+</section>
+
+<section class="card mt-6 border-red-200 p-6 dark:border-red-900/40">
+  <h2 class="font-headline text-lg font-semibold text-red-700 dark:text-red-300">Delete my Sightra data</h2>
+  <p class="mt-2 text-sm text-[var(--text-muted)]">Removes preferences and consent logs from this server and signs you out. Supabase account deletion requires configured admin credentials or manual action.</p>
+  <button type="button" id="btn-delete-data" class="btn-ghost mt-4 ring-1 ring-red-300 dark:ring-red-800">Delete account data</button>
+  <p id="delete-result" class="mt-3 text-sm" role="status"></p>
+</section>
+{% else %}
+<p class="mt-6"><a href="/signin/?next=/legal/rights/" class="btn-primary inline-block">Sign in to manage your data</a></p>
+{% endif %}
+
+<section class="mt-8 text-sm text-[var(--text-muted)]">
+  <h2 class="font-headline text-lg font-semibold text-[var(--text)]">Contact &amp; complaints</h2>
+  <p class="mt-2">Email: [CONFIGURE: privacy contact email]. You may also contact the <a href="https://www.odpc.go.ke/" rel="noopener">ODPC</a>.</p>
+</section>
+{% endblock %}
+{% block page_scripts %}
+<script>
+  function csrf() {
+    const m = document.cookie.match(/csrftoken=([^;]+)/);
+    return m ? decodeURIComponent(m[1]) : '';
+  }
+  document.getElementById('btn-export-data')?.addEventListener('click', async () => {
+    const res = await fetch('/api/privacy/export/', { credentials: 'same-origin' });
+    const data = await res.json();
+    const pre = document.getElementById('export-output');
+    if (pre && data.export) {
+      pre.hidden = false;
+      pre.textContent = JSON.stringify(data.export, null, 2);
+    }
+  });
+  document.getElementById('btn-delete-data')?.addEventListener('click', async () => {
+    if (!confirm('Permanently delete your Sightra data on this server?')) return;
+    const res = await fetch('/api/privacy/delete-account-data/', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'X-CSRFToken': csrf() },
+    });
+    const data = await res.json();
+    const el = document.getElementById('delete-result');
+    if (el) el.textContent = data.message || (data.success ? 'Deleted.' : 'Failed.');
+    if (data.success) setTimeout(() => { window.location.href = '/'; }, 2000);
+  });
+</script>
+{% endblock %}

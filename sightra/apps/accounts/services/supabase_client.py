@@ -99,3 +99,41 @@ def refresh_session(refresh_token: str) -> dict[str, Any]:
         "/auth/v1/token?grant_type=refresh_token",
         {"refresh_token": refresh_token},
     )
+
+
+def _admin_request(method: str, path: str) -> dict[str, Any]:
+    """Service-role calls (e.g. account deletion). Requires SUPABASE_SECRET_KEY."""
+    base = (os.getenv("SUPABASE_URL") or "").rstrip("/")
+    secret = os.getenv("SUPABASE_SECRET_KEY") or ""
+    if not base or not secret:
+        return {"success": False, "error": "Supabase admin API is not configured."}
+
+    req = urllib.request.Request(
+        f"{base}{path}",
+        headers={
+            "apikey": secret,
+            "Authorization": f"Bearer {secret}",
+            "Content-Type": "application/json",
+        },
+        method=method,
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=30, context=_ssl_context()) as resp:
+            body = resp.read().decode("utf-8")
+            return {"success": True, "message": "Deleted", "body": json.loads(body) if body else {}}
+    except urllib.error.HTTPError as exc:
+        try:
+            detail = json.loads(exc.read().decode("utf-8"))
+        except Exception:
+            detail = {"error": exc.reason or "Request failed"}
+        detail["success"] = False
+        return detail
+    except Exception as exc:
+        logger.exception("Supabase admin request failed")
+        return {"success": False, "error": str(exc)}
+
+
+def admin_delete_user(user_id: str) -> dict[str, Any]:
+    if not user_id:
+        return {"success": False, "error": "Missing user id"}
+    return _admin_request("DELETE", f"/auth/v1/admin/users/{user_id}")

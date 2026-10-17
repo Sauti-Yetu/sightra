@@ -15,7 +15,9 @@ _PUBLIC_PREFIXES = (
     "/sw.js",
     "/manifest.webmanifest",
     "/offline/",
+    "/legal/",
     "/api/accounts/auth/",
+    "/api/privacy/",
 )
 
 _PUBLIC_EXACT = {"/", ""}

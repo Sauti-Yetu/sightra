@@ -494,7 +494,12 @@
     });
 
     // Geolocation
-    useGpsBtn.addEventListener('click', () => {
+    useGpsBtn.addEventListener('click', async () => {
+        const locOk = await window.SightraPrivacy?.requireFeatureConsent?.(
+            window.SightraPrivacy?.CONSENT_LOCATION,
+            'Map GPS uses your location and may share coordinates with map providers from your browser. Continue?'
+        );
+        if (!locOk) return;
         if (navigator.geolocation) {
             startInput.value = "Locating...";
             startInput.disabled = true;
