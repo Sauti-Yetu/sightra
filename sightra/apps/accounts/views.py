@@ -7,20 +7,10 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
+from .auth_messages import auth_error_message, signup_success_message
 from .models import UserPreference
 from .services import supabase_client
 from .services.session_service import SessionService
-
-
-def _auth_error_message(payload: dict) -> str:
-    if payload.get("error_description"):
-        return str(payload["error_description"])
-    if payload.get("msg"):
-        return str(payload["msg"])
-    if payload.get("error"):
-        err = payload["error"]
-        return err if isinstance(err, str) else str(err)
-    return "Authentication failed. Please try again."
 
 
 def signin(request):
@@ -34,7 +24,7 @@ def signin(request):
             SessionService.set_from_auth_response(request, result)
             next_url = request.GET.get("next") or request.POST.get("next") or "/dashboard"
             return redirect(next_url)
-        messages.error(request, _auth_error_message(result))
+        messages.error(request, auth_error_message(result))
     return render(request, "signin.html", {"next": request.GET.get("next", "")})
 
 
@@ -48,10 +38,11 @@ def signup(request):
         if result.get("access_token"):
             SessionService.set_from_auth_response(request, result)
             return redirect("/dashboard")
-        if result.get("id") or (result.get("user") and not result.get("error")):
-            messages.success(request, "Account created. You can sign in now.")
+        hint = signup_success_message(result)
+        if hint or (result.get("user") or {}).get("id"):
+            messages.success(request, hint or "Account created. You can sign in now.")
             return redirect("/signin/")
-        messages.error(request, _auth_error_message(result))
+        messages.error(request, auth_error_message(result))
     return render(request, "signup.html")
 
 
@@ -106,7 +97,7 @@ def auth_signin_api(request):
         payload.get("password") or "",
     )
     if not result.get("access_token"):
-        return JsonResponse({"success": False, "error": _auth_error_message(result)}, status=400)
+        return JsonResponse({"success": False, "error": auth_error_message(result)}, status=400)
     SessionService.set_from_auth_response(request, result)
     return JsonResponse({"success": True})
 
@@ -125,9 +116,15 @@ def auth_signup_api(request):
     if result.get("access_token"):
         SessionService.set_from_auth_response(request, result)
         return JsonResponse({"success": True})
-    if result.get("id"):
-        return JsonResponse({"success": True, "confirm_email": True})
-    return JsonResponse({"success": False, "error": _auth_error_message(result)}, status=400)
+    if result.get("user", {}).get("id") or result.get("id"):
+        return JsonResponse(
+            {
+                "success": True,
+                "confirm_email": not bool(result.get("access_token")),
+                "message": signup_success_message(result),
+            }
+        )
+    return JsonResponse({"success": False, "error": auth_error_message(result)}, status=400)
 
 
 @require_POST

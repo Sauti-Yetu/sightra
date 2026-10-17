@@ -29,6 +29,21 @@ def _settings() -> tuple[str, str]:
     return url, key
 
 
+def normalize_auth_response(payload: dict[str, Any]) -> dict[str, Any]:
+    """Flatten Supabase signup/signin payloads (session may be nested)."""
+    if not payload:
+        return {}
+    if payload.get("access_token"):
+        return payload
+    session = payload.get("session")
+    if isinstance(session, dict) and session.get("access_token"):
+        merged = {**payload, **session}
+        if payload.get("user") and not merged.get("user"):
+            merged["user"] = payload["user"]
+        return merged
+    return payload
+
+
 def _request(method: str, path: str, payload: dict | None = None) -> dict[str, Any]:
     base, apikey = _settings()
     if not base or not apikey:
@@ -37,6 +52,7 @@ def _request(method: str, path: str, payload: dict | None = None) -> dict[str, A
     data = None
     headers = {
         "apikey": apikey,
+        "Authorization": f"Bearer {apikey}",
         "Content-Type": "application/json",
     }
     if payload is not None:
@@ -65,18 +81,22 @@ def _request(method: str, path: str, payload: dict | None = None) -> dict[str, A
 
 
 def sign_up(email: str, password: str) -> dict[str, Any]:
-    return _request(
-        "POST",
-        "/auth/v1/signup",
-        {"email": email, "password": password},
+    return normalize_auth_response(
+        _request(
+            "POST",
+            "/auth/v1/signup",
+            {"email": email, "password": password},
+        )
     )
 
 
 def sign_in_with_password(email: str, password: str) -> dict[str, Any]:
-    return _request(
-        "POST",
-        "/auth/v1/token?grant_type=password",
-        {"email": email, "password": password},
+    return normalize_auth_response(
+        _request(
+            "POST",
+            "/auth/v1/token?grant_type=password",
+            {"email": email, "password": password},
+        )
     )
 
 

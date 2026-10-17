@@ -7,6 +7,7 @@
   <meta name="theme-color" content="#0b3d91" />
   <title>{% block title %}Sightra{% endblock %}</title>
   <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" type="image/png" href="{% static 'icons/icon-192.png' %}" />
   <link rel="apple-touch-icon" href="{% static 'icons/icon-192.png' %}" />
   <script>
     (function () {
@@ -31,7 +32,7 @@
   {% if not hide_app_header %}
   <header class="app-header sticky top-0 z-40 border-b border-black/5 dark:border-white/5">
     <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
-      {% include "partials/brand_logo.html" with logo_href="/dashboard" %}
+      {% include "partials/brand_logo.html" with logo_href="/" %}
       <div class="flex items-center gap-2">
         <button type="button" id="a11y-toggle" class="icon-btn" aria-label="Accessibility options">
           <span class="material-symbols-outlined">accessibility_new</span>

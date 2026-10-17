@@ -128,9 +128,15 @@
     });
   }
 
+  function skipOnboardingForPath() {
+    const path = window.location.pathname.replace(/\/$/, "") || "/";
+    return path === "/signin" || path === "/signup" || path === "/signin/" || path === "/signup/";
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     bindOnboardingForm();
     bindPrivacySettingsForm();
+    if (skipOnboardingForPath()) return;
     fetchStatus().then((s) => {
       if (s.requires_onboarding && document.getElementById("privacy-onboarding-modal")) {
         showOnboardingModal();

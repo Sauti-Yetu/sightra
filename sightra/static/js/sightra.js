@@ -127,6 +127,21 @@
     });
   }
 
+  function initPasswordToggles() {
+    document.querySelectorAll("[data-password-target]").forEach((btn) => {
+      const id = btn.getAttribute("data-password-target");
+      const input = document.getElementById(id);
+      if (!input) return;
+      btn.addEventListener("click", () => {
+        const show = input.type === "password";
+        input.type = show ? "text" : "password";
+        btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
+        const icon = btn.querySelector(".material-symbols-outlined");
+        if (icon) icon.textContent = show ? "visibility_off" : "visibility";
+      });
+    });
+  }
+
   function initInstallPrompt() {
     if (!("serviceWorker" in navigator)) return;
     window.addEventListener("load", () => {
@@ -158,6 +173,7 @@
     initTheme();
     initA11yPanel();
     initNav();
+    initPasswordToggles();
     initInstallPrompt();
   });
 
