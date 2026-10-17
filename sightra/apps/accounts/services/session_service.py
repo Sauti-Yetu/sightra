@@ -19,7 +19,13 @@ SESSION_KEY = "sightra_supabase"
 
 
 def _jwks_url() -> str:
-    return os.getenv("SUPABASE_JWKS_URL") or ""
+    explicit = (os.getenv("SUPABASE_JWKS_URL") or "").strip()
+    if explicit:
+        return explicit
+    base = (os.getenv("SUPABASE_URL") or "").rstrip("/")
+    if base:
+        return f"{base}/auth/v1/.well-known/jwks.json"
+    return ""
 
 
 def _decode_token(access_token: str) -> dict[str, Any] | None:

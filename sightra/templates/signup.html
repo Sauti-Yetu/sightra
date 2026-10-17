@@ -1,8 +1,12 @@
 {% extends "base.html" %}
 {% block title %}Sign up | Sightra{% endblock %}
+{% block header %}{% endblock %}
 {% block bottom_nav %}{% endblock %}
 {% block content %}
 <section class="mx-auto mt-8 max-w-md">
+  <div class="mb-6 flex justify-center">
+    {% include "partials/brand_logo.html" with logo_href="/" %}
+  </div>
   <div class="card p-8">
     <h1 class="font-headline text-2xl font-semibold">Create account</h1>
     <p class="mt-2 text-sm text-[var(--text-muted)]">Start using Sightra on mobile or desktop.</p>

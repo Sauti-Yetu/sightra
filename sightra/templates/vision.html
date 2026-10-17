@@ -10,10 +10,7 @@
 </div>
 <div class="vision-overlay-ui relative z-10 flex h-[100dvh] flex-col text-white">
   <header class="interactive flex items-center justify-between px-5 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))]">
-    <a href="/dashboard" class="font-headline brand-logo flex items-center gap-2 text-xl font-black">
-      <span class="material-symbols-outlined text-[var(--brand-cyan)]">visibility</span>
-      Sightra
-    </a>
+    {% include "partials/brand_logo.html" with logo_href="/dashboard" %}
     <div class="flex items-center gap-4">
       <span class="h-2 w-2 rounded-full bg-[var(--brand-lime)] shadow-[0_0_10px_var(--brand-lime)]"></span>
       <span class="material-symbols-outlined text-[var(--brand-cyan)] text-sm">gps_fixed</span>

@@ -1,36 +1,41 @@
 :root {
+  /* Sightra logo palette: black, dark blue, medium blue, light blue */
+  --brand-black: #0a0a0a;
+  --brand-blue-dark: #0b3d91;
+  --brand-blue: #2563eb;
+  --brand-blue-light: #7cb9f1;
   --bg: #ffffff;
-  --bg-muted: #f8fafc;
+  --bg-muted: #f4f7fb;
   --surface: #ffffff;
-  --text: #0f172a;
-  --text-muted: #64748b;
-  --primary: #00a8b8;
-  --primary-soft: #e6fafa;
-  --primary-strong: #007a86;
-  --brand-cyan: #00e5ff;
-  --brand-cyan-soft: #e0fbff;
-  --brand-cyan-glow: rgba(0, 229, 255, 0.35);
-  --brand-lime: #9acd00;
-  --shadow: 0 8px 30px rgba(17, 24, 39, 0.06);
+  --text: #0a0a0a;
+  --text-muted: #4b5563;
+  --primary: var(--brand-blue-dark);
+  --primary-soft: #e8f0fc;
+  --primary-strong: #082f6e;
+  --brand-cyan: var(--brand-blue);
+  --brand-cyan-soft: #dbeafe;
+  --brand-cyan-glow: rgba(37, 99, 235, 0.28);
+  --brand-lime: var(--brand-blue-light);
+  --shadow: 0 8px 30px rgba(11, 61, 145, 0.08);
   --radius: 1rem;
-  --ring: rgba(0, 229, 255, 0.25);
+  --ring: rgba(37, 99, 235, 0.22);
 }
 
 html.dark {
-  --bg: #131313;
-  --bg-muted: #1c1b1b;
-  --surface: #201f1f;
-  --text: #e5e2e1;
-  --text-muted: #bac9cc;
-  --primary: #00e5ff;
-  --primary-soft: rgba(0, 229, 255, 0.12);
-  --primary-strong: #c3f5ff;
-  --brand-cyan: #00e5ff;
-  --brand-cyan-soft: rgba(0, 229, 255, 0.15);
-  --brand-cyan-glow: rgba(0, 229, 255, 0.45);
-  --brand-lime: #c3f400;
+  --bg: #0a0a0a;
+  --bg-muted: #141414;
+  --surface: #1a1a1a;
+  --text: #f3f4f6;
+  --text-muted: #9ca3af;
+  --primary: var(--brand-blue-light);
+  --primary-soft: rgba(124, 185, 241, 0.12);
+  --primary-strong: #dbeafe;
+  --brand-cyan: var(--brand-blue-light);
+  --brand-cyan-soft: rgba(37, 99, 235, 0.18);
+  --brand-cyan-glow: rgba(124, 185, 241, 0.35);
+  --brand-lime: var(--brand-blue-light);
   --shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
-  --ring: rgba(0, 229, 255, 0.35);
+  --ring: rgba(124, 185, 241, 0.35);
 }
 
 html[data-a11y-contrast="high"] {
@@ -120,9 +125,20 @@ body {
 }
 
 .brand-logo {
-  color: var(--brand-cyan);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  color: var(--brand-blue-dark);
+  letter-spacing: 0.02em;
+}
+
+.brand-logo-img {
+  height: 2.25rem;
+  width: auto;
+  max-width: min(11rem, 42vw);
+  object-fit: contain;
+  object-position: left center;
+}
+
+html.dark .brand-logo-img {
+  filter: brightness(1.05);
 }
 
 .bottom-nav a.is-active,

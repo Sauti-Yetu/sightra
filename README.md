@@ -151,6 +151,8 @@ Production must also set a strong `SECRET_KEY` and `DEBUG=False` in Django setti
 
 - Site URL: production and `http://127.0.0.1:8000` for local dev
 - Redirect URLs: `https://sightra.net/auth/callback/`, `http://127.0.0.1:8000/auth/callback/`
+- **Google OAuth:** Supabase → Authentication → Providers → Google — paste Google Cloud **Client ID** and **Client secret** (not in git). Enable the provider for the same Supabase project as `SUPABASE_URL`.
+- **Keys:** Use `SUPABASE_PUBLISHABLE_KEY` (`sb_publishable_…`) and `SUPABASE_SECRET_KEY` (`sb_secret_…`) from the Supabase API settings. Set `SUPABASE_JWKS_URL` or leave empty to auto-derive from `SUPABASE_URL`.
 
 **macOS SSL:** HTTP client uses `certifi` for Supabase HTTPS (`apps/accounts/services/supabase_client.py`).
 

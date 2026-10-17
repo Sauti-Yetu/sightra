@@ -1,0 +1,11 @@
+{% load static %}
+<a href="{{ logo_href|default:'/' }}" class="brand-logo flex items-center gap-2">
+  <img
+    src="{% static 'img/sightra-logo.jpg' %}"
+    alt="Sightra"
+    class="brand-logo-img"
+    width="160"
+    height="40"
+    decoding="async"
+  />
+</a>

@@ -26,6 +26,7 @@ For DevOps and on-call engineers deploying and operating Sightra.
    pip install -r requirements.txt
    python manage.py migrate --noinput
    ```
+   If you see **Conflicting migrations** in `accounts` (`0001_initial` vs `0001_userpreference`), pull latest `main` — it includes merge migration `0002_merge_0001_initial_0001_userpreference`, then run `migrate` again.
 5. **Static assets:** Production uses **WhiteNoise** (see `settings.py`). After deploy, verify `https://sightra.net/static/css/sightra.css` returns **200** (not Django 404 HTML).
 6. Confirm `models/weights/yolo26n.pt` exists.
 6. Restart Python/Passenger application.
