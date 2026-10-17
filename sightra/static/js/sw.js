@@ -1,12 +1,18 @@
-const CACHE = "sightra-shell-v1";
+const CACHE = "sightra-shell-v3";
 const PRECACHE = [
-  "/",
-  "/dashboard",
   "/offline/",
   "/static/css/sightra.css",
   "/static/js/sightra.js",
-  "/manifest.webmanifest",
 ];
+
+/** Never cache-first brand images (avoids stale white JPG / old icons). */
+function isBrandAsset(pathname) {
+  return (
+    pathname.startsWith("/static/img/sightra-logo") ||
+    pathname.startsWith("/static/icons/") ||
+    pathname.endsWith("sightra-logo.jpg")
+  );
+}
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)));
@@ -29,8 +35,27 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.pathname.startsWith("/api/")) return;
 
+  if (isBrandAsset(url.pathname)) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response && response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
+
   if (url.pathname.startsWith("/static/") || url.pathname === "/manifest.webmanifest") {
-    event.respondWith(caches.match(request).then((hit) => hit || fetch(request)));
+    event.respondWith(
+      fetch(request)
+        .then((response) => response)
+        .catch(() => caches.match(request))
+    );
     return;
   }
 

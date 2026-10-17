@@ -29,9 +29,13 @@ def _static_file(name: str, content_type: str):
 
 
 def service_worker(request):
-    return _static_file("js/sw.js", "application/javascript; charset=utf-8")
+    response = _static_file("js/sw.js", "application/javascript; charset=utf-8")
+    response["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    return response
 
 
 def web_manifest(request):
-    return _static_file("manifest.webmanifest", "application/manifest+json")
+    response = _static_file("manifest.webmanifest", "application/manifest+json")
+    response["Cache-Control"] = "no-cache, max-age=0, must-revalidate"
+    return response
 
