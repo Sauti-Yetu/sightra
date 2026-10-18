@@ -3,12 +3,14 @@ from pathlib import Path
 from django.conf import settings
 from django.http import FileResponse, Http404
 from django.shortcuts import render
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 
 def dashboard(request):
     return render(request, "dashboard.html")
 
 
+@ensure_csrf_cookie
 def landing_page(request):
     if getattr(request, "sightra_user", None):
         from django.shortcuts import redirect

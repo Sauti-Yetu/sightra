@@ -8,21 +8,42 @@
     return match ? decodeURIComponent(match[1]) : "";
   }
 
+  async function ensureCsrfCookie() {
+    if (getCsrf()) return;
+    await fetch(API_STATUS, { credentials: "same-origin" });
+  }
+
   async function fetchStatus() {
+    await ensureCsrfCookie();
     const res = await fetch(API_STATUS, { credentials: "same-origin" });
-    if (!res.ok) throw new Error("status");
+    if (!res.ok) throw new Error("Could not load privacy status.");
     return res.json();
   }
 
   async function postJson(url, body) {
+    await ensureCsrfCookie();
+    const headers = { "Content-Type": "application/json" };
+    const token = getCsrf();
+    if (token) headers["X-CSRFToken"] = token;
+
     const res = await fetch(url, {
       method: "POST",
       credentials: "same-origin",
-      headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrf() },
+      headers,
       body: JSON.stringify(body),
     });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || "request failed");
+    let data = {};
+    try {
+      data = await res.json();
+    } catch {
+      data = {};
+    }
+    if (!res.ok) {
+      const msg =
+        data.error ||
+        (res.status === 403 ? "Security check failed. Refresh the page and try again." : "request failed");
+      throw new Error(msg);
+    }
     return data;
   }
 
@@ -90,12 +111,16 @@
         ai_training: document.getElementById("po-opt-ai-train")?.checked === true,
         analytics: document.getElementById("po-opt-analytics")?.checked === true,
       };
+      const btn = form.querySelector('button[type="submit"]');
+      if (btn) btn.disabled = true;
       try {
         await postJson(API_ONBOARD, payload);
         hideOnboardingModal();
         window.SightraUI?.announce("Privacy choices saved.");
       } catch (err) {
         alert(err.message || "Could not save privacy choices.");
+      } finally {
+        if (btn) btn.disabled = false;
       }
     });
   }
@@ -106,7 +131,6 @@
     form.querySelectorAll("[data-consent-category]").forEach((input) => {
       input.addEventListener("change", async () => {
         const category = input.getAttribute("data-consent-category");
-        const decision = input.checked ? "granted" : input.type === "checkbox" ? "denied" : "granted";
         if (input.dataset.withdraw === "true" && !input.checked) {
           try {
             await postJson(API_CONSENT, { category, decision: "withdrawn", policy_slug: "privacy-policy" });
@@ -130,18 +154,20 @@
 
   function skipOnboardingForPath() {
     const path = window.location.pathname.replace(/\/$/, "") || "/";
-    return path === "/signin" || path === "/signup" || path === "/signin/" || path === "/signup/";
+    return path === "/signin" || path === "/signup";
   }
 
   document.addEventListener("DOMContentLoaded", () => {
     bindOnboardingForm();
     bindPrivacySettingsForm();
     if (skipOnboardingForPath()) return;
-    fetchStatus().then((s) => {
-      if (s.requires_onboarding && document.getElementById("privacy-onboarding-modal")) {
-        showOnboardingModal();
-      }
-    }).catch(() => {});
+    fetchStatus()
+      .then((s) => {
+        if (s.requires_onboarding && document.getElementById("privacy-onboarding-modal")) {
+          showOnboardingModal();
+        }
+      })
+      .catch(() => {});
   });
 
   window.SightraPrivacy = {

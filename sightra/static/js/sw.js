@@ -1,8 +1,11 @@
-const CACHE = "sightra-shell-v4";
+const CACHE = "sightra-shell-v5";
 const PRECACHE = [
   "/offline/",
+  "/manifest.webmanifest",
   "/static/css/sightra.css",
   "/static/js/sightra.js",
+  "/static/icons/app-icon-192.png",
+  "/static/icons/app-icon-512.png",
 ];
 
 /** Never cache-first brand images (avoids stale white JPG / old icons). */

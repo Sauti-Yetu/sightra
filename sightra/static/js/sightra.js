@@ -145,28 +145,51 @@
   function initInstallPrompt() {
     if (!("serviceWorker" in navigator)) return;
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("/sw.js").catch(() => {});
+      navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
     });
+
+    const banner = document.getElementById("pwa-install");
+    const btn = document.getElementById("pwa-install-btn");
+    const hint = banner?.querySelector("p");
+    if (!banner || !btn) return;
+
+    if (window.matchMedia("(display-mode: standalone)").matches) return;
 
     let deferred;
     window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
       deferred = e;
-      const banner = document.getElementById("pwa-install");
-      if (banner) banner.hidden = false;
+      banner.hidden = false;
+      if (hint) hint.textContent = "Add Sightra to your home screen for quick access offline.";
+      btn.textContent = "Install app";
     });
 
-    const btn = document.getElementById("pwa-install-btn");
-    if (btn) {
-      btn.addEventListener("click", async () => {
-        if (!deferred) return;
+    btn.addEventListener("click", async () => {
+      if (deferred) {
         deferred.prompt();
         await deferred.userChoice;
         deferred = null;
-        const banner = document.getElementById("pwa-install");
-        if (banner) banner.hidden = true;
-      });
-    }
+        banner.hidden = true;
+        return;
+      }
+      banner.hidden = true;
+    });
+
+    const isIOS =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+    window.setTimeout(() => {
+      if (deferred || !banner.hidden) return;
+      if (isIOS) {
+        banner.hidden = false;
+        if (hint) {
+          hint.textContent =
+            "On iPhone/iPad: tap Share in Safari, then “Add to Home Screen” to install Sightra.";
+        }
+        btn.textContent = "OK";
+      }
+    }, 3000);
   }
 
   document.addEventListener("DOMContentLoaded", () => {

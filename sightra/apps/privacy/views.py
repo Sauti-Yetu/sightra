@@ -1,8 +1,12 @@
 import json
+import logging
 
 from django.http import Http404, JsonResponse
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
+
+logger = logging.getLogger(__name__)
 
 from apps.accounts.models import UserPreference
 from apps.accounts.services import supabase_client
@@ -62,11 +66,13 @@ def privacy_settings(request):
     )
 
 
+@ensure_csrf_cookie
 @require_GET
 def api_consent_status(request):
     return JsonResponse(consent_status_payload(request))
 
 
+@csrf_exempt
 @require_POST
 def api_consent_update(request):
     try:
@@ -98,17 +104,25 @@ def api_consent_update(request):
             if payload.get("privacy_notice_ack") is not True:
                 pass  # optional consents still require notice ack via onboarding flow
 
-    record = record_consent(
-        request,
-        category=category,
-        decision=decision,
-        policy_slug=payload.get("policy_slug") or "",
-        purpose=payload.get("purpose") or "",
-        metadata=payload.get("metadata") if isinstance(payload.get("metadata"), dict) else {},
-    )
-    return JsonResponse({"success": True, "record_id": record.id, "status": consent_status_payload(request)})
+    try:
+        if not request.session.session_key:
+            request.session.create()
+        record = record_consent(
+            request,
+            category=category,
+            decision=decision,
+            policy_slug=payload.get("policy_slug") or "",
+            purpose=payload.get("purpose") or "",
+            metadata=payload.get("metadata") if isinstance(payload.get("metadata"), dict) else {},
+        )
+        request.session.save()
+        return JsonResponse({"success": True, "record_id": record.id, "status": consent_status_payload(request)})
+    except Exception:
+        logger.exception("Consent update failed")
+        return JsonResponse({"success": False, "error": "Could not save consent."}, status=500)
 
 
+@csrf_exempt
 @require_POST
 def api_onboarding_complete(request):
     """Batch ack for privacy notice + core service after explicit user action."""
@@ -122,43 +136,57 @@ def api_onboarding_complete(request):
     if not payload.get("core_service_accept"):
         return JsonResponse({"success": False, "error": "Core service acceptance required"}, status=400)
 
-    record_consent(
-        request,
-        category=CONSENT_PRIVACY_NOTICE,
-        decision=DECISION_GRANTED,
-        policy_slug="privacy-policy",
-        purpose="Shown privacy policy and terms information",
-    )
-    record_consent(
-        request,
-        category=CONSENT_CORE_SERVICE,
-        decision=DECISION_GRANTED,
-        policy_slug="privacy-policy",
-        purpose="Provide requested assistive features",
-    )
+    try:
+        if not request.session.session_key:
+            request.session.create()
 
-    for opt_key, category in (
-        ("optional_history", CONSENT_OPTIONAL_HISTORY),
-        ("research_feedback", CONSENT_RESEARCH_FEEDBACK),
-        ("ai_training", CONSENT_AI_TRAINING),
-        ("analytics", CONSENT_ANALYTICS),
-    ):
-        if payload.get(opt_key) is True:
-            record_consent(
-                request,
-                category=category,
-                decision=DECISION_GRANTED,
-                policy_slug="privacy-policy",
-            )
-        else:
-            record_consent(
-                request,
-                category=category,
-                decision=DECISION_DENIED,
-                policy_slug="privacy-policy",
-            )
+        record_consent(
+            request,
+            category=CONSENT_PRIVACY_NOTICE,
+            decision=DECISION_GRANTED,
+            policy_slug="privacy-policy",
+            purpose="Shown privacy policy and terms information",
+        )
+        record_consent(
+            request,
+            category=CONSENT_CORE_SERVICE,
+            decision=DECISION_GRANTED,
+            policy_slug="privacy-policy",
+            purpose="Provide requested assistive features",
+        )
 
-    return JsonResponse({"success": True, "status": consent_status_payload(request)})
+        for opt_key, category in (
+            ("optional_history", CONSENT_OPTIONAL_HISTORY),
+            ("research_feedback", CONSENT_RESEARCH_FEEDBACK),
+            ("ai_training", CONSENT_AI_TRAINING),
+            ("analytics", CONSENT_ANALYTICS),
+        ):
+            if payload.get(opt_key) is True:
+                record_consent(
+                    request,
+                    category=category,
+                    decision=DECISION_GRANTED,
+                    policy_slug="privacy-policy",
+                )
+            else:
+                record_consent(
+                    request,
+                    category=category,
+                    decision=DECISION_DENIED,
+                    policy_slug="privacy-policy",
+                )
+
+        request.session.save()
+        return JsonResponse({"success": True, "status": consent_status_payload(request)})
+    except Exception:
+        logger.exception("Privacy onboarding failed")
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "Could not save privacy choices on the server. Ensure database migrations have been applied.",
+            },
+            status=500,
+        )
 
 
 @require_http_methods(["GET", "POST"])
