@@ -52,14 +52,20 @@
   <aside id="dynamic-alerts" class="interactive absolute right-4 top-1/2 z-20 flex max-h-[65vh] -translate-y-1/2 flex-col gap-4 overflow-y-auto"></aside>
 
   <footer class="interactive pb-[max(5.5rem,env(safe-area-inset-bottom))] pt-2">
-    <div class="flex flex-col items-center gap-4">
+    <div class="flex flex-col items-center gap-3">
+      <p id="visionVoiceStatus" class="max-w-xs text-center text-[10px] text-white/70">Tap mic to ask what you see</p>
       <span id="scanLabel" class="text-[10px] font-black uppercase tracking-[0.4em] text-[var(--brand-cyan)]">Initiate sight scan</span>
+      <div class="flex items-center gap-6">
+      <button id="visionVoiceBtn" type="button" class="interactive flex h-14 w-14 items-center justify-center rounded-full bg-white/10 backdrop-blur-md ring-1 ring-white/20" aria-label="Ask a voice question about the scene">
+        <span class="material-symbols-outlined text-2xl text-white">mic</span>
+      </button>
       <button id="scanBtn" type="button" class="interactive group relative flex h-24 w-24 items-center justify-center rounded-full" aria-label="Toggle sight scan">
         <span class="absolute inset-0 rounded-full border-4 border-[var(--brand-cyan)]/25 group-hover:border-[var(--brand-cyan)]/45"></span>
         <span class="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--brand-cyan)]/15 shadow-[0_0_30px_var(--brand-cyan-glow)] backdrop-blur-md">
           <span class="material-symbols-outlined text-4xl text-[var(--brand-cyan)]" style="font-variation-settings:'FILL' 1">visibility</span>
         </span>
       </button>
+      </div>
     </div>
   </footer>
 </div>

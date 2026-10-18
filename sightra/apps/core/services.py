@@ -15,7 +15,7 @@ class GeminiAnalyzer:
     # Minimum fraction of object labels that must differ to trigger a new Gemini call.
     SCENE_CHANGE_THRESHOLD = 0.35
     # Minimum seconds between Gemini calls even if scene changed.
-    MIN_CALL_INTERVAL_S = 1.5
+    MIN_CALL_INTERVAL_S = 4.0
 
     def __init__(self):
         try:
@@ -98,7 +98,10 @@ class GeminiAnalyzer:
         if hazard_alert:
             user_prompt += f"Mandatory opening cue (must respect in meaning): {hazard_alert}\n"
         if text_prompt:
-            user_prompt += f"User query: {text_prompt}\n"
+            user_prompt += (
+                f"User query (answer directly and clearly): {text_prompt}\n"
+                "If they ask what you see, describe the scene in plain language for a blind user.\n"
+            )
         user_prompt += "Respond with audio-ready guidance only."
 
         # --- Scene-change guard ---------------------------------------------

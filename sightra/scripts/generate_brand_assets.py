@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SRC = Path(__file__).resolve().parent / "assets" / "sightra-logo-source.jpg"
 OUT_NAV = ROOT / "static" / "img" / "sightra-logo.png"
 ICONS = ROOT / "static" / "icons"
-BRAND_VERSION = "3"
+BRAND_VERSION = "4"
 
 
 def remove_white_bg(img: Image.Image, threshold: int = 232) -> Image.Image:
@@ -60,7 +60,10 @@ def main() -> None:
     mark.save(OUT_NAV, optimize=True)
     ICONS.mkdir(parents=True, exist_ok=True)
     for size in (72, 96, 128, 144, 152, 192, 384, 512):
-        square_icon(mark, size).save(ICONS / f"icon-{size}.png", optimize=True)
+        img = square_icon(mark, size)
+        img.save(ICONS / f"icon-{size}.png", optimize=True)
+        if size in (192, 512):
+            img.save(ICONS / f"app-icon-{size}.png", optimize=True)
     print(f"Brand assets v{BRAND_VERSION}: {OUT_NAV}, icons in {ICONS}")
 
 

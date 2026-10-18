@@ -17,8 +17,14 @@ class NavigationStreamView(APIView):
     def post(self, request, *args, **kwargs):
         # 1. Parse Input
         frame_data = request.data.get("frame_data") # e.g. base64 image
-        text_prompt = request.data.get("text_prompt") # e.g. "Is the path clear?"
+        text_prompt = request.data.get("text_prompt") or request.data.get("user_prompt")
         frame_id = request.data.get("frame_id", int(time.time()))
+        narration_mode = (request.data.get("narration_mode") or "auto").lower()
+        if narration_mode not in ("auto", "fast", "full"):
+            narration_mode = "auto"
+        if narration_mode == "auto":
+            narration_mode = "full" if text_prompt else "fast"
+        force_refresh = bool(request.data.get("force_refresh")) or bool(text_prompt)
 
         if not frame_data:
             return Response({"error": "frame_data is required"}, status=status.HTTP_400_BAD_REQUEST)
@@ -41,26 +47,34 @@ class NavigationStreamView(APIView):
         
         # Analyze using Vision + Gemini
         analysis_result = analyze_frame_context(
-            frame_data=frame_data, 
-            text_prompt=text_prompt, 
+            frame_data=frame_data,
+            text_prompt=text_prompt,
             run_vision_first=True,
-            frame_id=frame_id
+            frame_id=frame_id,
+            narration_mode=narration_mode,
+            force_refresh=force_refresh,
         )
-        
-        analysis_text = analysis_result.get("analysis_text", "Path clear. Proceed with caution.")
-        
-        # 3. Generate Audio Feedback
-        # This can also be asynchronous, but we return the URL or text
-        audio_info = generate_audio_feedback(analysis_text, output_filename=f"response_{frame_id}.wav")
-        
-        return Response({
-            "message": "Analysis completed successfully",
-            "analysis_text": analysis_text,
-            "audio_url": audio_info.get("audio_url"),
-            "metadata": analysis_result.get("vision_metadata"),
-            "warnings": analysis_result.get("warnings") or [],
-            "hazard_alert": analysis_result.get("hazard_alert"),
-        }, status=status.HTTP_200_OK)
+
+        analysis_text = analysis_result.get("analysis_text") or ""
+
+        audio_info = {"audio_url": None}
+        if analysis_text and narration_mode == "full":
+            audio_info = generate_audio_feedback(
+                analysis_text, output_filename=f"response_{frame_id}.wav"
+            )
+
+        return Response(
+            {
+                "message": "Analysis completed successfully",
+                "analysis_text": analysis_text,
+                "audio_url": audio_info.get("audio_url"),
+                "metadata": analysis_result.get("vision_metadata"),
+                "warnings": analysis_result.get("warnings") or [],
+                "hazard_alert": analysis_result.get("hazard_alert"),
+                "narration_mode": analysis_result.get("narration_mode", narration_mode),
+            },
+            status=status.HTTP_200_OK,
+        )
 
 class RouteGuidanceView(APIView):
     """

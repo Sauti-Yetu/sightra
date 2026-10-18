@@ -2,11 +2,95 @@ const video = document.getElementById('cameraElement');
 const canvas = document.getElementById('canvasElement');
 const scanBtn = document.getElementById('scanBtn');
 const scanLabel = document.getElementById('scanLabel');
+const voiceBtn = document.getElementById('visionVoiceBtn');
+const voiceStatus = document.getElementById('visionVoiceStatus');
+
 let isScanning = false;
 let streamRef = null;
 let captureIntervalId = null;
 let isFetchInFlight = false;
-const CAPTURE_INTERVAL_MS = 1500;
+let frameCounter = 0;
+let pendingUserPrompt = '';
+let lastFullNarrationAt = 0;
+let lastSpokenKey = '';
+
+const CAPTURE_FAST_MS = 1800;
+const CAPTURE_FULL_MS = 7000;
+const MIN_REPEAT_SPEECH_MS = 9000;
+
+const VisionSpeech = {
+  speaking: false,
+  queue: [],
+
+  enqueue(text, { urgent = false } = {}) {
+    const cleaned = (text || '').trim();
+    if (!cleaned || !window.speechSynthesis) return;
+
+    if (urgent) {
+      window.speechSynthesis.cancel();
+      this.queue = [cleaned];
+      this.speaking = false;
+      this._speakNext();
+      return;
+    }
+
+    if (this.speaking) {
+      return;
+    }
+    this.queue.push(cleaned);
+    this._speakNext();
+  },
+
+  _speakNext() {
+    if (this.speaking || !this.queue.length) return;
+    const text = this.queue.shift();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.rate = 0.95;
+    this.speaking = true;
+    utter.onend = () => {
+      this.speaking = false;
+      lastSpokenKey = text;
+      this._speakNext();
+    };
+    utter.onerror = () => {
+      this.speaking = false;
+      this._speakNext();
+    };
+    window.speechSynthesis.speak(utter);
+  },
+
+  clear() {
+    window.speechSynthesis?.cancel();
+    this.queue = [];
+    this.speaking = false;
+  },
+};
+
+function speechKey(data) {
+  const meta = data.metadata || {};
+  const labels = (meta.objects || []).map((o) => o.label).join(',');
+  return `${data.hazard_alert || ''}|${data.analysis_text || ''}|${labels}`;
+}
+
+function shouldSpeak(data, urgent) {
+  if (!data.analysis_text && !data.hazard_alert) return false;
+  const key = speechKey(data);
+  if (key === lastSpokenKey) return false;
+  if (urgent) return true;
+  if (Date.now() - lastFullNarrationAt < MIN_REPEAT_SPEECH_MS && !data.hazard_alert) return false;
+  return true;
+}
+
+function buildSpeechText(data) {
+  if (data.hazard_alert && data.analysis_text) {
+    const lower = data.analysis_text.toLowerCase();
+    if (lower.includes('urgent') || lower.includes('caution') || lower.includes('stop')) {
+      return data.analysis_text;
+    }
+    return `${data.hazard_alert} ${data.analysis_text}`;
+  }
+  return data.hazard_alert || data.analysis_text || '';
+}
 
 async function startCamera() {
   if (!navigator.mediaDevices?.getUserMedia) {
@@ -15,7 +99,7 @@ async function startCamera() {
   }
   try {
     streamRef = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+      video: { facingMode: 'environment', width: { ideal: 960 }, height: { ideal: 540 } },
     });
     video.srcObject = streamRef;
     await video.play();
@@ -39,41 +123,15 @@ function stopCamera() {
   }
 }
 
-scanBtn?.addEventListener('click', async () => {
-  if (!isScanning) {
-    const ready = await window.SightraPrivacy?.ensureOnboarding?.();
-    if (ready === false) return;
-    const camOk = await window.SightraPrivacy?.requireFeatureConsent?.(
-      window.SightraPrivacy.CONSENT_CAMERA,
-      'Live Vision sends camera frames to Sightra for analysis. Allow camera environmental analysis?'
-    );
-    if (!camOk) return;
-  }
-  isScanning = !isScanning;
-  if (isScanning) {
-    if (!streamRef) await startCamera();
-    scanLabel.textContent = 'Stop sight scan';
-    scanLabel.classList.add('vision-scan-label-active');
-    scanLabel.classList.remove('text-[var(--brand-cyan)]');
-    startCaptureLoop();
-    window.SightraUI?.announce('Sight scan started');
-  } else {
-    scanLabel.textContent = 'Initiate sight scan';
-    scanLabel.classList.remove('vision-scan-label-active');
-    scanLabel.classList.add('text-[var(--brand-cyan)]');
-    stopCaptureLoop();
-    window.speechSynthesis?.cancel();
-    clearDynamicUI();
-    stopCamera();
-    window.SightraUI?.announce('Sight scan stopped');
-  }
-});
-
-function startCaptureLoop() {
-  captureAndAnalyze();
-  captureIntervalId = setInterval(() => {
-    if (!isFetchInFlight) captureAndAnalyze();
-  }, CAPTURE_INTERVAL_MS);
+function scheduleCaptureLoop() {
+  stopCaptureLoop();
+  const tick = () => {
+    if (!isScanning || isFetchInFlight) return;
+    if (VisionSpeech.speaking && !pendingUserPrompt) return;
+    captureAndAnalyze();
+  };
+  tick();
+  captureIntervalId = setInterval(tick, CAPTURE_FAST_MS);
 }
 
 function stopCaptureLoop() {
@@ -91,20 +149,28 @@ function clearDynamicUI() {
   alerts.innerHTML = '';
 }
 
-function reticleHtml() {
-  return document.getElementById('vision-reticle')?.outerHTML || '';
-}
-
-async function captureAndAnalyze() {
+async function captureAndAnalyze(options = {}) {
   if (!isScanning) return;
+  if (VisionSpeech.speaking && !options.userPrompt && !options.forceFull) return;
+
   isFetchInFlight = true;
+  frameCounter += 1;
   const t0 = performance.now();
+
   canvas.width = video.videoWidth || 640;
   canvas.height = video.videoHeight || 480;
   if (canvas.width > 0 && canvas.height > 0) {
     canvas.getContext('2d').drawImage(video, 0, 0);
   }
-  const frameData = canvas.toDataURL('image/jpeg', 0.4);
+  const frameData = canvas.toDataURL('image/jpeg', 0.32);
+
+  const userPrompt = options.userPrompt || pendingUserPrompt || '';
+  if (pendingUserPrompt) pendingUserPrompt = '';
+
+  const forceFull = options.forceFull || Boolean(userPrompt);
+  const narrationMode = forceFull ? 'full' : 'fast';
+  if (forceFull) lastFullNarrationAt = Date.now();
+
   try {
     const response = await fetch('/api/navigation/stream/', {
       method: 'POST',
@@ -112,7 +178,11 @@ async function captureAndAnalyze() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         frame_data: frameData,
-        text_prompt: 'Describe any obstacles or pathways ahead.',
+        text_prompt: userPrompt || (narrationMode === 'full' ? 'Briefly describe obstacles and path ahead.' : ''),
+        user_prompt: userPrompt,
+        frame_id: Date.now(),
+        narration_mode: narrationMode,
+        force_refresh: forceFull,
       }),
     });
     const data = await response.json();
@@ -126,28 +196,33 @@ async function captureAndAnalyze() {
     }
     const proc = document.getElementById('proc-readout');
     if (proc) proc.textContent = `${Math.round(performance.now() - t0)}ms`;
+
     if (!isScanning) {
       isFetchInFlight = false;
       return;
     }
+
     updateDynamicUI(data.metadata);
-    const toSpeak = data.hazard_alert && data.analysis_text
-      ? (data.analysis_text.toLowerCase().includes('urgent') || data.analysis_text.toLowerCase().includes('caution')
-          ? data.analysis_text
-          : data.hazard_alert + ' ' + data.analysis_text)
-      : (data.hazard_alert || data.analysis_text);
-    if (toSpeak) speakNonBlocking(toSpeak);
+
+    const urgent = Boolean(data.hazard_alert);
+    const toSpeak = buildSpeechText(data);
+    if (shouldSpeak(data, urgent) && toSpeak) {
+      VisionSpeech.enqueue(toSpeak, { urgent });
+      lastSpokenKey = speechKey(data);
+      if (narrationMode === 'full') lastFullNarrationAt = Date.now();
+    }
+
+    if (userPrompt && voiceStatus) {
+      voiceStatus.textContent = data.analysis_text
+        ? 'Answered your question.'
+        : 'No answer yet — try again.';
+    }
   } catch (err) {
     console.error(err);
+    if (voiceStatus) voiceStatus.textContent = 'Connection error. Retrying…';
   } finally {
     isFetchInFlight = false;
   }
-}
-
-function speakNonBlocking(text) {
-  if (!text || !window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
 }
 
 function updateDynamicUI(metadata) {
@@ -176,10 +251,6 @@ function updateDynamicUI(metadata) {
           <span class="font-headline font-bold tracking-widest ${isObstacle ? 'text-[var(--brand-lime)]' : 'text-[var(--brand-cyan)]'}">${label}</span>
         </div>
         ${isObstacle ? '<div class="absolute inset-0 animate-pulse bg-[var(--brand-lime)]/10"></div>' : ''}
-        <div class="absolute -left-1 -top-1 h-3 w-3 border-l-2 border-t-2 border-[var(--brand-cyan)]"></div>
-        <div class="absolute -right-1 -top-1 h-3 w-3 border-r-2 border-t-2 border-[var(--brand-cyan)]"></div>
-        <div class="absolute -bottom-1 -left-1 h-3 w-3 border-b-2 border-l-2 border-[var(--brand-cyan)]"></div>
-        <div class="absolute -bottom-1 -right-1 h-3 w-3 border-b-2 border-r-2 border-[var(--brand-cyan)]"></div>
       </div>`;
     boxesContainer.appendChild(box);
 
@@ -187,8 +258,90 @@ function updateDynamicUI(metadata) {
       'beforeend',
       `<div class="vision-hud-card max-w-[140px] rounded-xl p-4">
         <p class="font-headline text-[10px] font-black tracking-widest text-[var(--brand-lime)]">${label}</p>
-        <p class="mt-1 text-[10px] leading-tight text-white/80">Detected with ${confPercent} confidence.</p>
+        <p class="mt-1 text-[10px] leading-tight text-white/80">${confPercent} confidence</p>
       </div>`
     );
   });
 }
+
+async function startVoiceCommand() {
+  const micOk = await window.SightraPrivacy?.requireFeatureConsent?.(
+    window.SightraPrivacy?.CONSENT_MIC,
+    'Voice questions use your microphone. Allow microphone access for Sightra?'
+  );
+  if (!micOk) return;
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    if (voiceStatus) voiceStatus.textContent = 'Voice input not supported in this browser.';
+    return;
+  }
+
+  const rec = new SpeechRecognition();
+  rec.lang = 'en-US';
+  rec.interimResults = false;
+  rec.maxAlternatives = 1;
+  if (voiceStatus) voiceStatus.textContent = 'Listening… ask what you see.';
+  window.SightraUI?.announce('Listening for your question');
+
+  rec.onresult = (event) => {
+    const text = event.results[0][0].transcript.trim();
+    if (!text) return;
+    if (voiceStatus) voiceStatus.textContent = `You asked: ${text}`;
+    pendingUserPrompt = text;
+    if (isScanning) {
+      captureAndAnalyze({ userPrompt: text, forceFull: true });
+    }
+  };
+  rec.onerror = () => {
+    if (voiceStatus) voiceStatus.textContent = 'Could not hear you. Tap mic and try again.';
+  };
+  rec.onend = () => {
+    if (voiceStatus && voiceStatus.textContent === 'Listening… ask what you see.') {
+      voiceStatus.textContent = 'Tap mic to ask a question';
+    }
+  };
+  rec.start();
+}
+
+scanBtn?.addEventListener('click', async () => {
+  if (!isScanning) {
+    const ready = await window.SightraPrivacy?.ensureOnboarding?.();
+    if (ready === false) return;
+    const camOk = await window.SightraPrivacy?.requireFeatureConsent?.(
+      window.SightraPrivacy.CONSENT_CAMERA,
+      'Live Vision sends camera frames to Sightra for analysis. Allow camera environmental analysis?'
+    );
+    if (!camOk) return;
+  }
+  isScanning = !isScanning;
+  if (isScanning) {
+    if (!streamRef) await startCamera();
+    scanLabel.textContent = 'Stop sight scan';
+    scanLabel.classList.add('vision-scan-label-active');
+    scanLabel.classList.remove('text-[var(--brand-cyan)]');
+    frameCounter = 0;
+    lastFullNarrationAt = 0;
+    scheduleCaptureLoop();
+    captureAndAnalyze({ forceFull: true });
+    window.SightraUI?.announce('Sight scan started');
+  } else {
+    scanLabel.textContent = 'Initiate sight scan';
+    scanLabel.classList.remove('vision-scan-label-active');
+    scanLabel.classList.add('text-[var(--brand-cyan)]');
+    stopCaptureLoop();
+    VisionSpeech.clear();
+    clearDynamicUI();
+    stopCamera();
+    window.SightraUI?.announce('Sight scan stopped');
+  }
+});
+
+voiceBtn?.addEventListener('click', () => {
+  if (!isScanning) {
+    window.SightraUI?.announce('Start sight scan first, then ask a question.');
+    if (voiceStatus) voiceStatus.textContent = 'Start sight scan, then tap mic.';
+    return;
+  }
+  startVoiceCommand();
+});

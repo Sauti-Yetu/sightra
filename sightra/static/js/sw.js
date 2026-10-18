@@ -1,4 +1,4 @@
-const CACHE = "sightra-shell-v3";
+const CACHE = "sightra-shell-v4";
 const PRECACHE = [
   "/offline/",
   "/static/css/sightra.css",
@@ -10,6 +10,7 @@ function isBrandAsset(pathname) {
   return (
     pathname.startsWith("/static/img/sightra-logo") ||
     pathname.startsWith("/static/icons/") ||
+    pathname.includes("app-icon-") ||
     pathname.endsWith("sightra-logo.jpg")
   );
 }
