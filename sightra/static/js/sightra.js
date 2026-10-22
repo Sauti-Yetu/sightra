@@ -142,54 +142,229 @@
     });
   }
 
-  function initInstallPrompt() {
-    if (!("serviceWorker" in navigator)) return;
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
-    });
+  function isStandalonePwa() {
+    return (
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true
+    );
+  }
 
-    const banner = document.getElementById("pwa-install");
-    const btn = document.getElementById("pwa-install-btn");
-    const hint = banner?.querySelector("p");
-    if (!banner || !btn) return;
+  function detectInstallPlatform() {
+    const ua = navigator.userAgent;
+    const isIOS =
+      /iPad|iPhone|iPod/.test(ua) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const isAndroid = /Android/i.test(ua);
+    if (isIOS) return "ios";
+    if (isAndroid) return "android";
+    return "other";
+  }
 
-    if (window.matchMedia("(display-mode: standalone)").matches) return;
+  const SightraPWA = (function () {
+    let deferredPrompt = null;
+    const platform = detectInstallPlatform();
 
-    let deferred;
-    window.addEventListener("beforeinstallprompt", (e) => {
-      e.preventDefault();
-      deferred = e;
-      banner.hidden = false;
-      if (hint) hint.textContent = "Add Sightra to your home screen for quick access offline.";
-      btn.textContent = "Install app";
-    });
+    function canInstall() {
+      if (isStandalonePwa()) return false;
+      if (deferredPrompt) return true;
+      if (platform === "ios") return true;
+      if (platform === "android" && "serviceWorker" in navigator) return true;
+      return !!deferredPrompt;
+    }
 
-    btn.addEventListener("click", async () => {
-      if (deferred) {
-        deferred.prompt();
-        await deferred.userChoice;
-        deferred = null;
-        banner.hidden = true;
+    function setInstallButtonsVisible(show) {
+      document.querySelectorAll("[data-pwa-install]").forEach((el) => {
+        if (isStandalonePwa()) {
+          el.hidden = true;
+          el.setAttribute("aria-hidden", "true");
+          return;
+        }
+        el.hidden = !show;
+        el.removeAttribute("aria-hidden");
+      });
+    }
+
+    function fillModal(mode) {
+      const lead = document.getElementById("pwa-install-modal-lead");
+      const steps = document.getElementById("pwa-install-modal-steps");
+      const action = document.getElementById("pwa-install-modal-action");
+      if (!lead || !steps || !action) return;
+
+      steps.innerHTML = "";
+      if (mode === "android-native") {
+        lead.textContent =
+          "Install Sightra like a regular app. It opens full screen and loads faster on your home screen.";
+        action.textContent = "Install now";
+        action.hidden = false;
         return;
       }
-      banner.hidden = true;
-    });
-
-    const isIOS =
-      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-
-    window.setTimeout(() => {
-      if (deferred || !banner.hidden) return;
-      if (isIOS) {
-        banner.hidden = false;
-        if (hint) {
-          hint.textContent =
-            "On iPhone/iPad: tap Share in Safari, then “Add to Home Screen” to install Sightra.";
-        }
-        btn.textContent = "OK";
+      if (mode === "ios") {
+        lead.textContent = "On iPhone and iPad, install Sightra from Safari:";
+        [
+          "Open this page in Safari (not an in-app browser).",
+          "Tap the Share button at the bottom of the screen.",
+          "Scroll and tap “Add to Home Screen”, then tap Add.",
+        ].forEach((text) => {
+          const li = document.createElement("li");
+          li.className = "flex gap-2";
+          li.innerHTML =
+            '<span class="material-symbols-outlined text-[var(--brand-cyan)] text-base">arrow_right</span><span>' +
+            text +
+            "</span>";
+          steps.appendChild(li);
+        });
+        action.textContent = "Got it";
+        action.hidden = false;
+        return;
       }
-    }, 3000);
+      lead.textContent =
+        "Use your browser menu and choose “Install app” or “Add to Home screen” to download Sightra.";
+      [
+        "Look for Install / Add to Home screen in the browser menu (⋮ or ⋯).",
+        "Confirm when prompted to add Sightra to your device.",
+      ].forEach((text) => {
+        const li = document.createElement("li");
+        li.className = "flex gap-2";
+        li.innerHTML =
+          '<span class="material-symbols-outlined text-[var(--brand-cyan)] text-base">arrow_right</span><span>' +
+          text +
+          "</span>";
+        steps.appendChild(li);
+      });
+      action.textContent = "Got it";
+      action.hidden = false;
+    }
+
+    function closeModal() {
+      const modal = document.getElementById("pwa-install-modal");
+      if (modal) modal.hidden = true;
+    }
+
+    function openModal(mode) {
+      const modal = document.getElementById("pwa-install-modal");
+      if (!modal) return;
+      fillModal(mode);
+      modal.hidden = false;
+      announce("Install Sightra instructions opened");
+    }
+
+    async function triggerInstall() {
+      if (isStandalonePwa()) {
+        announce("Sightra is already installed");
+        return;
+      }
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const choice = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        if (choice.outcome === "accepted") {
+          announce("Sightra installed");
+          hideBanner();
+          setInstallButtonsVisible(false);
+        }
+        closeModal();
+        return;
+      }
+      if (platform === "ios") {
+        openModal("ios");
+        return;
+      }
+      if (platform === "android") {
+        openModal("android-fallback");
+        return;
+      }
+      openModal("other");
+    }
+
+    function hideBanner() {
+      const banner = document.getElementById("pwa-install");
+      if (banner) banner.hidden = true;
+    }
+
+    function showBanner() {
+      const banner = document.getElementById("pwa-install");
+      const hint = banner?.querySelector("p.text-xs");
+      const btn = document.getElementById("pwa-install-btn");
+      if (!banner || !btn) return;
+      banner.hidden = false;
+      if (hint) {
+        hint.textContent =
+          platform === "ios"
+            ? "Add Sightra to your home screen for quick access."
+            : "Download Sightra to your home screen for offline-ready access.";
+      }
+      btn.textContent = platform === "ios" ? "How to install" : "Install app";
+    }
+
+    function bindUi() {
+      document.querySelectorAll("[data-pwa-install]").forEach((el) => {
+        el.addEventListener("click", (e) => {
+          e.preventDefault();
+          triggerInstall();
+        });
+      });
+
+      const bannerBtn = document.getElementById("pwa-install-btn");
+      if (bannerBtn) bannerBtn.addEventListener("click", () => triggerInstall());
+
+      const closeBtn = document.getElementById("pwa-install-modal-close");
+      const dismissBtn = document.getElementById("pwa-install-modal-dismiss");
+      const backdrop = document.getElementById("pwa-install-modal-backdrop");
+      const actionBtn = document.getElementById("pwa-install-modal-action");
+      [closeBtn, dismissBtn, backdrop].forEach((btn) => {
+        if (btn) btn.addEventListener("click", closeModal);
+      });
+      if (actionBtn) {
+        actionBtn.addEventListener("click", () => {
+          if (deferredPrompt) triggerInstall();
+          else closeModal();
+        });
+      }
+    }
+
+    function init() {
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
+        });
+      }
+
+      bindUi();
+
+      if (isStandalonePwa()) {
+        setInstallButtonsVisible(false);
+        return;
+      }
+
+      setInstallButtonsVisible(true);
+
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        showBanner();
+        setInstallButtonsVisible(true);
+        fillModal("android-native");
+      });
+
+      window.addEventListener("appinstalled", () => {
+        deferredPrompt = null;
+        hideBanner();
+        setInstallButtonsVisible(false);
+        announce("Sightra installed on your device");
+      });
+
+      if (platform === "ios") {
+        window.setTimeout(() => {
+          if (!deferredPrompt) showBanner();
+        }, 2500);
+      }
+    }
+
+    return { init, triggerInstall, canInstall, isStandalone: isStandalonePwa };
+  })();
+
+  function initInstallPrompt() {
+    SightraPWA.init();
   }
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -201,4 +376,5 @@
   });
 
   window.SightraUI = { announce, applyTheme, speak };
+  window.SightraPWA = SightraPWA;
 })();
