@@ -1,4 +1,4 @@
-const CACHE = "sightra-shell-v6";
+const CACHE = "sightra-shell-v7";
 const PRECACHE = [
   "/offline/",
   "/manifest.webmanifest",
@@ -19,7 +19,19 @@ function isBrandAsset(pathname) {
 }
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)));
+  event.waitUntil(
+    caches.open(CACHE).then(async (cache) => {
+      await Promise.all(
+        PRECACHE.map(async (url) => {
+          try {
+            await cache.add(url);
+          } catch {
+            /* one missing asset must not block SW install */
+          }
+        })
+      );
+    })
+  );
   self.skipWaiting();
 });
 

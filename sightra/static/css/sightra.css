@@ -281,6 +281,45 @@ html.dark .bottom-nav a.is-active {
   width: 100%;
 }
 
+.pwa-install-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  .pwa-install-modal {
+    align-items: center;
+  }
+}
+
+.pwa-install-modal[hidden] {
+  display: none !important;
+}
+
+.pwa-install-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 0;
+}
+
+.pwa-install-modal-panel {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-height: min(90vh, 36rem);
+  overflow-y: auto;
+}
+
+#pwa-install[hidden] {
+  display: none !important;
+}
+
 .legal-document .legal-prose ul {
   margin: 0.75rem 0 0.75rem 1.25rem;
   list-style: disc;

@@ -270,7 +270,7 @@
         return;
       }
       if (platform === "android") {
-        openModal("android-fallback");
+        openModal(deferredPrompt ? "android-native" : "android-fallback");
         return;
       }
       openModal("other");
@@ -279,6 +279,11 @@
     function hideBanner() {
       const banner = document.getElementById("pwa-install");
       if (banner) banner.hidden = true;
+      try {
+        sessionStorage.setItem("sightra_pwa_banner_dismissed", "1");
+      } catch {
+        /* ignore */
+      }
     }
 
     function showBanner() {
@@ -311,9 +316,12 @@
       const dismissBtn = document.getElementById("pwa-install-modal-dismiss");
       const backdrop = document.getElementById("pwa-install-modal-backdrop");
       const actionBtn = document.getElementById("pwa-install-modal-action");
-      [closeBtn, dismissBtn, backdrop].forEach((btn) => {
+      const bannerDismiss = document.getElementById("pwa-install-dismiss");
+      [closeBtn, dismissBtn].forEach((btn) => {
         if (btn) btn.addEventListener("click", closeModal);
       });
+      if (backdrop) backdrop.addEventListener("click", closeModal);
+      if (bannerDismiss) bannerDismiss.addEventListener("click", hideBanner);
       if (actionBtn) {
         actionBtn.addEventListener("click", () => {
           if (deferredPrompt) triggerInstall();
@@ -353,10 +361,15 @@
         announce("Sightra installed on your device");
       });
 
-      if (platform === "ios") {
-        window.setTimeout(() => {
-          if (!deferredPrompt) showBanner();
-        }, 2500);
+      try {
+        const dismissed = sessionStorage.getItem("sightra_pwa_banner_dismissed");
+        if (platform === "ios" && !dismissed) {
+          window.setTimeout(() => {
+            if (!deferredPrompt) showBanner();
+          }, 2500);
+        }
+      } catch {
+        /* sessionStorage unavailable */
       }
     }
 
