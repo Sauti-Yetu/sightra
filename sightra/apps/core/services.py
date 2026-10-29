@@ -144,7 +144,7 @@ class GeminiAnalyzer:
             parts = [system_prompt, user_prompt]
             if image is not None:
                 parts.append(image)
-            result = generate_text(parts, timeout=20)
+            result = generate_text(parts, timeout=8)
             self._last_scene_hash = new_hash
             self._last_analysis_text = result
             self._last_call_time = time.monotonic()

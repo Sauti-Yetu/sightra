@@ -147,12 +147,20 @@
     throw new Error(friendlyError(lastErr));
   }
 
-  function capture(video, canvas, quality) {
+  function capture(video, canvas, quality, maxDim) {
     if (!video || !canvas || !video.videoWidth) return "";
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    let width = video.videoWidth;
+    let height = video.videoHeight;
+    const cap = Number(maxDim) || 0;
+    if (cap > 0 && Math.max(width, height) > cap) {
+      const scale = cap / Math.max(width, height);
+      width = Math.max(1, Math.round(width * scale));
+      height = Math.max(1, Math.round(height * scale));
+    }
+    canvas.width = width;
+    canvas.height = height;
     const ctx = canvas.getContext("2d");
-    ctx.drawImage(video, 0, 0);
+    ctx.drawImage(video, 0, 0, width, height);
     return canvas.toDataURL("image/jpeg", quality || 0.7);
   }
 

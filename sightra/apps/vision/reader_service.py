@@ -116,7 +116,7 @@ def analyze_reader_image(
         "Do not invent text that is not visible. If unsure, say so."
     )
     try:
-        parsed = _parse_model_text(generate_text([prompt, img], timeout=20))
+        parsed = _parse_model_text(generate_text([prompt, img], timeout=12))
         spoken = parsed["spoken"] or "Nothing readable was found."
         body = parsed["text"] or spoken
         return {

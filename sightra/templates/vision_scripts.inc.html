@@ -15,9 +15,9 @@ let pendingUserPrompt = '';
 let lastFullNarrationAt = 0;
 let lastSpokenKey = '';
 
-const CAPTURE_FAST_MS = 1800;
+const CAPTURE_FAST_MS = 1600;
 const CAPTURE_FULL_MS = 7000;
-const MIN_REPEAT_SPEECH_MS = 9000;
+const MIN_REPEAT_SPEECH_MS = 7000;
 
 const VisionSpeech = {
   speaking: false,
@@ -179,7 +179,7 @@ async function captureAndAnalyze(options = {}) {
   const t0 = performance.now();
 
   if (window.SightraCamera) {
-    await window.SightraCamera.waitForFrame(video, 2500);
+    await window.SightraCamera.waitForFrame(video, 1200);
   }
   if (!video.videoWidth) {
     setScanStatus('Camera is not ready yet. Tap Enable camera.');
@@ -188,12 +188,12 @@ async function captureAndAnalyze(options = {}) {
     return;
   }
   const frameData = window.SightraCamera
-    ? window.SightraCamera.capture(video, canvas, 0.55)
+    ? window.SightraCamera.capture(video, canvas, 0.5, 640)
     : (() => {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         canvas.getContext('2d').drawImage(video, 0, 0);
-        return canvas.toDataURL('image/jpeg', 0.55);
+        return canvas.toDataURL('image/jpeg', 0.5);
       })();
   if (!frameData) {
     setScanStatus('Could not capture a frame. Try again.');
@@ -213,7 +213,7 @@ async function captureAndAnalyze(options = {}) {
   const token = csrfToken();
   if (token) headers['X-CSRFToken'] = token;
   const controller = new AbortController();
-  const timer = window.setTimeout(() => controller.abort(), 28000);
+  const timer = window.setTimeout(() => controller.abort(), 12000);
 
   try {
     const response = await fetch('/api/navigation/stream/', {
@@ -428,10 +428,11 @@ scanBtn?.addEventListener('click', async (event) => {
     setScanningUi(true);
     frameCounter = 0;
     lastFullNarrationAt = 0;
-    setScanStatus('Analysing the scene…');
-    await window.SightraCamera?.waitForFrame(video, 4000);
+    setScanStatus('Scanning…');
+    await window.SightraCamera?.waitForFrame(video, 1200);
     scheduleCaptureLoop();
-    captureAndAnalyze({ forceFull: true });
+    await captureAndAnalyze({ forceFull: false });
+    if (isScanning) captureAndAnalyze({ forceFull: true });
     window.SightraUI?.announce('Sight scan started');
   } finally {
     scanBtn.dataset.busy = '0';

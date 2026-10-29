@@ -25,6 +25,14 @@ class ReaderNavTests(SimpleTestCase):
         self.assertNotIn("Lookout", html)
         self.assertNotIn("lookout", html)
 
+    def test_reader_has_camera_and_upload_preview(self):
+        html = render_to_string("reader.html")
+        self.assertIn("readerSourceCamera", html)
+        self.assertIn("readerSourceUpload", html)
+        self.assertIn("readerStill", html)
+        self.assertIn("Document or photo being read", html)
+        self.assertIn("as it is read aloud", html)
+
 
 class ReaderParseTests(SimpleTestCase):
     def test_json_payload(self):

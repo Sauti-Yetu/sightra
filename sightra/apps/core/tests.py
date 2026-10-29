@@ -52,6 +52,20 @@ class GeminiHelperTests(SimpleTestCase):
         self.assertEqual(text, "Person ahead.")
         self.assertEqual(gemini._working_model, gemini.GEMINI_MODELS[1])
 
+    def test_generate_text_stops_after_max_attempts(self):
+        import apps.core.gemini as gemini
+
+        gemini._working_model = None
+        gemini._configured = True
+        boom = MagicMock()
+        boom.generate_content.side_effect = RuntimeError("404")
+
+        with patch("apps.core.gemini.genai.GenerativeModel", return_value=boom) as ctor:
+            with self.assertRaises(RuntimeError):
+                gemini.generate_text(["hello"], timeout=1, max_attempts=2)
+
+        self.assertEqual(ctor.call_count, 2)
+
     def test_analyze_scene_sends_image_and_returns_text(self):
         analyzer = GeminiAnalyzer()
         analyzer.ready = True
@@ -80,6 +94,24 @@ class GeminiHelperTests(SimpleTestCase):
                 force_refresh=True,
             )
         self.assertIn("person", result)
+
+
+class VisionFastPathTests(SimpleTestCase):
+    @patch("apps.core.tasks.analyzer.analyze_scene")
+    @patch("apps.core.tasks.process_frame_vision_pipeline")
+    def test_fast_scan_returns_objects_without_waiting_on_gemini(self, pipeline, analyze_scene):
+        from apps.core.tasks import analyze_frame_context
+
+        pipeline.return_value = {
+            "objects": [{"label": "person", "position": "ahead", "distance_band": "near"}],
+            "warnings": [],
+            "hazard_alert": None,
+            "detector_ready": True,
+        }
+        result = analyze_frame_context("frame", narration_mode="fast")
+        analyze_scene.assert_not_called()
+        self.assertEqual(result["narration_mode"], "fast")
+        self.assertIn("person", result["analysis_text"].lower())
 
 
 class DisplayNameTests(SimpleTestCase):

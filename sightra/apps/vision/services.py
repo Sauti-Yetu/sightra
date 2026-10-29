@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 # Tunable via environment (place custom weights e.g. yolo11s.pt in sightra/ or project root)
 YOLO_MODEL_PATH = os.getenv("YOLO_MODEL_PATH", "models/weights/yolo26n.pt")
-YOLO_IMGSZ = int(os.getenv("YOLO_IMGSZ", "512"))
+YOLO_IMGSZ = int(os.getenv("YOLO_IMGSZ", "384"))
 YOLO_MAX_DET = int(os.getenv("YOLO_MAX_DET", "24"))
 YOLO_IOU = float(os.getenv("YOLO_IOU", "0.5"))
 YOLO_BASE_CONF = float(os.getenv("YOLO_CONF", "0.35"))

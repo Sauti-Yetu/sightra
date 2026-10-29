@@ -9,14 +9,16 @@ import google.generativeai as genai
 
 logger = logging.getLogger(__name__)
 
-# Prefer models that currently serve generateContent. First match wins.
+# Faster flash-lite first; heavier flash is the fallback.
 GEMINI_MODELS = (
+    "gemini-2.5-flash-lite",
     "gemini-2.5-flash",
     "gemini-3.1-flash-lite",
-    "gemini-2.5-flash-lite",
     "gemini-flash-lite-latest",
     "gemini-3.1-flash-lite-preview",
 )
+DEFAULT_TIMEOUT = 8
+MAX_MODEL_ATTEMPTS = 2
 
 _configured = False
 _working_model: str | None = None
@@ -48,16 +50,19 @@ def _model_order() -> tuple[str, ...]:
     return GEMINI_MODELS
 
 
-def generate_text(parts: list, *, timeout: int = 20) -> str:
+def generate_text(parts: list, *, timeout: int = DEFAULT_TIMEOUT, max_attempts: int = MAX_MODEL_ATTEMPTS) -> str:
     """
     Generate text from prompt parts (strings and/or PIL images).
-    Raises the last error if every model fails.
+    Raises the last error if every attempted model fails.
     """
     global _working_model
     if not _configured:
         configure()
     last: Exception | None = None
-    for name in _model_order():
+    attempts = max(1, int(max_attempts or MAX_MODEL_ATTEMPTS))
+    for index, name in enumerate(_model_order()):
+        if index >= attempts:
+            break
         try:
             model = genai.GenerativeModel(name)
             response = model.generate_content(parts, request_options={"timeout": timeout})

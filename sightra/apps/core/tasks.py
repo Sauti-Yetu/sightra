@@ -35,7 +35,7 @@ def _decode_pil(frame_data):
         img.load()
         if img.mode not in ("RGB", "L"):
             img = img.convert("RGB")
-        img.thumbnail((768, 768))
+        img.thumbnail((512, 512))
         return img
     except Exception:
         logger.exception("Could not decode vision frame for Gemini")
