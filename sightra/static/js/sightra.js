@@ -243,7 +243,7 @@
       steps.innerHTML = "";
       if (mode === "android-native") {
         lead.textContent =
-          "Install Sightra like a regular app. It opens full screen and loads faster on your home screen.";
+          "Add Sightra to your home screen for convenient, full-screen access.";
         action.textContent = "Install now";
         action.hidden = false;
         return;
@@ -346,7 +346,7 @@
         hint.textContent =
           platform === "ios"
             ? "Add Sightra to your home screen for quick access."
-            : "Download Sightra to your home screen for offline-ready access.";
+            : "Add Sightra to your home screen for convenient access.";
       }
       btn.textContent = platform === "ios" ? "How to install" : "Install app";
     }
