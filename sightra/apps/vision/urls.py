@@ -1,7 +1,8 @@
 from django.urls import path
 
-from .views import *
+from .views import ReaderAnalyzeView, SceneAnalysisView
 
 urlpatterns = [
-    path("api/vision/analyze/", SceneAnalysisView.as_view(), name="scene_analysis_api"),
+    path("analyze/", SceneAnalysisView.as_view(), name="scene_analysis_api"),
+    path("reader/analyze/", ReaderAnalyzeView.as_view(), name="reader_analyze_api"),
 ]

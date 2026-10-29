@@ -24,10 +24,11 @@ const VisionSpeech = {
 
   enqueue(text, { urgent = false } = {}) {
     const cleaned = (text || '').trim();
-    if (!cleaned || !window.speechSynthesis) return;
+    if (!cleaned) return;
 
     if (urgent) {
-      window.speechSynthesis.cancel();
+      window.SightraTTS?.stop();
+      window.speechSynthesis?.cancel();
       this.queue = [cleaned];
       this.speaking = false;
       this._speakNext();
@@ -44,22 +45,29 @@ const VisionSpeech = {
   _speakNext() {
     if (this.speaking || !this.queue.length) return;
     const text = this.queue.shift();
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.rate = 0.95;
     this.speaking = true;
-    utter.onend = () => {
+    const done = () => {
       this.speaking = false;
       lastSpokenKey = text;
       this._speakNext();
     };
-    utter.onerror = () => {
-      this.speaking = false;
-      this._speakNext();
-    };
+    if (window.SightraTTS) {
+      Promise.resolve(window.SightraTTS.speak(text)).finally(done);
+      return;
+    }
+    if (!window.speechSynthesis) {
+      done();
+      return;
+    }
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.rate = 0.95;
+    utter.onend = done;
+    utter.onerror = done;
     window.speechSynthesis.speak(utter);
   },
 
   clear() {
+    window.SightraTTS?.stop();
     window.speechSynthesis?.cancel();
     this.queue = [];
     this.speaking = false;
@@ -344,4 +352,10 @@ voiceBtn?.addEventListener('click', () => {
     return;
   }
   startVoiceCommand();
+});
+
+window.addEventListener('sightra:command', (event) => {
+  const action = event.detail?.action;
+  if (action === 'scan' && !isScanning) scanBtn?.click();
+  if (action === 'stop' && isScanning) scanBtn?.click();
 });

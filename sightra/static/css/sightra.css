@@ -135,15 +135,11 @@ html.dark .btn-primary {
 }
 
 .brand-logo-img {
-  height: 2.25rem;
-  width: auto;
-  max-width: min(11rem, 42vw);
-  object-fit: contain;
-  object-position: left center;
-}
-
-html.dark .brand-logo-img {
-  filter: brightness(1.05);
+  height: 2.5rem;
+  width: 2.5rem;
+  border-radius: 0.7rem;
+  object-fit: cover;
+  background: #000;
 }
 
 .bottom-nav a.is-active,
@@ -392,4 +388,97 @@ html.dark textarea:focus-visible {
   box-shadow: var(--shadow);
   padding: 1.25rem;
   border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+}
+
+.reader-overlay {
+  pointer-events: none;
+}
+
+.reader-overlay header,
+.reader-overlay footer,
+.reader-overlay .reader-text-panel,
+.reader-overlay button,
+.reader-overlay a,
+.reader-overlay input {
+  pointer-events: auto;
+}
+
+.reader-text-panel {
+  border-radius: 1.1rem;
+  background: rgba(10, 10, 10, 0.72);
+  backdrop-filter: blur(14px);
+  padding: 1rem 1.1rem;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+.reader-mode {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.08);
+  white-space: nowrap;
+}
+
+.reader-mode.is-active {
+  color: #0a0a0a;
+  background: #ffffff;
+}
+
+.voice-command-bar[hidden] {
+  display: none !important;
+}
+
+.voice-command-bar {
+  position: fixed;
+  left: 1rem;
+  bottom: 5.75rem;
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: min(22rem, calc(100vw - 2rem));
+  padding: 0.55rem 0.85rem 0.55rem 0.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: var(--shadow);
+}
+
+.voice-command-toggle {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--brand-blue-dark);
+  color: #fff;
+}
+
+.voice-command-toggle.is-listening {
+  background: #b91c1c;
+}
+
+.voice-command-status {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
+.settings-select {
+  min-width: 10rem;
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+  background: var(--bg-muted);
+  color: var(--text);
+  padding: 0.5rem 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .voice-command-bar {
+    bottom: 1.5rem;
+  }
 }

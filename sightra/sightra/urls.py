@@ -41,8 +41,9 @@ urlpatterns = [
     # Homepage
     path("dashboard", dashboard, name="dashboard"),
     path("", landing_page, name="landing_page"),
-    # Vision 
+    # Vision
     path("vision/", vision, name="vision"),
+    path("reader/", reader, name="reader"),
     # Voice assistant
     path("voice_assistant/", voice_assistant, name="voice_assistant"),
     # Navigation

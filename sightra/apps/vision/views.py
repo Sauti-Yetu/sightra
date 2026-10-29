@@ -7,11 +7,17 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
+from .reader_service import MODES, analyze_reader_image
 from .services import analyze_scene
+from apps.privacy.services.consent_service import has_camera_consent, has_privacy_notice_ack
 
 # Create your views here.
 def vision(request):
     return render(request, "vision.html")
+
+
+def reader(request):
+    return render(request, "reader.html")
 
 @method_decorator(csrf_exempt, name="dispatch")
 class SceneAnalysisView(View):
@@ -60,3 +66,35 @@ class SceneAnalysisView(View):
                 "success": False,
                 "error": str(e)
             }, status=500)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class ReaderAnalyzeView(View):
+    def post(self, request, *args, **kwargs):
+        try:
+            payload = json.loads(request.body.decode("utf-8"))
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
+
+        if not has_privacy_notice_ack(request) or not has_camera_consent(request):
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "consent_required",
+                    "code": "consent_required",
+                    "message": "Privacy and camera consent are required before reading images.",
+                },
+                status=403,
+            )
+
+        frame_data = payload.get("frame_data") or ""
+        mode = (payload.get("mode") or "live").lower()
+        language = (payload.get("language") or "en").lower()
+        if mode not in MODES:
+            mode = "live"
+        if not frame_data:
+            return JsonResponse({"success": False, "error": "frame_data is required"}, status=400)
+
+        result = analyze_reader_image(frame_data, mode=mode, language=language)
+        status_code = 200 if result.get("success") else 400
+        return JsonResponse(result, status=status_code)

@@ -23,6 +23,28 @@
     window.dispatchEvent(new CustomEvent("sightra:theme", { detail: { theme } }));
   }
 
+  const DEFAULT_A11Y = {
+    highContrast: false,
+    reduceMotion: false,
+    voiceFeedback: false,
+    largeText: false,
+    voiceCommands: false,
+    voiceGender: "female",
+    spokenLanguage: "en",
+  };
+
+  function syncA11yControls(opts) {
+    document.querySelectorAll("[data-a11y-key]").forEach((input) => {
+      const key = input.getAttribute("data-a11y-key");
+      input.checked = !!opts[key];
+    });
+    document.querySelectorAll("[data-a11y-select]").forEach((select) => {
+      const key = select.getAttribute("data-a11y-select");
+      if (opts[key]) select.value = opts[key];
+    });
+    document.documentElement.style.fontSize = opts.largeText ? "106%" : "";
+  }
+
   function applyA11y(opts) {
     const root = document.documentElement;
     root.toggleAttribute("data-a11y-contrast", opts.highContrast === true);
@@ -33,13 +55,21 @@
     else root.removeAttribute("data-a11y-motion");
 
     root.toggleAttribute("data-a11y-voice", opts.voiceFeedback === true);
+    root.toggleAttribute("data-a11y-voice-commands", opts.voiceCommands === true);
+    syncA11yControls(opts);
     writeA11y(opts);
     syncPreferences({ accessibility: opts });
+    window.dispatchEvent(new CustomEvent("sightra:a11y", { detail: opts }));
   }
 
   function speak(text) {
     const a11y = readA11y();
-    if (!a11y.voiceFeedback || !window.speechSynthesis || !text) return;
+    if (!a11y.voiceFeedback || !text) return;
+    if (window.SightraTTS) {
+      window.SightraTTS.speak(text);
+      return;
+    }
+    if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
     utter.rate = 1;
@@ -89,10 +119,7 @@
     const toggle = document.getElementById("a11y-toggle");
     if (!panel || !toggle) return;
 
-    const opts = Object.assign(
-      { highContrast: false, reduceMotion: false, voiceFeedback: false, largeText: false },
-      readA11y()
-    );
+    const opts = Object.assign({}, DEFAULT_A11Y, readA11y());
     applyA11y(opts);
 
     toggle.addEventListener("click", () => {
@@ -107,16 +134,34 @@
       announce(hidden ? "Accessibility options opened" : "Accessibility options closed");
     });
 
-    panel.querySelectorAll("[data-a11y-key]").forEach((input) => {
+    document.querySelectorAll("[data-a11y-key]").forEach((input) => {
       const key = input.getAttribute("data-a11y-key");
-      input.checked = !!opts[key];
-      input.addEventListener("change", () => {
-        opts[key] = input.checked;
-        if (key === "largeText") {
-          document.documentElement.style.fontSize = input.checked ? "106%" : "";
+      input.addEventListener("change", async () => {
+        if (key === "voiceCommands" && input.checked) {
+          const ok = await window.SightraPrivacy?.requireFeatureConsent?.(
+            window.SightraPrivacy.CONSENT_MIC,
+            "Voice commands use your microphone. Allow microphone access for Sightra?"
+          );
+          if (ok === false) {
+            input.checked = false;
+            opts.voiceCommands = false;
+            applyA11y(opts);
+            announce("Voice commands need microphone consent");
+            return;
+          }
         }
+        opts[key] = input.checked;
         applyA11y(opts);
         announce(`${key} ${input.checked ? "enabled" : "disabled"}`);
+      });
+    });
+
+    document.querySelectorAll("[data-a11y-select]").forEach((select) => {
+      const key = select.getAttribute("data-a11y-select");
+      select.addEventListener("change", () => {
+        opts[key] = select.value;
+        applyA11y(opts);
+        announce(`${key} set to ${select.value}`);
       });
     });
   }
@@ -450,6 +495,6 @@
     initKeyboard();
   });
 
-  window.SightraUI = { announce, applyTheme, speak };
+  window.SightraUI = { announce, applyTheme, applyA11y, speak, readA11y };
   window.SightraPWA = SightraPWA;
 })();

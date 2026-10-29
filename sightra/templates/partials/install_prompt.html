@@ -1,5 +1,9 @@
+{% load static %}
 <div id="pwa-install" class="fixed bottom-24 left-1/2 z-50 w-[min(24rem,calc(100vw-2rem))] -translate-x-1/2 rounded-2xl bg-[var(--surface)] p-4 shadow-lg md:bottom-6" hidden>
-  <p class="font-headline text-sm font-semibold">Install Sightra</p>
+  <div class="flex items-center gap-3">
+    <img src="{% static 'img/sightra-logo.png' %}?v=6" alt="" class="h-10 w-10 rounded-lg object-cover" width="40" height="40" />
+    <p class="font-headline text-sm font-semibold">Install Sightra</p>
+  </div>
   <p class="mt-1 text-xs text-[var(--text-muted)]">Download Sightra to your home screen for quick, app-like access.</p>
   <div class="mt-3 flex gap-2">
     <button type="button" id="pwa-install-btn" class="btn-primary flex-1 text-sm">Download app</button>

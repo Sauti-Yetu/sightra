@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Live vision | Sightra{% endblock %}
 {% block header %}{% endblock %}
 {% block main_class %}fixed inset-0 z-0 p-0 max-w-none{% endblock %}
@@ -10,7 +11,9 @@
 </div>
 <div class="vision-overlay-ui relative z-10 flex h-[100dvh] flex-col text-white">
   <header class="interactive flex items-center justify-between px-5 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))]">
-    <a href="/dashboard" class="font-headline text-lg font-black tracking-tight text-white">Sightra</a>
+    <a href="/dashboard" class="flex items-center" aria-label="Sightra home">
+      <img src="{% static 'img/sightra-logo.png' %}?v=6" alt="Sightra" class="h-10 w-10 rounded-lg object-cover ring-1 ring-white/20" width="40" height="40" />
+    </a>
     <div class="flex items-center gap-4">
       <span class="h-2 w-2 rounded-full bg-[var(--brand-lime)] shadow-[0_0_10px_var(--brand-lime)]"></span>
       <span class="material-symbols-outlined text-[var(--brand-cyan)] text-sm">gps_fixed</span>

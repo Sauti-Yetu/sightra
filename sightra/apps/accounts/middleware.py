@@ -26,6 +26,7 @@ _PUBLIC_EXACT = {"/", ""}
 _PROTECTED_PREFIXES = (
     "/dashboard",
     "/vision/",
+    "/reader/",
     "/live-map/",
     "/voice_assistant/",
     "/live-call/",
