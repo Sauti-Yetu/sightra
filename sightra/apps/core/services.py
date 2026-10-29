@@ -1,15 +1,25 @@
 import logging
 import hashlib
 import json
-import os
 import time
 
-import google.generativeai as genai
 from dotenv import load_dotenv
 
 load_dotenv()
 
 logger = logging.getLogger(__name__)
+
+
+def _brief_from_objects(objects: list) -> str:
+    if not objects:
+        return ""
+    parts = []
+    for obj in objects[:3]:
+        label = (obj.get("label") or "object").replace("_", " ")
+        pos = obj.get("position") or "ahead"
+        dist = obj.get("distance_band") or "near"
+        parts.append(f"{label} {dist} {pos}")
+    return ". ".join(parts) + "."
 
 class GeminiAnalyzer:
     # Minimum fraction of object labels that must differ to trigger a new Gemini call.
@@ -19,8 +29,9 @@ class GeminiAnalyzer:
 
     def __init__(self):
         try:
-            genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-            self.model = genai.GenerativeModel('gemini-3.1-flash-lite-preview')
+            from .gemini import configure
+
+            configure()
             self.ready = True
             logger.info("GeminiAnalyzer initialized successfully.")
         except Exception as e:
@@ -56,7 +67,7 @@ class GeminiAnalyzer:
         # Also accept a partial change if ≥ SCENE_CHANGE_THRESHOLD objects differ
         return True
 
-    def analyze_scene(self, vision_metadata, text_prompt=None, force_refresh: bool = False):
+    def analyze_scene(self, vision_metadata, text_prompt=None, force_refresh: bool = False, image=None):
         """
         Combines metadata from vision models (YOLO, ZoeDepth, GroundedSAM, ByteTrack)
         and sends it to Gemini to synthesize a helpful response for the visually impaired user.
@@ -128,13 +139,24 @@ class GeminiAnalyzer:
         # -------------------------------------------------------------------
 
         try:
-            response = self.model.generate_content([system_prompt, user_prompt])
-            result = response.text
-            # Update state
+            from .gemini import generate_text
+
+            parts = [system_prompt, user_prompt]
+            if image is not None:
+                parts.append(image)
+            result = generate_text(parts, timeout=20)
             self._last_scene_hash = new_hash
             self._last_analysis_text = result
             self._last_call_time = time.monotonic()
             return result
         except Exception as e:
             logger.error(f"Gemini API error: {e}")
-            return "An error occurred while analyzing the scene."
+            result = (
+                _brief_from_objects(objects)
+                if objects
+                else "I could not analyse the scene. Try scanning again."
+            )
+            self._last_scene_hash = new_hash
+            self._last_analysis_text = result
+            self._last_call_time = time.monotonic()
+            return result

@@ -138,15 +138,21 @@ function stopCamera() {
   streamRef = null;
 }
 
+function csrfToken() {
+  const match = document.cookie.match(/csrftoken=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : '';
+}
+
+function setScanStatus(text) {
+  if (voiceStatus && text) voiceStatus.textContent = text;
+}
+
 function scheduleCaptureLoop() {
   stopCaptureLoop();
-  const tick = () => {
+  captureIntervalId = setInterval(() => {
     if (!isScanning || isFetchInFlight) return;
-    if (VisionSpeech.speaking && !pendingUserPrompt) return;
-    captureAndAnalyze();
-  };
-  tick();
-  captureIntervalId = setInterval(tick, CAPTURE_FAST_MS);
+    captureAndAnalyze({ silent: VisionSpeech.speaking && !pendingUserPrompt });
+  }, CAPTURE_FAST_MS);
 }
 
 function stopCaptureLoop() {
@@ -166,25 +172,31 @@ function clearDynamicUI() {
 
 async function captureAndAnalyze(options = {}) {
   if (!isScanning) return;
-  if (VisionSpeech.speaking && !options.userPrompt && !options.forceFull) return;
+  if (isFetchInFlight) return;
 
   isFetchInFlight = true;
   frameCounter += 1;
   const t0 = performance.now();
 
+  if (window.SightraCamera) {
+    await window.SightraCamera.waitForFrame(video, 2500);
+  }
   if (!video.videoWidth) {
+    setScanStatus('Camera is not ready yet. Tap Enable camera.');
+    showEnableCamera(true);
     isFetchInFlight = false;
     return;
   }
   const frameData = window.SightraCamera
-    ? window.SightraCamera.capture(video, canvas, 0.32)
+    ? window.SightraCamera.capture(video, canvas, 0.55)
     : (() => {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         canvas.getContext('2d').drawImage(video, 0, 0);
-        return canvas.toDataURL('image/jpeg', 0.32);
+        return canvas.toDataURL('image/jpeg', 0.55);
       })();
   if (!frameData) {
+    setScanStatus('Could not capture a frame. Try again.');
     isFetchInFlight = false;
     return;
   }
@@ -195,12 +207,20 @@ async function captureAndAnalyze(options = {}) {
   const forceFull = options.forceFull || Boolean(userPrompt);
   const narrationMode = forceFull ? 'full' : 'fast';
   if (forceFull) lastFullNarrationAt = Date.now();
+  if (!options.silent) setScanStatus(forceFull ? 'Analysing the scene…' : 'Scanning…');
+
+  const headers = { 'Content-Type': 'application/json' };
+  const token = csrfToken();
+  if (token) headers['X-CSRFToken'] = token;
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), 28000);
 
   try {
     const response = await fetch('/api/navigation/stream/', {
       method: 'POST',
       credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
+      signal: controller.signal,
       body: JSON.stringify({
         frame_data: frameData,
         text_prompt: userPrompt || (narrationMode === 'full' ? 'Briefly describe obstacles and path ahead.' : ''),
@@ -210,50 +230,73 @@ async function captureAndAnalyze(options = {}) {
         force_refresh: forceFull,
       }),
     });
-    const data = await response.json();
+    let data = {};
+    try {
+      data = await response.json();
+    } catch {
+      data = {};
+    }
     if (response.status === 403 && data.code === 'consent_required') {
       window.SightraPrivacy?.ensureOnboarding?.();
       isScanning = false;
       scanLabel.textContent = 'Initiate sight scan';
+      scanLabel.classList.remove('vision-scan-label-active');
       stopCaptureLoop();
-      isFetchInFlight = false;
+      setScanStatus('Grant camera analysis consent, then scan again.');
+      return;
+    }
+    if (!response.ok) {
+      const msg = data.message || data.analysis_text || data.error || 'Scan failed. Trying again.';
+      setScanStatus(msg);
+      if (!options.silent) VisionSpeech.enqueue(msg, { urgent: false });
       return;
     }
     const proc = document.getElementById('proc-readout');
     if (proc) proc.textContent = `${Math.round(performance.now() - t0)}ms`;
 
-    if (!isScanning) {
-      isFetchInFlight = false;
-      return;
-    }
+    if (!isScanning) return;
 
-    updateDynamicUI(data.metadata);
+    updateDynamicUI(data.metadata, data.analysis_text || data.hazard_alert || '');
+
+    const spoken = buildSpeechText(data);
+    if (spoken) setScanStatus(spoken);
+    else if (!data.metadata?.objects?.length) setScanStatus('Nothing detected yet. Hold the camera steady.');
 
     const urgent = Boolean(data.hazard_alert);
-    const toSpeak = buildSpeechText(data);
-    if (shouldSpeak(data, urgent) && toSpeak) {
-      VisionSpeech.enqueue(toSpeak, { urgent });
+    if (!options.silent && shouldSpeak(data, urgent) && spoken) {
+      VisionSpeech.enqueue(spoken, { urgent });
       lastSpokenKey = speechKey(data);
       if (narrationMode === 'full') lastFullNarrationAt = Date.now();
     }
 
-    if (userPrompt && voiceStatus) {
-      voiceStatus.textContent = data.analysis_text
-        ? 'Answered your question.'
-        : 'No answer yet — try again.';
+    if (userPrompt) {
+      setScanStatus(data.analysis_text ? data.analysis_text : 'No answer yet — try again.');
     }
   } catch (err) {
     console.error(err);
-    if (voiceStatus) voiceStatus.textContent = 'Connection error. Retrying…';
+    setScanStatus(err && err.name === 'AbortError' ? 'Scan timed out. Retrying…' : 'Connection error. Retrying…');
   } finally {
+    window.clearTimeout(timer);
     isFetchInFlight = false;
   }
 }
 
-function updateDynamicUI(metadata) {
+function updateDynamicUI(metadata, analysisText) {
   const boxesContainer = document.getElementById('dynamic-boxes');
   const alertsContainer = document.getElementById('dynamic-alerts');
   clearDynamicUI();
+  if (analysisText) {
+    const card = document.createElement('div');
+    card.className = 'vision-hud-card max-w-[160px] rounded-xl p-4';
+    const title = document.createElement('p');
+    title.className = 'font-headline text-[10px] font-black tracking-widest text-[var(--brand-cyan)]';
+    title.textContent = 'SCENE';
+    const body = document.createElement('p');
+    body.className = 'mt-1 text-[11px] leading-snug text-white/90';
+    body.textContent = analysisText;
+    card.append(title, body);
+    alertsContainer.appendChild(card);
+  }
   if (!metadata?.objects?.length) return;
 
   metadata.objects.forEach((obj) => {
@@ -351,6 +394,8 @@ scanBtn?.addEventListener('click', async () => {
     scanLabel.classList.remove('text-[var(--brand-cyan)]');
     frameCounter = 0;
     lastFullNarrationAt = 0;
+    setScanStatus('Analysing the scene…');
+    await window.SightraCamera?.waitForFrame(video, 4000);
     scheduleCaptureLoop();
     captureAndAnalyze({ forceFull: true });
     window.SightraUI?.announce('Sight scan started');

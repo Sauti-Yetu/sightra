@@ -90,24 +90,51 @@
     return canvas.toDataURL("image/jpeg", 0.7);
   }
 
+  async function postAnalyze(frameData) {
+    const headers = { "Content-Type": "application/json" };
+    const token = csrf();
+    if (token) headers["X-CSRFToken"] = token;
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), 28000);
+    try {
+      const res = await fetch("/api/vision/reader/analyze/", {
+        method: "POST",
+        credentials: "same-origin",
+        headers,
+        signal: controller.signal,
+        body: JSON.stringify({ frame_data: frameData, mode, language: language() }),
+      });
+      let data = {};
+      try {
+        data = await res.json();
+      } catch {
+        data = {};
+      }
+      return { res, data };
+    } finally {
+      window.clearTimeout(timer);
+    }
+  }
+
   async function analyze(frameData) {
     if (!frameData || busy) return;
     busy = true;
     setStatus("Reading…");
     try {
-      const headers = { "Content-Type": "application/json" };
-      const token = csrf();
-      if (token) headers["X-CSRFToken"] = token;
-      const res = await fetch("/api/vision/reader/analyze/", {
-        method: "POST",
-        credentials: "same-origin",
-        headers,
-        body: JSON.stringify({ frame_data: frameData, mode, language: language() }),
-      });
-      const data = await res.json();
+      let { res, data } = await postAnalyze(frameData);
       if (res.status === 403 && data.code === "consent_required") {
-        await ensureConsent();
-        setStatus("Grant consent, then try again.");
+        const ok = await ensureConsent();
+        if (!ok) {
+          setStatus("Grant camera analysis consent, then try again.");
+          return;
+        }
+        ({ res, data } = await postAnalyze(frameData));
+      }
+      if (!res.ok && data.code !== "consent_required") {
+        const spoken = data.spoken || data.error || "Reading failed. Try again.";
+        showResult(spoken, data.text || spoken);
+        window.SightraTTS?.speak(spoken);
+        setStatus(spoken);
         return;
       }
       const spoken = data.spoken || data.error || "Nothing found.";
@@ -115,8 +142,13 @@
       showResult(spoken, text);
       window.SightraTTS?.speak(spoken);
       setStatus(MODE_LABELS[mode] + " ready.");
-    } catch {
-      setStatus("Could not reach the reader service.");
+    } catch (err) {
+      const msg =
+        err && err.name === "AbortError"
+          ? "Reading timed out. Try again."
+          : "Could not reach the reader service.";
+      setStatus(msg);
+      window.SightraTTS?.speak(msg);
     } finally {
       busy = false;
     }

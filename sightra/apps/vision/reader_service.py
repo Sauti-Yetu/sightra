@@ -6,14 +6,12 @@ import base64
 import io
 import json
 import logging
-import os
 import re
 
-import google.generativeai as genai
-from dotenv import load_dotenv
 from PIL import Image
 
-load_dotenv()
+from apps.core.gemini import generate_text
+
 logger = logging.getLogger(__name__)
 
 MODES = ("live", "document", "currency", "signage", "upload")
@@ -61,6 +59,7 @@ def _decode_image(frame_data: str) -> Image.Image | None:
         img.load()
         if img.mode not in ("RGB", "L"):
             img = img.convert("RGB")
+        img.thumbnail((1280, 1280))
         return img
     except Exception:
         logger.exception("Could not decode reader image")
@@ -106,25 +105,24 @@ def analyze_reader_image(
             "language": language,
         }
 
+    lang_name = LANGUAGE_NAMES[language]
+    prompt = (
+        "You are Sightra Reader, assisting a blind or low-vision user. "
+        f"Task: {MODE_INSTRUCTIONS[mode]}\n"
+        f"Write the spoken summary and the on-screen transcript in {lang_name}.\n"
+        "Return JSON only with keys spoken and text. "
+        "spoken: one or two short sentences for text-to-speech. "
+        "text: the full transcript the user can review on screen. "
+        "Do not invent text that is not visible. If unsure, say so."
+    )
     try:
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        model = genai.GenerativeModel("gemini-3.1-flash-lite-preview")
-        lang_name = LANGUAGE_NAMES[language]
-        prompt = (
-            "You are Sightra Reader, assisting a blind or low-vision user. "
-            f"Task: {MODE_INSTRUCTIONS[mode]}\n"
-            f"Write the spoken summary and the on-screen transcript in {lang_name}.\n"
-            "Return JSON only with keys spoken and text. "
-            "spoken: one or two short sentences for text-to-speech. "
-            "text: the full transcript the user can review on screen. "
-            "Do not invent text that is not visible. If unsure, say so."
-        )
-        response = model.generate_content([prompt, img])
-        parsed = _parse_model_text(getattr(response, "text", "") or "")
+        parsed = _parse_model_text(generate_text([prompt, img], timeout=20))
+        spoken = parsed["spoken"] or "Nothing readable was found."
+        body = parsed["text"] or spoken
         return {
             "success": True,
-            "spoken": parsed["spoken"],
-            "text": parsed["text"],
+            "spoken": spoken,
+            "text": body,
             "mode": mode,
             "language": language,
         }

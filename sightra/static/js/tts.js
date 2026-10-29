@@ -58,16 +58,24 @@
       const headers = { "Content-Type": "application/json" };
       const token = csrf();
       if (token) headers["X-CSRFToken"] = token;
-      const res = await fetch("/api/audio/speak/", {
-        method: "POST",
-        credentials: "same-origin",
-        headers,
-        body: JSON.stringify({
-          text: cleaned,
-          gender: opts.gender || gender(),
-          language: opts.language || language(),
-        }),
-      });
+      const controller = new AbortController();
+      const timer = window.setTimeout(() => controller.abort(), 8000);
+      let res;
+      try {
+        res = await fetch("/api/audio/speak/", {
+          method: "POST",
+          credentials: "same-origin",
+          headers,
+          signal: controller.signal,
+          body: JSON.stringify({
+            text: cleaned,
+            gender: opts.gender || gender(),
+            language: opts.language || language(),
+          }),
+        });
+      } finally {
+        window.clearTimeout(timer);
+      }
       if (!res.ok) {
         deviceSpeak(cleaned);
         return;

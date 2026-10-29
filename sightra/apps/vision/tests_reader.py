@@ -85,3 +85,23 @@ class ReaderApiTests(TestCase):
         )
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.json()["spoken"], "Exit sign ahead.")
+
+    @patch(
+        "apps.vision.reader_service.generate_text",
+        return_value='{"spoken": "Exit two hundred metres.", "text": "EXIT 200 M"}',
+    )
+    def test_reader_service_uses_shared_gemini(self, _gen):
+        import base64
+        import io
+
+        from PIL import Image
+
+        from apps.vision.reader_service import analyze_reader_image
+
+        buf = io.BytesIO()
+        Image.new("RGB", (16, 16), "white").save(buf, format="JPEG")
+        frame = "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
+        result = analyze_reader_image(frame, mode="signage", language="en")
+        self.assertTrue(result["success"])
+        self.assertEqual(result["spoken"], "Exit two hundred metres.")
+        self.assertEqual(result["text"], "EXIT 200 M")
