@@ -8,7 +8,7 @@
   --bg-muted: #f4f7fb;
   --surface: #ffffff;
   --text: #0a0a0a;
-  --text-muted: #4b5563;
+  --text-muted: #374151;
   --primary: var(--brand-blue-dark);
   --primary-soft: #e8f0fc;
   --primary-strong: #082f6e;
@@ -26,7 +26,7 @@ html.dark {
   --bg-muted: #141414;
   --surface: #1a1a1a;
   --text: #f3f4f6;
-  --text-muted: #9ca3af;
+  --text-muted: #d1d5db;
   --primary: var(--brand-blue-light);
   --primary-soft: rgba(124, 185, 241, 0.12);
   --primary-strong: #dbeafe;
@@ -89,13 +89,18 @@ body {
 }
 
 .btn-primary {
-  background: var(--primary);
-  color: #fff;
+  background: var(--brand-blue-dark);
+  color: #ffffff;
   border-radius: 999px;
   padding: 0.75rem 1.25rem;
   font-weight: 600;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   box-shadow: 0 8px 20px var(--ring);
+}
+
+html.dark .btn-primary {
+  background: #93c5fd;
+  color: #0a0a0a;
 }
 
 .btn-primary:hover {
@@ -215,6 +220,29 @@ html.dark .bottom-nav a.is-active {
 
 .skip-link:focus {
   left: 1rem;
+  top: 0.5rem;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--brand-blue);
+  outline-offset: 2px;
+}
+
+html.dark a:focus-visible,
+html.dark button:focus-visible,
+html.dark input:focus-visible,
+html.dark select:focus-visible,
+html.dark textarea:focus-visible {
+  outline-color: var(--brand-blue-light);
+}
+
+.a11y-panel[hidden] {
+  display: none !important;
 }
 
 .a11y-panel {
@@ -264,7 +292,7 @@ html.dark .bottom-nav a.is-active {
 }
 
 .privacy-modal[hidden] {
-  display: none;
+  display: none !important;
 }
 
 .privacy-modal-backdrop {
@@ -340,4 +368,28 @@ html.dark .bottom-nav a.is-active {
 
 .legal-footer a:hover {
   color: var(--primary-strong);
+}
+
+.cookie-banner {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 65;
+  padding: 1rem;
+}
+
+.cookie-banner[hidden] {
+  display: none !important;
+}
+
+.cookie-banner-inner {
+  margin: 0 auto;
+  max-width: 42rem;
+  border-radius: 1rem;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  padding: 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
 }

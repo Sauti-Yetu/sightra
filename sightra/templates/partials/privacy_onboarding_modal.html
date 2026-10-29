@@ -6,7 +6,7 @@
       Sightra processes camera and AI data to provide assistive guidance. Please review
       <a href="/legal/privacy-policy/" class="font-medium text-[var(--primary-strong)]">Privacy Policy</a>,
       <a href="/legal/ai-transparency/" class="font-medium text-[var(--primary-strong)]">AI Transparency</a>, and
-      <a href="/legal/terms-of-use/" class="font-medium text-[var(--primary-strong)]">Terms of Use</a>.
+      <a href="/legal/terms-of-service/" class="font-medium text-[var(--primary-strong)]">Terms of Service</a>.
     </p>
     <form id="privacy-onboarding-form" class="mt-6 space-y-4 text-sm">
       <label class="flex gap-3">
@@ -17,6 +17,19 @@
         <input id="po-core-accept" type="checkbox" required class="mt-1" />
         <span>I agree to processing necessary to provide Sightra’s assistive features I choose to use.</span>
       </label>
+      <label class="flex gap-3">
+        <input id="po-age-adult" type="checkbox" class="mt-1" />
+        <span>I confirm I am 18 or older.</span>
+      </label>
+      <label class="flex gap-3">
+        <input id="po-parental" type="checkbox" class="mt-1" />
+        <span>I am under 18 and a parent or guardian consents (enter their email below).</span>
+      </label>
+      <div id="po-guardian-wrap" hidden>
+        <label for="po-guardian-email" class="mb-1 block text-sm font-medium">Parent or guardian email</label>
+        <input id="po-guardian-email" type="email" autocomplete="email"
+          class="w-full rounded-xl border-0 bg-[var(--bg-muted)] px-4 py-3 text-sm ring-1 ring-black/5" />
+      </div>
       <fieldset class="rounded-xl border border-black/5 p-4 dark:border-white/10">
         <legend class="px-1 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Optional (off by default)</legend>
         <label class="mt-2 flex gap-3">
@@ -34,6 +47,10 @@
         <label class="mt-2 flex gap-3">
           <input id="po-opt-analytics" type="checkbox" class="mt-1" />
           <span>Optional analytics (not used in the current app build).</span>
+        </label>
+        <label class="mt-2 flex gap-3">
+          <input id="po-opt-marketing" type="checkbox" class="mt-1" />
+          <span>Optional product emails (you can <a href="/legal/unsubscribe/" class="underline">unsubscribe</a> anytime).</span>
         </label>
       </fieldset>
       <button type="submit" class="btn-primary w-full">Save and continue</button>

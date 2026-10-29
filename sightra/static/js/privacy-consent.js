@@ -103,13 +103,28 @@
         window.SightraUI?.announce("Please confirm required privacy items.");
         return;
       }
+      const ageAdult = document.getElementById("po-age-adult")?.checked === true;
+      const parental = document.getElementById("po-parental")?.checked === true;
+      const guardianEmail = document.getElementById("po-guardian-email")?.value?.trim() || "";
+      if (!ageAdult && !parental) {
+        window.SightraUI?.announce("Confirm you are 18 or older, or that a parent or guardian consents.");
+        return;
+      }
+      if (parental && !ageAdult && !guardianEmail.includes("@")) {
+        window.SightraUI?.announce("Enter a parent or guardian email.");
+        return;
+      }
       const payload = {
         privacy_notice_ack: true,
         core_service_accept: true,
+        age_adult: ageAdult,
+        parental_consent: parental,
+        guardian_email: guardianEmail,
         optional_history: document.getElementById("po-opt-history")?.checked === true,
         research_feedback: document.getElementById("po-opt-research")?.checked === true,
         ai_training: document.getElementById("po-opt-ai-train")?.checked === true,
         analytics: document.getElementById("po-opt-analytics")?.checked === true,
+        marketing_email: document.getElementById("po-opt-marketing")?.checked === true,
       };
       const btn = form.querySelector('button[type="submit"]');
       if (btn) btn.disabled = true;
@@ -154,12 +169,30 @@
 
   function skipOnboardingForPath() {
     const path = window.location.pathname.replace(/\/$/, "") || "/";
-    return path === "/signin" || path === "/signup";
+    return (
+      path === "/" ||
+      path === "/signin" ||
+      path === "/signup" ||
+      path.startsWith("/legal") ||
+      path === "/unsubscribe"
+    );
+  }
+
+  function bindGuardianToggle() {
+    const adult = document.getElementById("po-age-adult");
+    const parental = document.getElementById("po-parental");
+    const wrap = document.getElementById("po-guardian-wrap");
+    function sync() {
+      if (wrap) wrap.hidden = !(parental?.checked && !adult?.checked);
+    }
+    adult?.addEventListener("change", sync);
+    parental?.addEventListener("change", sync);
   }
 
   document.addEventListener("DOMContentLoaded", () => {
     bindOnboardingForm();
     bindPrivacySettingsForm();
+    bindGuardianToggle();
     if (skipOnboardingForPath()) return;
     fetchStatus()
       .then((s) => {

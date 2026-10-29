@@ -50,10 +50,24 @@
           {% if status.decisions.optional_analytics == "granted" %}checked{% endif %} />
         <span>Analytics (not active in current build)</span>
       </label>
+      <label class="mt-3 flex gap-3 text-sm">
+        <input type="checkbox" data-consent-category="optional_cookies" data-withdraw="true"
+          {% if status.decisions.optional_cookies == "granted" %}checked{% endif %} />
+        <span>Optional cookies (same as cookie banner “Accept optional”)</span>
+      </label>
+      <label class="mt-3 flex gap-3 text-sm">
+        <input type="checkbox" data-consent-category="marketing_email" data-withdraw="true"
+          {% if status.decisions.marketing_email == "granted" %}checked{% endif %} />
+        <span>Optional product emails</span>
+      </label>
     </section>
 
     <p class="text-sm text-[var(--text-muted)]">Withdrawing consent stops related processing where technically feasible. Core account sign-in may still require minimal processing.</p>
-    <a href="/legal/rights/" class="btn-secondary inline-block">Export or delete data</a>
+    <div class="flex flex-wrap gap-3">
+      <a href="/legal/rights/" class="btn-secondary inline-block">Export or delete data</a>
+      <a href="/legal/unsubscribe/" class="btn-ghost inline-flex ring-1 ring-black/5 dark:ring-white/10">Unsubscribe</a>
+      <a href="/legal/parental-consent/" class="btn-ghost inline-flex ring-1 ring-black/5 dark:ring-white/10">Parental consent</a>
+    </div>
   </form>
 </div>
 {% endblock %}

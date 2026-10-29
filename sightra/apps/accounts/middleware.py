@@ -16,6 +16,7 @@ _PUBLIC_PREFIXES = (
     "/manifest.webmanifest",
     "/offline/",
     "/legal/",
+    "/unsubscribe",
     "/api/accounts/auth/",
     "/api/privacy/",
 )

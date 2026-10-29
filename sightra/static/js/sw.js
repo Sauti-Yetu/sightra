@@ -1,4 +1,4 @@
-const CACHE = "sightra-shell-v7";
+const CACHE = "sightra-shell-v8";
 const PRECACHE = [
   "/offline/",
   "/manifest.webmanifest",

@@ -7,6 +7,18 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
+from apps.privacy.constants import (
+    CONSENT_AGE_ADULT,
+    CONSENT_CORE_SERVICE,
+    CONSENT_MARKETING_EMAIL,
+    CONSENT_PARENTAL,
+    CONSENT_PRIVACY_NOTICE,
+    DECISION_DENIED,
+    DECISION_GRANTED,
+)
+from apps.privacy.services.consent_service import record_consent, set_marketing_preference
+from apps.privacy.services.data_requests import create_data_request
+
 from .auth_messages import auth_error_message, signup_success_message
 from .models import UserPreference
 from .services import supabase_client
@@ -34,12 +46,85 @@ def signup(request):
     if request.method == "POST":
         email = (request.POST.get("email") or "").strip()
         password = request.POST.get("password") or ""
+        if request.POST.get("agree_terms") != "on":
+            messages.error(request, "Please agree to the Terms of Service to create an account.")
+            return render(request, "signup.html")
+        if request.POST.get("agree_privacy") != "on":
+            messages.error(request, "Please agree to the Privacy Policy to create an account.")
+            return render(request, "signup.html")
+        age_adult = request.POST.get("age_adult") == "on"
+        parental = request.POST.get("parental_consent") == "on"
+        guardian_email = (request.POST.get("guardian_email") or "").strip()
+        if not age_adult and not parental:
+            messages.error(
+                request,
+                "Confirm you are 18 or older, or that a parent/guardian consents to this account.",
+            )
+            return render(request, "signup.html")
+        if parental and not age_adult and ("@" not in guardian_email):
+            messages.error(request, "Enter a parent or guardian email for accounts used by people under 18.")
+            return render(request, "signup.html")
         result = supabase_client.sign_up(email, password)
-        if result.get("access_token"):
-            SessionService.set_from_auth_response(request, result)
-            return redirect("/dashboard")
-        hint = signup_success_message(result)
-        if hint or (result.get("user") or {}).get("id"):
+        created = bool(result.get("access_token") or (result.get("user") or {}).get("id") or signup_success_message(result))
+        if created:
+            if not request.session.session_key:
+                request.session.create()
+            if result.get("access_token"):
+                SessionService.set_from_auth_response(request, result)
+            record_consent(
+                request,
+                category=CONSENT_PRIVACY_NOTICE,
+                decision=DECISION_GRANTED,
+                policy_slug="privacy-policy",
+                purpose="Signup form acknowledgement",
+            )
+            record_consent(
+                request,
+                category=CONSENT_CORE_SERVICE,
+                decision=DECISION_GRANTED,
+                policy_slug="terms-of-service",
+                purpose="Signup form acknowledgement",
+            )
+            if age_adult:
+                record_consent(
+                    request,
+                    category=CONSENT_AGE_ADULT,
+                    decision=DECISION_GRANTED,
+                    policy_slug="privacy-policy",
+                    purpose="Adult age attestation at signup",
+                )
+            if parental:
+                record_consent(
+                    request,
+                    category=CONSENT_PARENTAL,
+                    decision=DECISION_GRANTED,
+                    policy_slug="privacy-policy",
+                    purpose="Parental consent attestation at signup",
+                    metadata={"guardian_email": guardian_email},
+                )
+                try:
+                    create_data_request(
+                        kind="parental_consent",
+                        email=email,
+                        guardian_email=guardian_email,
+                        details="Recorded at signup",
+                    )
+                except ValueError:
+                    pass
+            marketing = request.POST.get("marketing_email") == "on"
+            if email:
+                set_marketing_preference(email, opt_in=marketing)
+            record_consent(
+                request,
+                category=CONSENT_MARKETING_EMAIL,
+                decision=DECISION_GRANTED if marketing else DECISION_DENIED,
+                policy_slug="privacy-policy",
+                purpose="Signup marketing checkbox",
+            )
+            request.session.save()
+            if result.get("access_token"):
+                return redirect("/dashboard")
+            hint = signup_success_message(result)
             messages.success(request, hint or "Account created. You can sign in now.")
             return redirect("/signin/")
         messages.error(request, auth_error_message(result))

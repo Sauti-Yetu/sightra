@@ -26,7 +26,7 @@
   </script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lexend:wght@500;600;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <link rel="stylesheet" href="{% static 'css/sightra.css' %}?v=7" />
+  <link rel="stylesheet" href="{% static 'css/sightra.css' %}?v=8" />
   {% block extra_head %}{% endblock %}
 </head>
 <body class="{% block body_class %}app-shell{% endblock %}">
@@ -64,14 +64,16 @@
   {% include "partials/install_prompt.html" %}
   {% include "partials/pwa_install_modal.html" %}
   {% include "partials/privacy_onboarding_modal.html" %}
+  {% include "partials/cookie_banner.html" %}
   {% include "partials/legal_footer.html" %}
 
   {% block bottom_nav %}
   {% include "bottom_nav.html" %}
   {% endblock %}
 
-  <script src="{% static 'js/privacy-consent.js' %}"></script>
-  <script src="{% static 'js/sightra.js' %}?v=7"></script>
+  <script src="{% static 'js/privacy-consent.js' %}?v=8"></script>
+  <script src="{% static 'js/cookie-consent.js' %}?v=8"></script>
+  <script src="{% static 'js/sightra.js' %}?v=8"></script>
   {% block page_scripts %}{% endblock %}
 </body>
 </html>

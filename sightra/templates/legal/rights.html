@@ -2,8 +2,51 @@
 {% block title %}Privacy rights | Sightra{% endblock %}
 {% block main_class %}mx-auto max-w-3xl px-4 pb-28 pt-8 md:pb-12{% endblock %}
 {% block content %}
-<h1 class="font-headline text-3xl font-semibold">Privacy rights &amp; data requests</h1>
-<p class="mt-3 text-[var(--text-muted)]">Exercise rights under Kenyan data protection law. Engineering tools below export or delete data stored in Sightra’s application database.</p>
+<p class="text-sm"><a href="/legal/" class="text-[var(--primary-strong)]">← Privacy &amp; Legal</a></p>
+<h1 class="font-headline mt-4 text-3xl font-semibold">Privacy rights &amp; data requests</h1>
+<p class="mt-3 text-[var(--text-muted)]">Ask us to access, correct, or delete personal data. Signed-in users can also download or delete data stored in Sightra’s application database immediately.</p>
+
+{% if form_message %}
+<p class="mt-6 rounded-xl bg-[var(--primary-soft)] p-4 text-sm" role="status">{{ form_message }}</p>
+{% endif %}
+{% if form_error %}
+<p class="mt-6 rounded-xl bg-red-50 p-4 text-sm text-red-800 dark:bg-red-950/40 dark:text-red-200" role="alert">{{ form_error }}</p>
+{% endif %}
+
+<section class="card mt-8 p-6">
+  <h2 class="font-headline text-lg font-semibold">Submit a request (no account required)</h2>
+  <p class="mt-2 text-sm text-[var(--text-muted)]">Use this if you cannot sign in, you are a parent or guardian, or you want us to delete data associated with an email address.</p>
+  <form method="post" class="mt-4 space-y-4" novalidate>
+    {% csrf_token %}
+    <div>
+      <label for="req-email" class="mb-1 block text-sm font-medium">Your email</label>
+      <input id="req-email" name="email" type="email" required autocomplete="email"
+        value="{% if request.sightra_user %}{{ request.sightra_user.email }}{% endif %}"
+        class="w-full rounded-xl border-0 bg-[var(--bg-muted)] px-4 py-3 text-sm ring-1 ring-black/5 focus:ring-2 focus:ring-[var(--primary)] dark:ring-white/10" />
+    </div>
+    <div>
+      <label for="req-kind" class="mb-1 block text-sm font-medium">What do you need?</label>
+      <select id="req-kind" name="kind" class="w-full rounded-xl border-0 bg-[var(--bg-muted)] px-4 py-3 text-sm ring-1 ring-black/5 focus:ring-2 focus:ring-[var(--primary)] dark:ring-white/10">
+        <option value="deletion">Delete my data</option>
+        <option value="access">Download / access my data</option>
+        <option value="correction">Correct my data</option>
+        <option value="parental_consent">Parental consent or child data</option>
+        <option value="unsubscribe">Unsubscribe from emails</option>
+      </select>
+    </div>
+    <div>
+      <label for="req-guardian" class="mb-1 block text-sm font-medium">Parent/guardian email (if this is about a child)</label>
+      <input id="req-guardian" name="guardian_email" type="email" autocomplete="email"
+        class="w-full rounded-xl border-0 bg-[var(--bg-muted)] px-4 py-3 text-sm ring-1 ring-black/5 focus:ring-2 focus:ring-[var(--primary)] dark:ring-white/10" />
+    </div>
+    <div>
+      <label for="req-details" class="mb-1 block text-sm font-medium">Details (optional)</label>
+      <textarea id="req-details" name="details" rows="3" maxlength="4000"
+        class="w-full rounded-xl border-0 bg-[var(--bg-muted)] px-4 py-3 text-sm ring-1 ring-black/5 focus:ring-2 focus:ring-[var(--primary)] dark:ring-white/10"></textarea>
+    </div>
+    <button type="submit" class="btn-primary">Send request</button>
+  </form>
+</section>
 
 {% if request.sightra_user %}
 <section class="card mt-8 p-6">
@@ -13,19 +56,19 @@
   <pre id="export-output" class="mt-4 hidden max-h-64 overflow-auto rounded-xl bg-[var(--bg-muted)] p-4 text-xs" tabindex="0"></pre>
 </section>
 
-<section class="card mt-6 border-red-200 p-6 dark:border-red-900/40">
-  <h2 class="font-headline text-lg font-semibold text-red-700 dark:text-red-300">Delete my Sightra data</h2>
-  <p class="mt-2 text-sm text-[var(--text-muted)]">Removes preferences and consent logs from this server and signs you out. Supabase account deletion requires configured admin credentials or manual action.</p>
-  <button type="button" id="btn-delete-data" class="btn-ghost mt-4 ring-1 ring-red-300 dark:ring-red-800">Delete account data</button>
+<section class="card mt-6 border border-red-300 p-6 dark:border-red-900/40">
+  <h2 class="font-headline text-lg font-semibold">Delete my Sightra data now</h2>
+  <p class="mt-2 text-sm text-[var(--text-muted)]">Removes preferences and consent logs from this server and signs you out. This cannot be undone from the app. Supabase account deletion requires configured admin credentials or a follow-up request.</p>
+  <button type="button" id="btn-delete-data" class="btn-ghost mt-4 ring-1 ring-red-400 dark:ring-red-800">Delete account data</button>
   <p id="delete-result" class="mt-3 text-sm" role="status"></p>
 </section>
 {% else %}
-<p class="mt-6"><a href="/signin/?next=/legal/rights/" class="btn-primary inline-block">Sign in to manage your data</a></p>
+<p class="mt-6 text-sm text-[var(--text-muted)]">Already have an account? <a href="/signin/?next=/legal/rights/" class="underline">Sign in</a> to export or delete immediately.</p>
 {% endif %}
 
 <section class="mt-8 text-sm text-[var(--text-muted)]">
   <h2 class="font-headline text-lg font-semibold text-[var(--text)]">Contact &amp; complaints</h2>
-  <p class="mt-2">Email: [CONFIGURE: privacy contact email]. You may also contact the <a href="https://www.odpc.go.ke/" rel="noopener">ODPC</a>.</p>
+  <p class="mt-2">Email: <a class="underline" href="mailto:{{ legal.contact_email }}">{{ legal.contact_email }}</a>. You may also contact the <a href="https://www.odpc.go.ke/" rel="noopener" class="underline">ODPC</a>.</p>
 </section>
 {% endblock %}
 {% block page_scripts %}
@@ -40,11 +83,17 @@
     const pre = document.getElementById('export-output');
     if (pre && data.export) {
       pre.hidden = false;
+      pre.classList.remove('hidden');
       pre.textContent = JSON.stringify(data.export, null, 2);
+      const blob = new Blob([pre.textContent], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'sightra-data-export.json';
+      a.click();
     }
   });
   document.getElementById('btn-delete-data')?.addEventListener('click', async () => {
-    if (!confirm('Permanently delete your Sightra data on this server?')) return;
+    if (!confirm('Permanently delete your Sightra data on this server? This cannot be undone.')) return;
     const res = await fetch('/api/privacy/delete-account-data/', {
       method: 'POST',
       credentials: 'same-origin',

@@ -56,6 +56,10 @@ urlpatterns = [
     path("settings/privacy/", privacy_views.privacy_settings, name="privacy-settings"),
     path("legal/", privacy_views.legal_index, name="legal-index"),
     path("legal/rights/", privacy_views.privacy_rights, name="privacy-rights"),
+    path("legal/business/", privacy_views.business_details, name="legal-business"),
+    path("legal/unsubscribe/", privacy_views.unsubscribe, name="legal-unsubscribe"),
+    path("unsubscribe/", privacy_views.unsubscribe, name="unsubscribe"),
+    path("legal/parental-consent/", privacy_views.parental_consent, name="legal-parental"),
     path("legal/<slug:slug>/", privacy_views.legal_document, name="legal-document"),
     # APIs
     path("api/accounts/", include("apps.accounts.urls")),

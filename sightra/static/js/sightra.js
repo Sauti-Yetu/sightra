@@ -97,8 +97,13 @@
 
     toggle.addEventListener("click", () => {
       const hidden = panel.hasAttribute("hidden");
-      if (hidden) panel.removeAttribute("hidden");
-      else panel.setAttribute("hidden", "hidden");
+      if (hidden) {
+        panel.removeAttribute("hidden");
+        panel.querySelector("input")?.focus();
+      } else {
+        panel.setAttribute("hidden", "hidden");
+        toggle.focus();
+      }
       announce(hidden ? "Accessibility options opened" : "Accessibility options closed");
     });
 
@@ -380,12 +385,69 @@
     SightraPWA.init();
   }
 
+  function focusable(root) {
+    return Array.from(
+      root.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+    ).filter((el) => !el.hidden && el.offsetParent !== null);
+  }
+
+  function initKeyboard() {
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape" && e.key !== "Tab") return;
+
+      const privacy = document.getElementById("privacy-onboarding-modal");
+      const pwa = document.getElementById("pwa-install-modal");
+      const a11y = document.getElementById("a11y-panel");
+      const cookie = document.getElementById("cookie-banner");
+
+      const openDialog = [privacy, pwa].find((el) => el && !el.hidden);
+      const openA11y = a11y && !a11y.hidden;
+      const openCookie = cookie && !cookie.hidden;
+
+      if (e.key === "Escape") {
+        if (openDialog && openDialog.id === "pwa-install-modal") {
+          openDialog.hidden = true;
+          announce("Install dialog closed");
+          return;
+        }
+        if (openA11y) {
+          a11y.setAttribute("hidden", "hidden");
+          document.getElementById("a11y-toggle")?.focus();
+          announce("Accessibility options closed");
+          return;
+        }
+        if (openCookie) {
+          document.getElementById("cookie-reject")?.focus();
+          announce("Choose Reject optional or Accept optional. Essential cookies stay on.");
+        }
+        return;
+      }
+
+      if (e.key === "Tab" && openDialog) {
+        const items = focusable(openDialog);
+        if (!items.length) return;
+        const first = items[0];
+        const last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     initTheme();
     initA11yPanel();
     initNav();
     initPasswordToggles();
     initInstallPrompt();
+    initKeyboard();
   });
 
   window.SightraUI = { announce, applyTheme, speak };

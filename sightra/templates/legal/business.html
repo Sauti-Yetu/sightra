@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Business details | Sightra{% endblock %}
+{% block main_class %}mx-auto max-w-3xl px-4 pb-28 pt-8 md:pb-12 legal-document{% endblock %}
+{% block content %}
+<p class="text-sm"><a href="/legal/" class="text-[var(--primary-strong)]">← Privacy &amp; Legal</a></p>
+<h1 class="font-headline mt-4 text-3xl font-semibold">Business details</h1>
+<p class="mt-3 text-[var(--text-muted)]">Who operates Sightra. Registration numbers are published only when they exist; we do not invent them.</p>
+<dl class="card mt-8 divide-y divide-black/5 p-0 dark:divide-white/10">
+  <div class="grid gap-1 px-6 py-4 sm:grid-cols-3"><dt class="text-sm font-medium">Operator</dt><dd class="sm:col-span-2">{{ org.operator_name }}</dd></div>
+  <div class="grid gap-1 px-6 py-4 sm:grid-cols-3"><dt class="text-sm font-medium">Product</dt><dd class="sm:col-span-2">{{ org.product_name }}</dd></div>
+  <div class="grid gap-1 px-6 py-4 sm:grid-cols-3"><dt class="text-sm font-medium">Website</dt><dd class="sm:col-span-2"><a class="underline" href="{{ org.website_url }}">{{ org.website_url }}</a></dd></div>
+  <div class="grid gap-1 px-6 py-4 sm:grid-cols-3"><dt class="text-sm font-medium">Privacy email</dt><dd class="sm:col-span-2"><a class="underline" href="mailto:{{ org.contact_email }}">{{ org.contact_email }}</a></dd></div>
+  <div class="grid gap-1 px-6 py-4 sm:grid-cols-3"><dt class="text-sm font-medium">Support</dt><dd class="sm:col-span-2"><a class="underline" href="mailto:{{ org.support_email }}">{{ org.support_email }}</a></dd></div>
+  <div class="grid gap-1 px-6 py-4 sm:grid-cols-3"><dt class="text-sm font-medium">Data protection contact</dt><dd class="sm:col-span-2">{{ org.dpo_contact }}</dd></div>
+  <div class="grid gap-1 px-6 py-4 sm:grid-cols-3"><dt class="text-sm font-medium">Postal address</dt><dd class="sm:col-span-2">{{ org.postal_address }}</dd></div>
+  <div class="grid gap-1 px-6 py-4 sm:grid-cols-3"><dt class="text-sm font-medium">Registration</dt><dd class="sm:col-span-2">{{ org.registration_number }}</dd></div>
+  <div class="grid gap-1 px-6 py-4 sm:grid-cols-3"><dt class="text-sm font-medium">Intended jurisdiction</dt><dd class="sm:col-span-2">{{ org.jurisdiction }}</dd></div>
+</dl>
+<p class="mt-6 text-sm text-[var(--text-muted)]">Supervisory authority in Kenya: <a class="underline" href="{{ org.odpc_url }}" rel="noopener">Office of the Data Protection Commissioner</a>.</p>
+<p class="mt-2 text-xs text-[var(--text-muted)]">Policy version {{ policy_version }}.</p>
+{% endblock %}

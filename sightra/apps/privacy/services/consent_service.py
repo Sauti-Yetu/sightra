@@ -3,11 +3,15 @@ from __future__ import annotations
 from django.utils import timezone
 
 from apps.privacy.constants import (
+    CONSENT_AGE_ADULT,
     CONSENT_CAMERA_FEATURE,
+    CONSENT_COOKIES_OPTIONAL,
     CONSENT_CORE_SERVICE,
     CONSENT_LOCATION_FEATURE,
+    CONSENT_MARKETING_EMAIL,
     CONSENT_MICROPHONE_FEATURE,
     CONSENT_OPTIONAL_HISTORY,
+    CONSENT_PARENTAL,
     CONSENT_PRIVACY_NOTICE,
     CONSENT_RESEARCH_FEEDBACK,
     CONSENT_AI_TRAINING,
@@ -17,7 +21,7 @@ from apps.privacy.constants import (
     DECISION_WITHDRAWN,
     POLICY_VERSION,
 )
-from apps.privacy.models import ConsentRecord, PrivacyProfile
+from apps.privacy.models import ConsentRecord, EmailPreference, PrivacyProfile
 
 SESSION_PRIVACY_KEY = "sightra_privacy_state"
 
@@ -105,6 +109,17 @@ def record_consent(
             profile.ai_model_secondary_use = decision == DECISION_GRANTED
         elif category == CONSENT_ANALYTICS:
             profile.optional_analytics = decision == DECISION_GRANTED
+        elif category == CONSENT_COOKIES_OPTIONAL:
+            profile.optional_cookies = decision == DECISION_GRANTED
+        elif category == CONSENT_MARKETING_EMAIL:
+            profile.marketing_emails_opt_in = decision == DECISION_GRANTED
+        elif category == CONSENT_AGE_ADULT and decision == DECISION_GRANTED:
+            profile.age_confirmed_adult = True
+        elif category == CONSENT_PARENTAL and decision == DECISION_GRANTED:
+            profile.parental_consent_at = now
+            guardian = (metadata or {}).get("guardian_email") or ""
+            if guardian:
+                profile.guardian_email = str(guardian)[:254]
         if decision == DECISION_WITHDRAWN:
             if category == CONSENT_OPTIONAL_HISTORY:
                 profile.optional_interaction_history = False
@@ -114,6 +129,10 @@ def record_consent(
                 profile.ai_model_secondary_use = False
             elif category == CONSENT_ANALYTICS:
                 profile.optional_analytics = False
+            elif category == CONSENT_COOKIES_OPTIONAL:
+                profile.optional_cookies = False
+            elif category == CONSENT_MARKETING_EMAIL:
+                profile.marketing_emails_opt_in = False
         profile.save()
 
     return record
@@ -146,6 +165,14 @@ def _decision_for(request, category: str) -> str | None:
                 return DECISION_GRANTED if profile.ai_model_secondary_use else DECISION_DENIED
             if category == CONSENT_ANALYTICS:
                 return DECISION_GRANTED if profile.optional_analytics else DECISION_DENIED
+            if category == CONSENT_COOKIES_OPTIONAL:
+                return DECISION_GRANTED if profile.optional_cookies else DECISION_DENIED
+            if category == CONSENT_MARKETING_EMAIL:
+                return DECISION_GRANTED if profile.marketing_emails_opt_in else DECISION_DENIED
+            if category == CONSENT_AGE_ADULT:
+                return DECISION_GRANTED if profile.age_confirmed_adult else None
+            if category == CONSENT_PARENTAL:
+                return DECISION_GRANTED if profile.parental_consent_at else None
 
     state = _session_state(request).get(category)
     if state and state.get("policy_version") == POLICY_VERSION:
@@ -193,6 +220,10 @@ def consent_status_payload(request) -> dict:
         CONSENT_RESEARCH_FEEDBACK,
         CONSENT_AI_TRAINING,
         CONSENT_ANALYTICS,
+        CONSENT_COOKIES_OPTIONAL,
+        CONSENT_MARKETING_EMAIL,
+        CONSENT_AGE_ADULT,
+        CONSENT_PARENTAL,
     ]
     decisions = {c: _decision_for(request, c) for c in categories}
     return {
@@ -203,6 +234,7 @@ def consent_status_payload(request) -> dict:
             decisions.get(CONSENT_PRIVACY_NOTICE) == DECISION_GRANTED
             and decisions.get(CONSENT_CORE_SERVICE) == DECISION_GRANTED
         ),
+        "requires_cookie_banner": not cookie_choice_made(request),
     }
 
 
@@ -210,3 +242,28 @@ def delete_user_privacy_data(supabase_user_id: str) -> int:
     deleted, _ = ConsentRecord.objects.filter(supabase_user_id=supabase_user_id).delete()
     PrivacyProfile.objects.filter(supabase_user_id=supabase_user_id).delete()
     return deleted
+
+
+def set_cookie_choice(request, *, optional_accepted: bool) -> None:
+    record_consent(
+        request,
+        category=CONSENT_COOKIES_OPTIONAL,
+        decision=DECISION_GRANTED if optional_accepted else DECISION_DENIED,
+        policy_slug="cookie-policy",
+        purpose="Cookie banner choice",
+    )
+
+
+def set_marketing_preference(email: str, *, opt_in: bool) -> EmailPreference:
+    pref, _ = EmailPreference.objects.get_or_create(email=email.lower())
+    pref.marketing_opt_in = opt_in
+    if opt_in:
+        pref.unsubscribed_at = None
+    else:
+        pref.unsubscribed_at = timezone.now()
+    pref.save()
+    return pref
+
+
+def cookie_choice_made(request) -> bool:
+    return _decision_for(request, CONSENT_COOKIES_OPTIONAL) in (DECISION_GRANTED, DECISION_DENIED)
