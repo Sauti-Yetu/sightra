@@ -18,6 +18,26 @@ logger = logging.getLogger(__name__)
 SESSION_KEY = "sightra_supabase"
 
 
+def display_name_for(user: dict[str, Any] | None) -> str:
+    """First-name style label from metadata or the email local-part. Never returns the full email."""
+    if not user:
+        return ""
+    meta = user.get("user_metadata") or {}
+    if not isinstance(meta, dict):
+        meta = {}
+    for key in ("given_name", "full_name", "name", "preferred_username"):
+        raw = str(meta.get(key) or "").strip()
+        if raw:
+            return raw.split()[0]
+    email = str(user.get("email") or "").strip()
+    local = email.split("@")[0].strip() if email else ""
+    if not local:
+        return ""
+    pretty = local.replace(".", " ").replace("_", " ").replace("-", " ").strip()
+    first = pretty.split()[0] if pretty else ""
+    return first[:1].upper() + first[1:] if first else ""
+
+
 def _jwks_url() -> str:
     explicit = (os.getenv("SUPABASE_JWKS_URL") or "").strip()
     if explicit:
@@ -99,8 +119,14 @@ class SessionService:
             return None
         user = bundle.get("user") or {}
         email = user.get("email") or claims.get("email")
-        return {
+        meta = user.get("user_metadata") or user.get("raw_user_meta_data") or {}
+        if not isinstance(meta, dict):
+            meta = {}
+        payload = {
             "id": user.get("id") or claims.get("sub"),
             "email": email,
+            "user_metadata": meta,
             "claims": claims,
         }
+        payload["display_name"] = display_name_for(payload)
+        return payload

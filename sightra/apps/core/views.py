@@ -7,7 +7,17 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 
 
 def dashboard(request):
-    return render(request, "dashboard.html")
+    from apps.accounts.services.session_service import display_name_for
+
+    user = getattr(request, "sightra_user", None)
+    return render(
+        request,
+        "dashboard.html",
+        {
+            "display_name": display_name_for(user),
+            "signed_in": bool(user),
+        },
+    )
 
 
 @ensure_csrf_cookie

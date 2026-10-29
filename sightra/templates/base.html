@@ -29,7 +29,7 @@
   </script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lexend:wght@500;600;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <link rel="stylesheet" href="{% static 'css/sightra.css' %}?v=11" />
+  <link rel="stylesheet" href="{% static 'css/sightra.css' %}?v=12" />
   {% block extra_head %}{% endblock %}
 </head>
 <body class="{% block body_class %}app-shell{% endblock %}">
@@ -40,7 +40,11 @@
   {% if not hide_app_header %}
   <header class="app-header sticky top-0 z-40 border-b border-black/5 dark:border-white/5">
     <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
+      {% if request.sightra_user %}
+      {% include "partials/brand_logo.html" with logo_href="/dashboard" %}
+      {% else %}
       {% include "partials/brand_logo.html" with logo_href="/" %}
+      {% endif %}
       <div class="flex items-center gap-2">
         <button type="button" id="a11y-toggle" class="icon-btn" aria-label="Accessibility options">
           <span class="material-symbols-outlined">accessibility_new</span>

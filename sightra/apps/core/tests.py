@@ -2,6 +2,7 @@ from unittest.mock import MagicMock, patch
 
 from django.test import Client, SimpleTestCase, TestCase
 
+from apps.accounts.services.session_service import display_name_for
 from apps.core.services import GeminiAnalyzer
 
 
@@ -77,3 +78,62 @@ class GeminiHelperTests(SimpleTestCase):
                 force_refresh=True,
             )
         self.assertIn("person", result)
+
+
+class DisplayNameTests(SimpleTestCase):
+    def test_given_name_preferred(self):
+        self.assertEqual(
+            display_name_for({"email": "x@example.com", "user_metadata": {"given_name": "Ada Lovelace"}}),
+            "Ada",
+        )
+
+    def test_email_local_part(self):
+        self.assertEqual(display_name_for({"email": "antonriziki@gmail.com"}), "Antonriziki")
+
+    def test_missing_user(self):
+        self.assertEqual(display_name_for(None), "")
+        self.assertEqual(display_name_for({}), "")
+
+
+class DashboardTests(TestCase):
+    def test_requires_sign_in(self):
+        res = Client().get("/dashboard")
+        self.assertEqual(res.status_code, 302)
+        self.assertIn("/signin/", res.url)
+
+    def _dashboard(self, user):
+        with patch("apps.accounts.middleware.SessionService.get_user", return_value=user):
+            return Client().get("/dashboard")
+
+    def test_user_a_sees_own_workspace_not_email_or_subscription(self):
+        res = self._dashboard({"id": "user-a", "email": "alice.ngugi@example.com"})
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, "Alice")
+        self.assertContains(res, "Your personal Sightra space")
+        self.assertContains(res, "Start vision scan")
+        self.assertContains(res, 'href="/vision/"')
+        self.assertContains(res, "Open reader")
+        self.assertContains(res, 'href="/reader/"')
+        self.assertContains(res, "Voice assistance")
+        self.assertContains(res, "/settings/#voice")
+        self.assertContains(res, "does not keep a scan or reading history")
+        self.assertContains(res, 'href="/signout/"')
+        self.assertContains(res, "You are signed in")
+        self.assertNotContains(res, "alice.ngugi@example.com")
+        self.assertNotContains(res, "No hidden fees")
+        self.assertNotContains(res, ">Free<")
+        self.assertNotContains(res, "Tools ready when you are")
+
+    def test_user_b_does_not_see_user_a_name(self):
+        res = self._dashboard({"id": "user-b", "email": "ben@example.com"})
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, "Ben")
+        self.assertNotContains(res, "Alice")
+        self.assertNotContains(res, "alice.ngugi@example.com")
+
+    def test_missing_profile_still_renders_workspace(self):
+        res = self._dashboard({"id": "user-c"})
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, "Hello.")
+        self.assertContains(res, "Start vision scan")
+        self.assertContains(res, "Open reader")
