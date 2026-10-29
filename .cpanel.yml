@@ -9,4 +9,7 @@ deployment:
     - /bin/cp -R sightra/sightra $DEPLOYPATH
     - /bin/cp sightra/manage.py $DEPLOYPATH
     - /bin/cp sightra/requirements.txt $DEPLOYPATH
+    - find /home2/sightran/sightra-main/sightra/apps -type d -name '__pycache__' -prune -exec rm -rf {} +
+    - mkdir -p /home2/sightran/sightra-main/sightra/tmp
+    - /bin/touch /home2/sightran/sightra-main/sightra/tmp/restart.txt
     - cd /home2/sightran/sightra-main/sightra && python3 manage.py migrate --noinput

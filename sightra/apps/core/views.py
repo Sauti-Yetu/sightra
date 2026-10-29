@@ -6,15 +6,40 @@ from django.shortcuts import render
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 
-def dashboard(request):
-    from apps.accounts.services.session_service import display_name_for
+def _display_name_for(user):
+    """First-name label from the signed-in account. Never returns a full email.
 
+    Kept in this module so /dashboard does not depend on a Passenger-cached
+    session_service.py from a previous deploy.
+    """
+    if not isinstance(user, dict) or not user:
+        return ""
+    cached = str(user.get("display_name") or "").strip()
+    if cached and "@" not in cached:
+        return cached.split()[0]
+    meta = user.get("user_metadata") or {}
+    if not isinstance(meta, dict):
+        meta = {}
+    for key in ("given_name", "full_name", "name", "preferred_username"):
+        raw = str(meta.get(key) or "").strip()
+        if raw:
+            return raw.split()[0]
+    email = str(user.get("email") or "").strip()
+    local = email.split("@")[0].strip() if email else ""
+    if not local:
+        return ""
+    pretty = local.replace(".", " ").replace("_", " ").replace("-", " ").strip()
+    first = pretty.split()[0] if pretty else ""
+    return first[:1].upper() + first[1:] if first else ""
+
+
+def dashboard(request):
     user = getattr(request, "sightra_user", None)
     return render(
         request,
         "dashboard.html",
         {
-            "display_name": display_name_for(user),
+            "display_name": _display_name_for(user),
             "signed_in": bool(user),
         },
     )

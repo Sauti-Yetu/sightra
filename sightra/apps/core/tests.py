@@ -1,9 +1,11 @@
+import inspect
 from unittest.mock import MagicMock, patch
 
 from django.test import Client, SimpleTestCase, TestCase
 
 from apps.accounts.services.session_service import display_name_for
 from apps.core.services import GeminiAnalyzer
+from apps.core.views import _display_name_for, dashboard
 
 
 class LandingAndManifestTests(TestCase):
@@ -94,6 +96,16 @@ class DisplayNameTests(SimpleTestCase):
         self.assertEqual(display_name_for(None), "")
         self.assertEqual(display_name_for({}), "")
 
+    def test_dashboard_helper_matches_session_helper(self):
+        samples = (
+            None,
+            {},
+            {"email": "ben@example.com"},
+            {"email": "x@example.com", "user_metadata": {"given_name": "Ada Lovelace"}},
+        )
+        for sample in samples:
+            self.assertEqual(_display_name_for(sample), display_name_for(sample))
+
 
 class DashboardTests(TestCase):
     def test_requires_sign_in(self):
@@ -137,3 +149,9 @@ class DashboardTests(TestCase):
         self.assertContains(res, "Hello.")
         self.assertContains(res, "Start vision scan")
         self.assertContains(res, "Open reader")
+
+    def test_legacy_session_payload_without_display_name(self):
+        res = self._dashboard({"id": "user-a", "email": "alice.ngugi@example.com", "claims": {}})
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, "Alice")
+        self.assertNotIn("session_service", inspect.getsource(dashboard))
