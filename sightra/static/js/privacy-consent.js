@@ -71,16 +71,51 @@
     }
   }
 
+  function askInApp(message) {
+    return new Promise((resolve) => {
+      const existing = document.getElementById("sightra-feature-consent");
+      if (existing) existing.remove();
+      const wrap = document.createElement("div");
+      wrap.id = "sightra-feature-consent";
+      wrap.className = "privacy-modal";
+      wrap.setAttribute("role", "dialog");
+      wrap.setAttribute("aria-modal", "true");
+      wrap.innerHTML =
+        '<div class="privacy-modal-backdrop"></div>' +
+        '<div class="privacy-modal-panel card max-w-md p-6 text-[var(--text)]">' +
+        '<p class="text-sm leading-relaxed"></p>' +
+        '<div class="mt-5 flex gap-3 justify-end">' +
+        '<button type="button" class="btn-ghost" data-choice="no">Not now</button>' +
+        '<button type="button" class="btn-primary" data-choice="yes">Allow</button>' +
+        "</div></div>";
+      wrap.querySelector("p").textContent =
+        message || "Sightra needs your consent for this feature.";
+      const finish = (value) => {
+        wrap.remove();
+        resolve(value);
+      };
+      wrap.querySelector('[data-choice="yes"]').addEventListener("click", () => finish(true));
+      wrap.querySelector('[data-choice="no"]').addEventListener("click", () => finish(false));
+      wrap.querySelector(".privacy-modal-backdrop").addEventListener("click", () => finish(false));
+      document.body.appendChild(wrap);
+      wrap.querySelector('[data-choice="yes"]').focus();
+    });
+  }
+
   async function requireFeatureConsent(category, promptMessage) {
     const ok = await ensureOnboarding();
     if (!ok) return false;
-    const status = await fetchStatus();
+    let status = { decisions: {} };
+    try {
+      status = await fetchStatus();
+    } catch (err) {
+      console.error(err);
+    }
     if (status.decisions && status.decisions[category] === "granted") {
       return true;
     }
-    const accept = window.confirm(
-      promptMessage ||
-        "Sightra needs your consent for this feature. Open Privacy settings to review?"
+    const accept = await askInApp(
+      promptMessage || "Sightra needs your consent for this feature."
     );
     if (!accept) return false;
     try {

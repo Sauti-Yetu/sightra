@@ -120,7 +120,19 @@ def privacy_settings(request):
 @ensure_csrf_cookie
 @require_GET
 def api_consent_status(request):
-    return JsonResponse(consent_status_payload(request))
+    try:
+        return JsonResponse(consent_status_payload(request))
+    except Exception:
+        logger.exception("Consent status failed")
+        return JsonResponse(
+            {
+                "policy_version": POLICY_VERSION,
+                "authenticated": bool(getattr(request, "sightra_user", None)),
+                "decisions": {},
+                "requires_onboarding": False,
+                "requires_cookie_banner": False,
+            }
+        )
 
 
 @csrf_exempt

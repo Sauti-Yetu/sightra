@@ -372,33 +372,12 @@ async function startVoiceCommand() {
   rec.start();
 }
 
-scanBtn?.addEventListener('click', async () => {
-  if (!isScanning) {
-    const ready = await window.SightraPrivacy?.ensureOnboarding?.();
-    if (ready === false) return;
-    const camOk = await window.SightraPrivacy?.requireFeatureConsent?.(
-      window.SightraPrivacy.CONSENT_CAMERA,
-      'Live Vision sends camera frames to Sightra for analysis. Allow camera environmental analysis?'
-    );
-    if (!camOk) return;
-  }
-  isScanning = !isScanning;
-  if (isScanning) {
-    const camOkLive = await startCamera();
-    if (!camOkLive) {
-      isScanning = false;
-      return;
-    }
+function setScanningUi(on) {
+  isScanning = on;
+  if (on) {
     scanLabel.textContent = 'Stop sight scan';
     scanLabel.classList.add('vision-scan-label-active');
     scanLabel.classList.remove('text-[var(--brand-cyan)]');
-    frameCounter = 0;
-    lastFullNarrationAt = 0;
-    setScanStatus('Analysing the scene…');
-    await window.SightraCamera?.waitForFrame(video, 4000);
-    scheduleCaptureLoop();
-    captureAndAnalyze({ forceFull: true });
-    window.SightraUI?.announce('Sight scan started');
   } else {
     scanLabel.textContent = 'Initiate sight scan';
     scanLabel.classList.remove('vision-scan-label-active');
@@ -406,11 +385,64 @@ scanBtn?.addEventListener('click', async () => {
     stopCaptureLoop();
     VisionSpeech.clear();
     clearDynamicUI();
-    window.SightraUI?.announce('Sight scan stopped');
+  }
+}
+
+scanBtn?.addEventListener('click', async (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  if (scanBtn.dataset.busy === '1') return;
+  scanBtn.dataset.busy = '1';
+  try {
+    if (isScanning) {
+      setScanningUi(false);
+      window.SightraUI?.announce('Sight scan stopped');
+      return;
+    }
+    let ready = true;
+    try {
+      ready = await window.SightraPrivacy?.ensureOnboarding?.();
+    } catch (err) {
+      console.error(err);
+    }
+    if (ready === false) {
+      setScanStatus('Complete the privacy choices, then tap the eye to scan.');
+      return;
+    }
+    let camOk = true;
+    try {
+      camOk = await window.SightraPrivacy?.requireFeatureConsent?.(
+        window.SightraPrivacy.CONSENT_CAMERA,
+        'Live Vision sends camera frames to Sightra for analysis. Allow camera environmental analysis?'
+      );
+    } catch (err) {
+      console.error(err);
+      camOk = true;
+    }
+    if (!camOk) {
+      setScanStatus('Camera analysis consent is needed before scanning.');
+      return;
+    }
+    const camOkLive = await startCamera();
+    if (!camOkLive) return;
+    setScanningUi(true);
+    frameCounter = 0;
+    lastFullNarrationAt = 0;
+    setScanStatus('Analysing the scene…');
+    await window.SightraCamera?.waitForFrame(video, 4000);
+    scheduleCaptureLoop();
+    captureAndAnalyze({ forceFull: true });
+    window.SightraUI?.announce('Sight scan started');
+  } finally {
+    scanBtn.dataset.busy = '0';
   }
 });
 
-enableCamBtn?.addEventListener('click', () => startCamera());
+enableCamBtn?.addEventListener('click', async (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  await startCamera();
+});
 startCamera();
 window.addEventListener('sightra:privacy-onboarded', () => startCamera());
 

@@ -273,8 +273,26 @@ html.dark textarea:focus-visible {
   pointer-events: none;
 }
 
-.vision-overlay-ui .interactive {
+.vision-overlay-ui .interactive,
+.vision-overlay-ui header,
+.vision-overlay-ui footer,
+.vision-overlay-ui button,
+.vision-overlay-ui a {
   pointer-events: auto;
+}
+
+.vision-overlay-ui footer,
+.reader-overlay footer {
+  position: relative;
+  z-index: 50;
+}
+
+body.is-camera-page .bottom-nav {
+  z-index: 30;
+}
+
+body.is-camera-page .voice-command-bar {
+  display: none !important;
 }
 
 .privacy-modal {

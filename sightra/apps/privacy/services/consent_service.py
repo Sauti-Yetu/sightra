@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+import logging
+
 from django.utils import timezone
+
+logger = logging.getLogger(__name__)
 
 from apps.privacy.constants import (
     CONSENT_AGE_ADULT,
@@ -85,10 +89,14 @@ def record_consent(
     _save_session_state(request, state)
 
     if uid:
-        profile, _ = PrivacyProfile.objects.get_or_create(
-            supabase_user_id=uid,
-            defaults={"email": (getattr(request, "sightra_user", None) or {}).get("email") or ""},
-        )
+        try:
+            profile, _ = PrivacyProfile.objects.get_or_create(
+                supabase_user_id=uid,
+                defaults={"email": (getattr(request, "sightra_user", None) or {}).get("email") or ""},
+            )
+        except Exception:
+            logger.exception("PrivacyProfile get_or_create failed; using session consent only")
+            return record
         now = timezone.now()
         if category == CONSENT_PRIVACY_NOTICE and decision == DECISION_GRANTED:
             profile.privacy_notice_version = POLICY_VERSION
@@ -133,7 +141,10 @@ def record_consent(
                 profile.optional_cookies = False
             elif category == CONSENT_MARKETING_EMAIL:
                 profile.marketing_emails_opt_in = False
-        profile.save()
+        try:
+            profile.save()
+        except Exception:
+            logger.exception("Could not persist privacy profile; session consent still saved")
 
     return record
 
@@ -144,6 +155,9 @@ def _decision_for(request, category: str) -> str | None:
         try:
             profile = PrivacyProfile.objects.get(supabase_user_id=uid)
         except PrivacyProfile.DoesNotExist:
+            profile = None
+        except Exception:
+            logger.exception("PrivacyProfile lookup failed")
             profile = None
         if profile:
             if category == CONSENT_PRIVACY_NOTICE and profile.privacy_notice_ack_at:
@@ -225,7 +239,13 @@ def consent_status_payload(request) -> dict:
         CONSENT_AGE_ADULT,
         CONSENT_PARENTAL,
     ]
-    decisions = {c: _decision_for(request, c) for c in categories}
+    try:
+        decisions = {c: _decision_for(request, c) for c in categories}
+        cookie_banner = not cookie_choice_made(request)
+    except Exception:
+        logger.exception("Consent status payload failed")
+        decisions = {c: None for c in categories}
+        cookie_banner = False
     return {
         "policy_version": POLICY_VERSION,
         "authenticated": bool(_user_id(request)),
@@ -234,7 +254,7 @@ def consent_status_payload(request) -> dict:
             decisions.get(CONSENT_PRIVACY_NOTICE) == DECISION_GRANTED
             and decisions.get(CONSENT_CORE_SERVICE) == DECISION_GRANTED
         ),
-        "requires_cookie_banner": not cookie_choice_made(request),
+        "requires_cookie_banner": cookie_banner,
     }
 
 

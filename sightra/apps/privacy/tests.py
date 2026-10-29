@@ -1,6 +1,10 @@
+from unittest.mock import patch
+
+from django.db.utils import OperationalError
 from django.test import Client, TestCase
 
 from apps.privacy.constants import CONSENT_CORE_SERVICE, CONSENT_PRIVACY_NOTICE, DECISION_GRANTED
+from apps.privacy.models import PrivacyProfile
 from apps.privacy.models import DataRequest, EmailPreference
 from apps.privacy.content.policies import get_all_policies, get_policy
 
@@ -39,6 +43,13 @@ class ConsentServiceTests(TestCase):
         self.assertFalse(status["requires_onboarding"])
         self.assertEqual(status["decisions"][CONSENT_PRIVACY_NOTICE], DECISION_GRANTED)
         self.assertEqual(status["decisions"][CONSENT_CORE_SERVICE], DECISION_GRANTED)
+
+    @patch.object(PrivacyProfile.objects, "get", side_effect=OperationalError("no such column"))
+    def test_status_survives_missing_profile_column(self, _get):
+        client = Client()
+        res = client.get("/api/privacy/status/")
+        self.assertEqual(res.status_code, 200)
+        self.assertIn("decisions", res.json())
 
 
 class LegalPagesTests(TestCase):

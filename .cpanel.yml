@@ -9,3 +9,4 @@ deployment:
     - /bin/cp -R sightra/sightra $DEPLOYPATH
     - /bin/cp sightra/manage.py $DEPLOYPATH
     - /bin/cp sightra/requirements.txt $DEPLOYPATH
+    - cd /home2/sightran/sightra-main/sightra && python3 manage.py migrate --noinput

@@ -58,6 +58,7 @@
   function showEnable(show) {
     if (!enableBtn) return;
     enableBtn.classList.toggle("hidden", !show);
+    enableBtn.textContent = show ? "Enable camera" : "Camera on";
   }
 
   async function startCamera() {
