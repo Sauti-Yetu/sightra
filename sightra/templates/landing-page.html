@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Sightra — Access visual information with spoken guidance{% endblock %}
+{% block title %}Sightra — See more. Understand more.{% endblock %}
 {% block extra_head %}
-<meta name="description" content="Sightra helps people who are blind or have low vision access visual information through AI-assisted scene understanding, spoken guidance and text reading. It is not a medical device." />
+<meta name="description" content="Sightra helps people who are blind or have low vision understand their surroundings and access visual information through AI-powered audio assistance. It is not a medical device." />
 <meta name="keywords" content="Sightra, Sauti Yetu, assistive technology, visual impairment, accessibility, spoken guidance" />
 <meta name="application-name" content="Sightra" />
-<meta property="og:title" content="Sightra — Access visual information with spoken guidance" />
-<meta property="og:description" content="AI-assisted scene understanding, spoken guidance and text reading for people who are blind or have low vision. Not a substitute for a cane, guide dog or mobility training." />
+<meta property="og:title" content="Sightra — See more. Understand more." />
+<meta property="og:description" content="AI-powered audio assistance for people who are blind or have low vision. Not a substitute for a cane, guide dog or mobility training." />
 <meta property="og:type" content="website" />
 <meta property="og:image" content="{% static 'img/landing-assistive.jpg' %}" />
 <meta name="twitter:card" content="summary_large_image" />
@@ -18,19 +18,12 @@
   <div class="grid gap-0 md:grid-cols-2">
     <div class="flex flex-col justify-center p-8 md:p-12">
       <p class="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--brand-blue)]">Sightra by Sauti Yetu</p>
-      <h1 id="hero-heading" class="font-headline mt-3 text-4xl font-bold leading-tight md:text-5xl">See more of your world. Access more of your day.</h1>
-      <p class="mt-4 max-w-lg text-[var(--text-muted)]">Sightra helps people who are blind or have low vision access visual information through AI-assisted scene understanding, spoken guidance and text reading. Explore your surroundings or listen to the information that matters to you.</p>
+      <h1 id="hero-heading" class="font-headline mt-3 text-4xl font-bold leading-tight md:text-5xl">See more. Understand more.</h1>
+      <p class="mt-4 max-w-lg text-[var(--text-muted)]">Sightra helps people who are blind or have low vision understand their surroundings and access visual information through AI-powered audio assistance.</p>
       <div class="mt-8 flex flex-wrap gap-3">
-        <a href="#product" class="btn-primary">Explore Sightra</a>
-        <a href="#how-it-works" class="btn-secondary">How it works</a>
-        <a href="/signin/" class="btn-secondary">Sign in</a>
+        <a href="/signup/" class="btn-primary">Get started</a>
+        <a href="#product" class="btn-secondary">Explore Sightra</a>
       </div>
-      <p class="mt-3 text-xs text-[var(--text-muted)]">A mobile-first web app you can add to your home screen on Android (Chrome) and iPhone or iPad (Safari).</p>
-      <dl class="mt-10 grid grid-cols-3 gap-4 text-center text-xs md:text-sm">
-        <div><dt class="font-headline text-lg font-bold text-[var(--brand-blue-dark)] dark:text-[var(--brand-blue-light)]">Vision</dt><dd class="text-[var(--text-muted)]">On-demand scans</dd></div>
-        <div><dt class="font-headline text-lg font-bold text-[var(--brand-blue-dark)] dark:text-[var(--brand-blue-light)]">Reader</dt><dd class="text-[var(--text-muted)]">Text and documents</dd></div>
-        <div><dt class="font-headline text-lg font-bold text-[var(--text)]">PWA</dt><dd class="text-[var(--text-muted)]">Home-screen app</dd></div>
-      </dl>
     </div>
     <div class="relative min-h-[280px] bg-[var(--bg-muted)] md:min-h-full">
       <img src="{% static 'img/landing-assistive.jpg' %}" alt="Person using assistive technology outdoors" class="h-full w-full object-cover" loading="eager" />
@@ -38,127 +31,28 @@
   </div>
 </section>
 
-<section id="product" class="mt-12 grid gap-8 md:grid-cols-2 md:items-center">
-  <div class="order-2 md:order-1">
-    <img src="{% static 'img/landing-mobility.png' %}" alt="Smart mobility and navigation interface" class="w-full rounded-2xl shadow-[var(--shadow)]" loading="lazy" />
+<section id="product" class="mt-12" aria-label="Core features">
+  <div class="grid gap-4 md:grid-cols-2">
+    <article class="card p-6">
+      <h2 class="font-headline text-2xl font-semibold">Vision</h2>
+      <p class="mt-2 text-[var(--text-muted)]">Understand your surroundings with AI-assisted scene descriptions and obstacle awareness.</p>
+      <a href="/vision/" class="btn-primary mt-6 inline-flex min-h-11 items-center">Open Vision</a>
+    </article>
+    <article class="card p-6">
+      <h2 class="font-headline text-2xl font-semibold">Reader</h2>
+      <p class="mt-2 text-[var(--text-muted)]">Listen to text, documents, signs and supported images.</p>
+      <a href="/reader/" class="btn-primary mt-6 inline-flex min-h-11 items-center">Open Reader</a>
+    </article>
   </div>
-  <div class="order-1 md:order-2">
-    <h2 class="font-headline text-2xl font-semibold">What Sightra helps you do</h2>
-    <p class="mt-3 text-[var(--text-muted)]">Sightra is an AI-assisted visual perception and information-access product. It is built for everyday independence — not as a generic camera app, and not as a replacement for your own judgement.</p>
-    <ul class="mt-6 space-y-4 text-sm">
-      <li>
-        <p class="font-semibold">Understand your surroundings</p>
-        <p class="mt-1 text-[var(--text-muted)]">On-demand scene and obstacle analysis with spoken descriptions where supported. Requires camera permission and a network connection.</p>
-      </li>
-      <li>
-        <p class="font-semibold">Access printed information</p>
-        <p class="mt-1 text-[var(--text-muted)]">Read text, documents, signs, currency and supported uploaded images through spoken output and a transcript.</p>
-      </li>
-      <li>
-        <p class="font-semibold">Interact accessibly</p>
-        <p class="mt-1 text-[var(--text-muted)]">Use supported voice commands together with TalkBack or VoiceOver, and save theme, text size, contrast and spoken-language preferences.</p>
-      </li>
-    </ul>
-  </div>
-</section>
-
-<section id="how-it-works" class="mt-12 rounded-3xl bg-[var(--surface)] px-8 py-10 shadow-[var(--shadow)]">
-  <h2 class="font-headline text-2xl font-semibold">How Sightra works</h2>
-  <p class="mt-3 max-w-2xl text-[var(--text-muted)]">Vision and Reader run when you ask them to. They need a signed-in session, a camera or an uploaded image, and an internet connection for analysis.</p>
-  <ol class="mt-6 max-w-2xl space-y-3 text-sm">
-    <li class="flex gap-3"><span class="font-headline font-semibold text-[var(--brand-blue)]" aria-hidden="true">1</span><span>Choose Vision to understand a scene, or Reader to listen to printed text.</span></li>
-    <li class="flex gap-3"><span class="font-headline font-semibold text-[var(--brand-blue)]" aria-hidden="true">2</span><span>Capture a camera frame, or upload a supported photo of a document, sign or note.</span></li>
-    <li class="flex gap-3"><span class="font-headline font-semibold text-[var(--brand-blue)]" aria-hidden="true">3</span><span>Allow analysis to run. This can take a few seconds and needs the network.</span></li>
-    <li class="flex gap-3"><span class="font-headline font-semibold text-[var(--brand-blue)]" aria-hidden="true">4</span><span>Hear spoken guidance and, where available, review an on-screen result or transcript.</span></li>
-    <li class="flex gap-3"><span class="font-headline font-semibold text-[var(--brand-blue)]" aria-hidden="true">5</span><span>Retry or choose another action if processing fails or the result is unclear.</span></li>
-  </ol>
-</section>
-
-<section id="who" class="mt-12">
-  <h2 class="font-headline text-2xl font-semibold">Who Sightra is for</h2>
-  <p class="mt-3 max-w-2xl text-[var(--text-muted)]">Sightra is for people who are blind or have low vision, and for anyone who benefits from spoken access to visual information. Caregivers and accessibility stakeholders can also evaluate it as assistive technology.</p>
-  <p class="mt-3 max-w-2xl text-sm text-[var(--text-muted)]">It is a support for awareness and access. It does not replace your judgement, mobility skills, white cane, guide dog or other devices you already trust.</p>
-</section>
-
-<section id="roadmap" class="mt-12 grid gap-4 md:grid-cols-2">
-  <article class="card p-6">
-    <h2 class="font-headline text-xl font-semibold">Available today</h2>
-    <ul class="mt-4 space-y-2 text-sm text-[var(--text-muted)]">
-      <li>On-demand Vision scans with spoken scene guidance</li>
-      <li>Reader for live text, documents, signs, currency and uploaded photos</li>
-      <li>Supported voice commands and spoken-language preferences</li>
-      <li>Theme, contrast, larger text and other accessibility controls</li>
-      <li>Installable home-screen app (PWA) and a signed-in personal workspace</li>
-    </ul>
-  </article>
-  <article class="card p-6">
-    <h2 class="font-headline text-xl font-semibold">In development</h2>
-    <p class="mt-2 text-sm text-[var(--text-muted)]">We are working toward these next priorities. They are not available in the current product, and we do not give delivery dates.</p>
-    <ul class="mt-4 space-y-2 text-sm text-[var(--text-muted)]">
-      <li>Richer spatial awareness and more reliable processing</li>
-      <li>Expanded language support</li>
-      <li>Further testing with people who are blind or have low vision</li>
-      <li>Longer-term direction toward more integrated assistive hardware</li>
-    </ul>
-  </article>
 </section>
 
 <section id="about" class="mt-12 rounded-3xl bg-[var(--surface)] px-8 py-10 shadow-[var(--shadow)]">
-  <h2 class="font-headline text-2xl font-semibold">Sauti Yetu Assistive Venture</h2>
-  <p class="mt-3 max-w-2xl text-[var(--text-muted)]">Sauti Yetu Assistive Venture builds practical, human-centred assistive technology. Sightra is our flagship product: an evolving way for people who are blind or have low vision to access visual information with greater independence, confidence and dignity.</p>
-  <p class="mt-3 max-w-2xl text-sm text-[var(--text-muted)]">We use AI as a tool for perception and spoken access — not as a substitute for people. Feedback and testing with people with visual impairments guide how Sightra develops. Our longer-term direction is a more accessible world in which assistive technology helps people navigate information and environments with greater autonomy.</p>
-  <p class="mt-4 text-sm"><a href="/legal/business/" class="font-medium text-[var(--brand-cyan)]">Business details and contact</a></p>
+  <h2 class="font-headline text-2xl font-semibold">Technology for greater independence.</h2>
+  <p class="mt-3 max-w-2xl text-[var(--text-muted)]">Sightra is an assistive technology product by Sauti Yetu Assistive Venture, designed to make visual information more accessible through AI and spoken guidance.</p>
 </section>
 
 <section id="safety" class="mt-12 rounded-3xl border border-[var(--brand-blue)]/15 bg-[var(--surface)] px-8 py-10">
-  <h2 class="font-headline text-2xl font-semibold">Trust and safety</h2>
-  <p class="mt-3 max-w-2xl text-[var(--text-muted)]">Sightra provides AI-assisted information to support awareness and access to visual information. Results may be incomplete or incorrect. Sightra is not a substitute for a white cane, guide dog, mobility training or other appropriate safety measures. Always use your judgement and established mobility aids.</p>
-  <p class="mt-3 max-w-2xl text-sm text-[var(--text-muted)]">Scene descriptions are informational. They are not guaranteed obstacle detection or verified navigation instructions.</p>
-  <p class="mt-4 text-sm">
-    <a href="/legal/ai-transparency/" class="font-medium text-[var(--brand-cyan)]">AI Transparency</a>
-    <span aria-hidden="true"> · </span>
-    <a href="/legal/privacy-policy/" class="font-medium text-[var(--brand-cyan)]">Privacy Policy</a>
-    <span aria-hidden="true"> · </span>
-    <a href="/legal/terms-of-service/" class="font-medium text-[var(--brand-cyan)]">Terms of Service</a>
-  </p>
-</section>
-
-<section id="download-app" class="mt-12 rounded-3xl border border-[var(--brand-blue)]/15 bg-[var(--surface)] px-8 py-10 shadow-[var(--shadow)]">
-  <div class="mx-auto max-w-2xl text-center">
-    <span class="material-symbols-outlined text-4xl text-[var(--brand-blue)]" aria-hidden="true">install_mobile</span>
-    <h2 class="font-headline mt-3 text-2xl font-semibold">Add Sightra to your home screen</h2>
-    <p class="mt-2 text-sm text-[var(--text-muted)]">Install the progressive web app for convenient access. Vision and Reader still need an internet connection.</p>
-  </div>
-  <div class="mx-auto mt-8 grid max-w-3xl gap-6 md:grid-cols-2">
-    <article class="rounded-2xl bg-[var(--bg-muted)] p-5 text-left">
-      <h3 class="font-headline flex items-center gap-2 text-lg font-semibold">
-        <span class="material-symbols-outlined text-[var(--brand-lime)]" aria-hidden="true">android</span>
-        Android
-      </h3>
-      <p class="mt-2 text-sm text-[var(--text-muted)]">Open Sightra in Chrome, tap <strong>Download app</strong> below, then confirm <strong>Install</strong> when prompted.</p>
-      <button type="button" class="btn-primary mt-4 w-full text-sm" data-pwa-install>Download on Android</button>
-    </article>
-    <article class="rounded-2xl bg-[var(--bg-muted)] p-5 text-left">
-      <h3 class="font-headline flex items-center gap-2 text-lg font-semibold">
-        <span class="material-symbols-outlined text-[var(--brand-cyan)]" aria-hidden="true">phone_iphone</span>
-        iPhone &amp; iPad
-      </h3>
-      <p class="mt-2 text-sm text-[var(--text-muted)]">Use Safari, tap <strong>Download app</strong>, then follow the steps to <strong>Add to Home Screen</strong>.</p>
-      <button type="button" class="btn-primary mt-4 w-full text-sm" data-pwa-install>Download on iOS</button>
-    </article>
-  </div>
-  <p class="mx-auto mt-6 max-w-lg text-center text-xs text-[var(--text-muted)]">Already installed? Open Sightra from your home screen icon.</p>
-</section>
-
-<section class="mt-12 rounded-3xl bg-[var(--brand-cyan-soft)] px-8 py-10 text-center dark:bg-[var(--surface)]">
-  <h2 class="font-headline text-2xl font-semibold">Ready when you are</h2>
-  <p class="mx-auto mt-2 max-w-xl text-sm text-[var(--text-muted)]">Create an account to use Vision and Reader. There are no paid plans in the current product. Review the <a class="underline" href="/legal/privacy-policy/">Privacy Policy</a> and <a class="underline" href="/legal/terms-of-service/">Terms</a> when you sign up.</p>
-  <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
-    <a href="/signup/" class="btn-primary inline-block">Create account</a>
-    <button type="button" class="btn-secondary inline-flex items-center gap-2" data-pwa-install>
-      <span class="material-symbols-outlined text-lg" aria-hidden="true">download</span>
-      Download app
-    </button>
-  </div>
+  <h2 class="font-headline text-xl font-semibold">Trust and safety</h2>
+  <p class="mt-3 max-w-2xl text-[var(--text-muted)]">AI guidance may be incomplete or incorrect. Always use your established mobility aids and judgement.</p>
 </section>
 {% endblock %}

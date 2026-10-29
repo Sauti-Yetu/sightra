@@ -8,13 +8,6 @@
     ki: "Kikuyu",
   };
 
-  function greetingWord() {
-    const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) return "Good morning";
-    if (hour >= 12 && hour < 17) return "Good afternoon";
-    return "Good evening";
-  }
-
   function readA11y() {
     try {
       return JSON.parse(localStorage.getItem("sightra_a11y") || "{}");
@@ -27,7 +20,7 @@
     const el = document.getElementById("greeting");
     if (!el) return;
     const name = (el.getAttribute("data-display-name") || "").trim();
-    const next = name ? `${greetingWord()}, ${name}.` : `${greetingWord()}.`;
+    const next = name ? `Welcome back, ${name}` : "Welcome back";
     if (el.textContent !== next) el.textContent = next;
   }
 
