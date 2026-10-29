@@ -53,7 +53,7 @@
     if (/\b(home|dashboard|go home|nyumbani)\b/.test(t)) return { action: "home" };
     if (/\b(settings|preferences|mipangilio)\b/.test(t)) return { action: "settings" };
     if (/\b(vision|look around|what('s| is) around|ona)\b/.test(t)) return { action: "vision" };
-    if (/\b(reader|lookout|read text|read this|soma)\b/.test(t)) return { action: "reader" };
+    if (/\b(reader|read text|read this|soma)\b/.test(t)) return { action: "reader" };
     if (/\b(upload|pakia)\b/.test(t)) return { action: "upload" };
     if (/\b(document|letter|page|waraka)\b/.test(t)) return { action: "reader-mode", mode: "document" };
     if (/\b(currency|money|banknote|note|pesa)\b/.test(t)) return { action: "reader-mode", mode: "currency" };

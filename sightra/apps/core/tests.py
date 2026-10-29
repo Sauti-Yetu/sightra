@@ -18,3 +18,5 @@ class LandingAndManifestTests(TestCase):
         self.assertIn("app-icon-192.png", body)
         self.assertIn("app-icon-512.png", body)
         self.assertIn('"name": "Sightra"', body)
+        self.assertIn('"background_color": "#000000"', body)
+        self.assertNotIn("Lookout", body)

@@ -55,12 +55,16 @@ class LoginRequiredMiddleware:
 
     def __call__(self, request):
         if self._is_public(request.path):
-            return self.get_response(request)
+            return self._with_permissions(self.get_response(request))
         if getattr(request, "sightra_user", None):
-            return self.get_response(request)
+            return self._with_permissions(self.get_response(request))
         if self._is_protected(request.path) or self.force_all:
             return redirect(f"{settings.SIGHTTRA_SIGNIN_URL}?next={request.path}")
-        return self.get_response(request)
+        return self._with_permissions(self.get_response(request))
+
+    def _with_permissions(self, response):
+        response["Permissions-Policy"] = "camera=(self), microphone=(self), geolocation=(self)"
+        return response
 
     def _is_public(self, path: str) -> bool:
         if path in _PUBLIC_EXACT:

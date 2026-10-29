@@ -14,10 +14,15 @@
     const next = "{{ next|escapejs }}";
     const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
     const query = new URLSearchParams(window.location.search);
+    const oauthError = hash.get('error_description') || hash.get('error') || query.get('error_description') || query.get('error');
+    if (oauthError) {
+      status.textContent = oauthError;
+      return;
+    }
     const access_token = hash.get('access_token') || query.get('access_token');
     const refresh_token = hash.get('refresh_token') || query.get('refresh_token');
     if (!access_token) {
-      status.textContent = 'Sign-in could not be completed. Return to sign in and try again.';
+      status.textContent = 'Sign-in could not be completed. Return to sign in and try Continue with Google again.';
       return;
     }
     try {

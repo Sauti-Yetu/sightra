@@ -482,3 +482,19 @@ html.dark textarea:focus-visible {
     bottom: 1.5rem;
   }
 }
+
+.camera-enable-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #0a0a0a;
+  background: #ffffff;
+}
+
+.camera-enable-btn.hidden {
+  display: none !important;
+}

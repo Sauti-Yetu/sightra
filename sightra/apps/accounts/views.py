@@ -3,7 +3,6 @@ import json
 from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
@@ -21,6 +20,7 @@ from apps.privacy.services.data_requests import create_data_request
 
 from .auth_messages import auth_error_message, signup_success_message
 from .models import UserPreference
+from .oauth import build_google_authorize_url
 from .services import supabase_client
 from .services.session_service import SessionService
 
@@ -137,16 +137,40 @@ def signout(request):
 
 
 def auth_google(request):
-    redirect_to = request.build_absolute_uri(reverse("auth-callback"))
-    url = supabase_client.oauth_authorize_url("google", redirect_to)
+    next_url = request.GET.get("next") or "/dashboard"
+    url = build_google_authorize_url(request, next_url=next_url)
     if not url:
-        messages.error(request, "Google sign-in is not configured.")
+        messages.error(
+            request,
+            "Google sign-in is not configured. Add SUPABASE_URL and enable Google in Supabase Authentication.",
+        )
         return redirect("/signin/")
     return redirect(url)
 
 
 def auth_callback(request):
-    return render(request, "auth_callback.html", {"next": request.GET.get("next", "/dashboard")})
+    next_url = request.GET.get("next") or request.session.get("oauth_next") or "/dashboard"
+    oauth_error = request.GET.get("error_description") or request.GET.get("error")
+    if oauth_error:
+        messages.error(request, auth_error_message({"error_description": oauth_error}))
+        return redirect("/signin/")
+
+    code = request.GET.get("code")
+    verifier = request.session.get("oauth_verifier")
+    if code:
+        if not verifier:
+            messages.error(request, "Google sign-in expired. Try Continue with Google again.")
+            return redirect("/signin/")
+        result = supabase_client.exchange_auth_code(code, verifier)
+        request.session.pop("oauth_verifier", None)
+        request.session.pop("oauth_next", None)
+        if result.get("access_token"):
+            SessionService.set_from_auth_response(request, result)
+            return redirect(next_url)
+        messages.error(request, auth_error_message(result))
+        return redirect("/signin/")
+
+    return render(request, "auth_callback.html", {"next": next_url})
 
 
 @csrf_exempt

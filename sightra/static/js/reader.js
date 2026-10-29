@@ -14,6 +14,7 @@
   const statusEl = document.getElementById("readerStatus");
   const modeLabel = document.getElementById("readerModeLabel");
   const fileInput = document.getElementById("readerFile");
+  const enableBtn = document.getElementById("readerEnableCamera");
 
   let mode = "live";
   let liveTimer = null;
@@ -54,20 +55,33 @@
     );
   }
 
+  function showEnable(show) {
+    if (!enableBtn) return;
+    enableBtn.classList.toggle("hidden", !show);
+  }
+
   async function startCamera() {
-    if (stream) return;
+    if (stream && video && video.videoWidth) return stream;
+    if (!window.SightraCamera) {
+      setStatus("Camera helper did not load. Refresh and try again.");
+      showEnable(true);
+      return null;
+    }
     try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 } },
-        audio: false,
-      });
-      if (video) video.srcObject = stream;
-    } catch {
-      setStatus("Camera permission is needed for live reading. You can still upload a photo.");
+      stream = await window.SightraCamera.start(video);
+      showEnable(false);
+      setStatus("Camera ready. Tap the shutter to read.");
+      return stream;
+    } catch (err) {
+      stream = null;
+      showEnable(true);
+      setStatus((err && err.message) || "Camera permission is needed. You can still upload a photo.");
+      return null;
     }
   }
 
   function captureFrame() {
+    if (window.SightraCamera) return window.SightraCamera.capture(video, canvas, 0.7);
     if (!video || !canvas || !video.videoWidth) return "";
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -115,10 +129,13 @@
       fileInput?.click();
       return;
     }
-    await startCamera();
+    const cam = await startCamera();
+    if (!cam) return;
+    await window.SightraCamera?.waitForFrame(video);
     const frame = captureFrame();
     if (!frame) {
-      setStatus("Camera is not ready yet.");
+      setStatus("Camera is not ready yet. Tap Enable camera, then try again.");
+      showEnable(true);
       return;
     }
     await analyze(frame);
@@ -181,6 +198,7 @@
   document.getElementById("readerUploadBtn")?.addEventListener("click", () => {
     setMode("upload");
   });
+  enableBtn?.addEventListener("click", () => startCamera());
   fileInput?.addEventListener("change", async () => {
     const file = fileInput.files && fileInput.files[0];
     if (!file) return;
@@ -204,8 +222,6 @@
     }
   });
 
-  ensureConsent().then((ok) => {
-    if (ok) startCamera();
-    else setStatus("Grant camera consent, or upload a photo.");
-  });
+  startCamera();
+  window.addEventListener("sightra:privacy-onboarded", () => startCamera());
 })();

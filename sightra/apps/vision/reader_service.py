@@ -1,4 +1,4 @@
-"""Lookout-style reading: send the image to Gemini and return spoken + transcript text."""
+"""Reader: send the image to Gemini and return spoken + transcript text."""
 
 from __future__ import annotations
 
@@ -111,7 +111,7 @@ def analyze_reader_image(
         model = genai.GenerativeModel("gemini-3.1-flash-lite-preview")
         lang_name = LANGUAGE_NAMES[language]
         prompt = (
-            "You are Sightra Reader, assisting a blind or low-vision user, similar to Google Lookout. "
+            "You are Sightra Reader, assisting a blind or low-vision user. "
             f"Task: {MODE_INSTRUCTIONS[mode]}\n"
             f"Write the spoken summary and the on-screen transcript in {lang_name}.\n"
             "Return JSON only with keys spoken and text. "

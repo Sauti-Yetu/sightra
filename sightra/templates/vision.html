@@ -6,13 +6,13 @@
 {% block bottom_nav %}{% endblock %}
 {% block content %}
 <div class="fixed inset-0 bg-black">
-  <video id="cameraElement" class="h-full w-full object-cover" autoplay playsinline muted></video>
+  <video id="cameraElement" class="h-full w-full object-cover" autoplay playsinline muted webkit-playsinline></video>
   <canvas id="canvasElement" class="hidden"></canvas>
 </div>
 <div class="vision-overlay-ui relative z-10 flex h-[100dvh] flex-col text-white">
   <header class="interactive flex items-center justify-between px-5 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))]">
     <a href="/dashboard" class="flex items-center" aria-label="Sightra home">
-      <img src="{% static 'img/sightra-logo.png' %}?v=6" alt="Sightra" class="h-10 w-10 rounded-lg object-cover ring-1 ring-white/20" width="40" height="40" />
+      <img src="{% static 'img/sightra-logo.png' %}?v=7" alt="Sightra" class="h-10 w-10 rounded-lg object-cover ring-1 ring-white/20" width="40" height="40" />
     </a>
     <div class="flex items-center gap-4">
       <span class="h-2 w-2 rounded-full bg-[var(--brand-lime)] shadow-[0_0_10px_var(--brand-lime)]"></span>
@@ -57,6 +57,7 @@
   <footer class="interactive pb-[max(5.5rem,env(safe-area-inset-bottom))] pt-2">
     <div class="flex flex-col items-center gap-3">
       <p id="visionVoiceStatus" class="max-w-xs text-center text-[10px] text-white/70">Tap mic to ask what you see</p>
+      <button type="button" id="visionEnableCamera" class="camera-enable-btn hidden">Enable camera</button>
       <span id="scanLabel" class="text-[10px] font-black uppercase tracking-[0.4em] text-[var(--brand-cyan)]">Initiate sight scan</span>
       <div class="flex items-center gap-6">
       <button id="visionVoiceBtn" type="button" class="interactive flex h-14 w-14 items-center justify-center rounded-full bg-white/10 backdrop-blur-md ring-1 ring-white/20" aria-label="Ask a voice question about the scene">

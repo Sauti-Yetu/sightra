@@ -132,6 +132,7 @@
         await postJson(API_ONBOARD, payload);
         hideOnboardingModal();
         window.SightraUI?.announce("Privacy choices saved.");
+        window.dispatchEvent(new CustomEvent("sightra:privacy-onboarded"));
       } catch (err) {
         alert(err.message || "Could not save privacy choices.");
       } finally {

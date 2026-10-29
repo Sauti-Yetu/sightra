@@ -20,6 +20,11 @@ class ReaderNavTests(SimpleTestCase):
         self.assertEqual(ACTIVE_NAV, ("home", "vision", "reader", "settings"))
         self.assertIn("map", HIDDEN_NAV)
 
+    def test_reader_copy_has_no_competitor_name(self):
+        html = render_to_string("reader.html")
+        self.assertNotIn("Lookout", html)
+        self.assertNotIn("lookout", html)
+
 
 class ReaderParseTests(SimpleTestCase):
     def test_json_payload(self):

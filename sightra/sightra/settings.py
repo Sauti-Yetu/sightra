@@ -150,6 +150,18 @@ SIGHTTRA_REQUIRE_LOGIN = os.getenv("SIGHTTRA_REQUIRE_LOGIN", "false").lower() in
     "yes",
 )
 SIGHTTRA_SIGNIN_URL = "/signin/"
+SIGHTTRA_PUBLIC_URL = os.getenv("SIGHTTRA_PUBLIC_URL", "").rstrip("/")
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        "CSRF_TRUSTED_ORIGINS",
+        "https://sightra.net,https://www.sightra.net,http://127.0.0.1:8000,http://localhost:8000",
+    ).split(",")
+    if origin.strip()
+]
 
 # Celery Configuration Options
 CELERY_BROKER_URL = "redis://localhost:6379/0"

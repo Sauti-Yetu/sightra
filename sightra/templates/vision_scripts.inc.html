@@ -4,6 +4,7 @@ const scanBtn = document.getElementById('scanBtn');
 const scanLabel = document.getElementById('scanLabel');
 const voiceBtn = document.getElementById('visionVoiceBtn');
 const voiceStatus = document.getElementById('visionVoiceStatus');
+const enableCamBtn = document.getElementById('visionEnableCamera');
 
 let isScanning = false;
 let streamRef = null;
@@ -100,35 +101,41 @@ function buildSpeechText(data) {
   return data.hazard_alert || data.analysis_text || '';
 }
 
+function showEnableCamera(show) {
+  if (!enableCamBtn) return;
+  enableCamBtn.classList.toggle('hidden', !show);
+}
+
 async function startCamera() {
-  if (!navigator.mediaDevices?.getUserMedia) {
-    alert('Camera access is not available. Use HTTPS and allow camera permissions.');
-    return;
+  if (streamRef && video && video.videoWidth) return true;
+  if (!window.SightraCamera) {
+    if (voiceStatus) voiceStatus.textContent = 'Camera helper did not load. Refresh and try again.';
+    showEnableCamera(true);
+    return false;
   }
   try {
-    streamRef = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width: { ideal: 960 }, height: { ideal: 540 } },
-    });
-    video.srcObject = streamRef;
-    await video.play();
+    streamRef = await window.SightraCamera.start(video);
+    showEnableCamera(false);
+    if (voiceStatus) voiceStatus.textContent = 'Camera ready. Tap scan to analyse the scene.';
+    return true;
   } catch (err) {
-    try {
-      streamRef = await navigator.mediaDevices.getUserMedia({ video: true });
-      video.srcObject = streamRef;
-      await video.play();
-    } catch (fallbackErr) {
-      console.error(fallbackErr);
-      alert('Please enable camera access for Sightra.');
-    }
+    streamRef = null;
+    showEnableCamera(true);
+    const msg = (err && err.message) || 'Please enable camera access for Sightra.';
+    if (voiceStatus) voiceStatus.textContent = msg;
+    window.SightraUI?.announce(msg);
+    return false;
   }
 }
 
 function stopCamera() {
-  if (streamRef) {
+  if (window.SightraCamera) {
+    window.SightraCamera.stop(video);
+  } else if (streamRef) {
     streamRef.getTracks().forEach((track) => track.stop());
-    streamRef = null;
     video.srcObject = null;
   }
+  streamRef = null;
 }
 
 function scheduleCaptureLoop() {
@@ -165,12 +172,22 @@ async function captureAndAnalyze(options = {}) {
   frameCounter += 1;
   const t0 = performance.now();
 
-  canvas.width = video.videoWidth || 640;
-  canvas.height = video.videoHeight || 480;
-  if (canvas.width > 0 && canvas.height > 0) {
-    canvas.getContext('2d').drawImage(video, 0, 0);
+  if (!video.videoWidth) {
+    isFetchInFlight = false;
+    return;
   }
-  const frameData = canvas.toDataURL('image/jpeg', 0.32);
+  const frameData = window.SightraCamera
+    ? window.SightraCamera.capture(video, canvas, 0.32)
+    : (() => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        return canvas.toDataURL('image/jpeg', 0.32);
+      })();
+  if (!frameData) {
+    isFetchInFlight = false;
+    return;
+  }
 
   const userPrompt = options.userPrompt || pendingUserPrompt || '';
   if (pendingUserPrompt) pendingUserPrompt = '';
@@ -324,7 +341,11 @@ scanBtn?.addEventListener('click', async () => {
   }
   isScanning = !isScanning;
   if (isScanning) {
-    if (!streamRef) await startCamera();
+    const camOkLive = await startCamera();
+    if (!camOkLive) {
+      isScanning = false;
+      return;
+    }
     scanLabel.textContent = 'Stop sight scan';
     scanLabel.classList.add('vision-scan-label-active');
     scanLabel.classList.remove('text-[var(--brand-cyan)]');
@@ -340,10 +361,13 @@ scanBtn?.addEventListener('click', async () => {
     stopCaptureLoop();
     VisionSpeech.clear();
     clearDynamicUI();
-    stopCamera();
     window.SightraUI?.announce('Sight scan stopped');
   }
 });
+
+enableCamBtn?.addEventListener('click', () => startCamera());
+startCamera();
+window.addEventListener('sightra:privacy-onboarded', () => startCamera());
 
 voiceBtn?.addEventListener('click', () => {
   if (!isScanning) {

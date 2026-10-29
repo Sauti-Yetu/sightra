@@ -100,16 +100,45 @@ def sign_in_with_password(email: str, password: str) -> dict[str, Any]:
     )
 
 
-def oauth_authorize_url(provider: str, redirect_to: str) -> str | None:
+def oauth_authorize_url(
+    provider: str,
+    redirect_to: str,
+    *,
+    code_challenge: str | None = None,
+) -> str | None:
     base, apikey = _settings()
     if not base or not apikey:
         return None
-    from urllib.parse import quote
+    from urllib.parse import quote, urlencode
 
-    return (
-        f"{base}/auth/v1/authorize?provider={quote(provider)}"
-        f"&redirect_to={quote(redirect_to, safe='')}"
-        f"&apikey={quote(apikey)}"
+    params = {
+        "provider": provider,
+        "redirect_to": redirect_to,
+        "apikey": apikey,
+    }
+    if code_challenge:
+        params["code_challenge"] = code_challenge
+        params["code_challenge_method"] = "S256"
+    return f"{base}/auth/v1/authorize?{urlencode(params)}"
+
+
+def exchange_auth_code(code: str, code_verifier: str) -> dict[str, Any]:
+    """Exchange a PKCE auth code for a session."""
+    payload = normalize_auth_response(
+        _request(
+            "POST",
+            "/auth/v1/token?grant_type=pkce",
+            {"auth_code": code, "code_verifier": code_verifier},
+        )
+    )
+    if payload.get("access_token"):
+        return payload
+    return normalize_auth_response(
+        _request(
+            "POST",
+            "/auth/v1/token?grant_type=authorization_code",
+            {"code": code, "code_verifier": code_verifier},
+        )
     )
 
 
