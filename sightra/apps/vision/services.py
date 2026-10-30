@@ -16,8 +16,8 @@ logger = logging.getLogger(__name__)
 
 # Tunable via environment (place custom weights e.g. yolo11s.pt in sightra/ or project root)
 YOLO_MODEL_PATH = os.getenv("YOLO_MODEL_PATH", "models/weights/yolo26n.pt")
-YOLO_IMGSZ = int(os.getenv("YOLO_IMGSZ", "384"))
-YOLO_MAX_DET = int(os.getenv("YOLO_MAX_DET", "24"))
+YOLO_IMGSZ = int(os.getenv("YOLO_IMGSZ", "320"))
+YOLO_MAX_DET = int(os.getenv("YOLO_MAX_DET", "16"))
 YOLO_IOU = float(os.getenv("YOLO_IOU", "0.5"))
 YOLO_BASE_CONF = float(os.getenv("YOLO_CONF", "0.35"))
 
@@ -51,6 +51,11 @@ class YoloObjectDetector:
             self.model = YOLO(path)
             self.names = getattr(self.model, "names", {}) or {}
             self.ready = True
+            try:
+                dummy = np.zeros((YOLO_IMGSZ, YOLO_IMGSZ, 3), dtype=np.uint8)
+                self.model.predict(dummy, imgsz=YOLO_IMGSZ, verbose=False, device="cpu")
+            except Exception:
+                logger.debug("YOLO warmup skipped.", exc_info=True)
             logger.info("YoloObjectDetector ready (%s, imgsz=%s).", path, YOLO_IMGSZ)
         except Exception as e:
             logger.error("Failed to load YOLO: %s", e)
@@ -91,6 +96,7 @@ class YoloObjectDetector:
                 iou=YOLO_IOU,
                 max_det=YOLO_MAX_DET,
                 verbose=False,
+                device="cpu",
             )
 
             detections: list[dict] = []

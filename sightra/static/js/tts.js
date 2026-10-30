@@ -32,34 +32,46 @@
   }
 
   function deviceSpeak(text) {
-    if (!window.speechSynthesis || !text) return;
-    window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = DEVICE_LANG[language()] || "en-US";
-    const voices = window.speechSynthesis.getVoices();
-    const wantMale = gender() === "male";
-    const langPrefix = (utter.lang || "en").slice(0, 2);
-    const match =
-      voices.find((v) => {
-        const name = (v.name || "").toLowerCase();
-        const sameLang = (v.lang || "").toLowerCase().startsWith(langPrefix);
-        const genderHit = wantMale ? /male|daniel|alex|fred|george/.test(name) : /female|samantha|karen|moira|zira|samantha|sarah/.test(name);
-        return sameLang && genderHit;
-      }) || voices.find((v) => (v.lang || "").toLowerCase().startsWith(langPrefix));
-    if (match) utter.voice = match;
-    window.speechSynthesis.speak(utter);
+    return new Promise((resolve) => {
+      if (!window.speechSynthesis || !text) {
+        resolve();
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = DEVICE_LANG[language()] || "en-US";
+      utter.rate = 1.05;
+      const voices = window.speechSynthesis.getVoices();
+      const wantMale = gender() === "male";
+      const langPrefix = (utter.lang || "en").slice(0, 2);
+      const match =
+        voices.find((v) => {
+          const name = (v.name || "").toLowerCase();
+          const sameLang = (v.lang || "").toLowerCase().startsWith(langPrefix);
+          const genderHit = wantMale ? /male|daniel|alex|fred|george/.test(name) : /female|samantha|karen|moira|zira|samantha|sarah/.test(name);
+          return sameLang && genderHit;
+        }) || voices.find((v) => (v.lang || "").toLowerCase().startsWith(langPrefix));
+      if (match) utter.voice = match;
+      utter.onend = () => resolve();
+      utter.onerror = () => resolve();
+      window.speechSynthesis.speak(utter);
+    });
   }
 
   async function speak(text, opts = {}) {
     const cleaned = (text || "").trim();
     if (!cleaned) return;
     stop();
+    if (opts.immediate) {
+      await deviceSpeak(cleaned);
+      return;
+    }
     try {
       const headers = { "Content-Type": "application/json" };
       const token = csrf();
       if (token) headers["X-CSRFToken"] = token;
       const controller = new AbortController();
-      const timer = window.setTimeout(() => controller.abort(), 8000);
+      const timer = window.setTimeout(() => controller.abort(), 4000);
       let res;
       try {
         res = await fetch("/api/audio/speak/", {
@@ -77,7 +89,7 @@
         window.clearTimeout(timer);
       }
       if (!res.ok) {
-        deviceSpeak(cleaned);
+        await deviceSpeak(cleaned);
         return;
       }
       const blob = await res.blob();
@@ -89,7 +101,7 @@
       };
       await currentAudio.play();
     } catch {
-      deviceSpeak(cleaned);
+      await deviceSpeak(cleaned);
     }
   }
 

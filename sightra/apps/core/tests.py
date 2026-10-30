@@ -16,13 +16,15 @@ class LandingAndManifestTests(TestCase):
         self.assertContains(res, "See more. Understand more.")
         self.assertContains(res, "Get started")
         self.assertContains(res, "Explore Sightra")
+        self.assertContains(res, "Built for real-world movement")
+        self.assertContains(res, "landing-mobility.png")
+        self.assertContains(res, "Obstacle-aware vision scanning")
         self.assertContains(res, "Open Vision")
         self.assertContains(res, "Open Reader")
         self.assertContains(res, "Sauti Yetu Assistive Venture")
         self.assertContains(res, "Always use your established mobility aids")
         self.assertContains(res, "app-icon-192.png")
         self.assertContains(res, "sightra-logo.png")
-        self.assertNotContains(res, "optional volunteer video")
         self.assertNotContains(res, "offline-ready")
         self.assertNotContains(res, "No hidden fees")
         self.assertNotContains(res, "How Sightra works")
@@ -123,6 +125,22 @@ class VisionFastPathTests(SimpleTestCase):
         analyze_scene.assert_not_called()
         self.assertEqual(result["narration_mode"], "fast")
         self.assertIn("person", result["analysis_text"].lower())
+
+    @patch("apps.core.tasks.analyzer.analyze_scene")
+    @patch("apps.core.tasks.process_frame_vision_pipeline")
+    def test_fast_scan_skips_gemini_when_no_objects(self, pipeline, analyze_scene):
+        from apps.core.tasks import analyze_frame_context
+
+        pipeline.return_value = {
+            "objects": [],
+            "warnings": [],
+            "hazard_alert": None,
+            "detector_ready": True,
+        }
+        result = analyze_frame_context("frame", narration_mode="fast")
+        analyze_scene.assert_not_called()
+        self.assertEqual(result["narration_mode"], "fast")
+        self.assertEqual(result["analysis_text"], "")
 
 
 class DisplayNameTests(SimpleTestCase):

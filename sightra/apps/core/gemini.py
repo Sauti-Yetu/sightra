@@ -50,7 +50,13 @@ def _model_order() -> tuple[str, ...]:
     return GEMINI_MODELS
 
 
-def generate_text(parts: list, *, timeout: int = DEFAULT_TIMEOUT, max_attempts: int = MAX_MODEL_ATTEMPTS) -> str:
+def generate_text(
+    parts: list,
+    *,
+    timeout: int = DEFAULT_TIMEOUT,
+    max_attempts: int = MAX_MODEL_ATTEMPTS,
+    generation_config: dict | None = None,
+) -> str:
     """
     Generate text from prompt parts (strings and/or PIL images).
     Raises the last error if every attempted model fails.
@@ -60,12 +66,16 @@ def generate_text(parts: list, *, timeout: int = DEFAULT_TIMEOUT, max_attempts: 
         configure()
     last: Exception | None = None
     attempts = max(1, int(max_attempts or MAX_MODEL_ATTEMPTS))
+    config = generation_config
     for index, name in enumerate(_model_order()):
         if index >= attempts:
             break
         try:
             model = genai.GenerativeModel(name)
-            response = model.generate_content(parts, request_options={"timeout": timeout})
+            kwargs = {"request_options": {"timeout": timeout}}
+            if config:
+                kwargs["generation_config"] = config
+            response = model.generate_content(parts, **kwargs)
             text = _response_text(response)
             if text:
                 _working_model = name

@@ -144,7 +144,11 @@ class GeminiAnalyzer:
             parts = [system_prompt, user_prompt]
             if image is not None:
                 parts.append(image)
-            result = generate_text(parts, timeout=8)
+            result = generate_text(
+                parts,
+                timeout=5,
+                generation_config={"max_output_tokens": 90, "temperature": 0.2},
+            )
             self._last_scene_hash = new_hash
             self._last_analysis_text = result
             self._last_call_time = time.monotonic()

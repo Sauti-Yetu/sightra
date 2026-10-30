@@ -9,15 +9,17 @@ const enableCamBtn = document.getElementById('visionEnableCamera');
 let isScanning = false;
 let streamRef = null;
 let captureIntervalId = null;
-let isFetchInFlight = false;
+let fastInFlight = false;
+let fullInFlight = false;
 let frameCounter = 0;
 let pendingUserPrompt = '';
 let lastFullNarrationAt = 0;
 let lastSpokenKey = '';
+let lastFullQueuedAt = 0;
 
-const CAPTURE_FAST_MS = 1600;
-const CAPTURE_FULL_MS = 7000;
-const MIN_REPEAT_SPEECH_MS = 7000;
+const CAPTURE_FAST_MS = 1200;
+const FULL_NARRATION_MS = 8000;
+const MIN_REPEAT_SPEECH_MS = 5000;
 
 const VisionSpeech = {
   speaking: false,
@@ -37,6 +39,7 @@ const VisionSpeech = {
     }
 
     if (this.speaking) {
+      if (this.queue.length < 1) this.queue = [cleaned];
       return;
     }
     this.queue.push(cleaned);
@@ -53,7 +56,7 @@ const VisionSpeech = {
       this._speakNext();
     };
     if (window.SightraTTS) {
-      Promise.resolve(window.SightraTTS.speak(text)).finally(done);
+      Promise.resolve(window.SightraTTS.speak(text, { immediate: true })).finally(done);
       return;
     }
     if (!window.speechSynthesis) {
@@ -150,8 +153,12 @@ function setScanStatus(text) {
 function scheduleCaptureLoop() {
   stopCaptureLoop();
   captureIntervalId = setInterval(() => {
-    if (!isScanning || isFetchInFlight) return;
+    if (!isScanning || fastInFlight) return;
     captureAndAnalyze({ silent: VisionSpeech.speaking && !pendingUserPrompt });
+    if (!fullInFlight && Date.now() - lastFullQueuedAt >= FULL_NARRATION_MS) {
+      lastFullQueuedAt = Date.now();
+      captureAndAnalyze({ forceFull: true, silent: VisionSpeech.speaking });
+    }
   }, CAPTURE_FAST_MS);
 }
 
@@ -160,7 +167,8 @@ function stopCaptureLoop() {
     clearInterval(captureIntervalId);
     captureIntervalId = null;
   }
-  isFetchInFlight = false;
+  fastInFlight = false;
+  fullInFlight = false;
 }
 
 function clearDynamicUI() {
@@ -172,48 +180,57 @@ function clearDynamicUI() {
 
 async function captureAndAnalyze(options = {}) {
   if (!isScanning) return;
-  if (isFetchInFlight) return;
 
-  isFetchInFlight = true;
+  const userPrompt = options.userPrompt || pendingUserPrompt || '';
+  const forceFull = options.forceFull || Boolean(userPrompt);
+  if (forceFull) {
+    if (fullInFlight && !userPrompt) return;
+    fullInFlight = true;
+  } else if (fastInFlight) {
+    return;
+  } else {
+    fastInFlight = true;
+  }
+
   frameCounter += 1;
+  const requestId = frameCounter;
   const t0 = performance.now();
 
   if (window.SightraCamera) {
-    await window.SightraCamera.waitForFrame(video, 1200);
+    await window.SightraCamera.waitForFrame(video, 800);
   }
   if (!video.videoWidth) {
     setScanStatus('Camera is not ready yet. Tap Enable camera.');
     showEnableCamera(true);
-    isFetchInFlight = false;
+    if (forceFull) fullInFlight = false;
+    else fastInFlight = false;
     return;
   }
   const frameData = window.SightraCamera
-    ? window.SightraCamera.capture(video, canvas, 0.5, 640)
+    ? window.SightraCamera.capture(video, canvas, 0.45, 480)
     : (() => {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         canvas.getContext('2d').drawImage(video, 0, 0);
-        return canvas.toDataURL('image/jpeg', 0.5);
+        return canvas.toDataURL('image/jpeg', 0.45);
       })();
   if (!frameData) {
     setScanStatus('Could not capture a frame. Try again.');
-    isFetchInFlight = false;
+    if (forceFull) fullInFlight = false;
+    else fastInFlight = false;
     return;
   }
 
-  const userPrompt = options.userPrompt || pendingUserPrompt || '';
-  if (pendingUserPrompt) pendingUserPrompt = '';
+  if (pendingUserPrompt && userPrompt === pendingUserPrompt) pendingUserPrompt = '';
 
-  const forceFull = options.forceFull || Boolean(userPrompt);
   const narrationMode = forceFull ? 'full' : 'fast';
-  if (forceFull) lastFullNarrationAt = Date.now();
-  if (!options.silent) setScanStatus(forceFull ? 'Analysing the scene…' : 'Scanning…');
+  if (!options.silent) setScanStatus(forceFull ? 'Describing the scene…' : 'Scanning…');
 
   const headers = { 'Content-Type': 'application/json' };
   const token = csrfToken();
   if (token) headers['X-CSRFToken'] = token;
   const controller = new AbortController();
-  const timer = window.setTimeout(() => controller.abort(), 12000);
+  const timer = window.setTimeout(() => controller.abort(), forceFull ? 8000 : 4000);
 
   try {
     const response = await fetch('/api/navigation/stream/', {
@@ -223,11 +240,11 @@ async function captureAndAnalyze(options = {}) {
       signal: controller.signal,
       body: JSON.stringify({
         frame_data: frameData,
-        text_prompt: userPrompt || (narrationMode === 'full' ? 'Briefly describe obstacles and path ahead.' : ''),
+        text_prompt: userPrompt,
         user_prompt: userPrompt,
         frame_id: Date.now(),
         narration_mode: narrationMode,
-        force_refresh: forceFull,
+        force_refresh: Boolean(userPrompt),
       }),
     });
     let data = {};
@@ -255,6 +272,7 @@ async function captureAndAnalyze(options = {}) {
     if (proc) proc.textContent = `${Math.round(performance.now() - t0)}ms`;
 
     if (!isScanning) return;
+    if (!forceFull && requestId < frameCounter - 1) return;
 
     updateDynamicUI(data.metadata, data.analysis_text || data.hazard_alert || '');
 
@@ -263,7 +281,7 @@ async function captureAndAnalyze(options = {}) {
     else if (!data.metadata?.objects?.length) setScanStatus('Nothing detected yet. Hold the camera steady.');
 
     const urgent = Boolean(data.hazard_alert);
-    if (!options.silent && shouldSpeak(data, urgent) && spoken) {
+    if (shouldSpeak(data, urgent) && spoken) {
       VisionSpeech.enqueue(spoken, { urgent });
       lastSpokenKey = speechKey(data);
       if (narrationMode === 'full') lastFullNarrationAt = Date.now();
@@ -277,7 +295,8 @@ async function captureAndAnalyze(options = {}) {
     setScanStatus(err && err.name === 'AbortError' ? 'Scan timed out. Retrying…' : 'Connection error. Retrying…');
   } finally {
     window.clearTimeout(timer);
-    isFetchInFlight = false;
+    if (forceFull) fullInFlight = false;
+    else fastInFlight = false;
   }
 }
 
@@ -428,11 +447,12 @@ scanBtn?.addEventListener('click', async (event) => {
     setScanningUi(true);
     frameCounter = 0;
     lastFullNarrationAt = 0;
+    lastFullQueuedAt = Date.now();
     setScanStatus('Scanning…');
-    await window.SightraCamera?.waitForFrame(video, 1200);
+    await window.SightraCamera?.waitForFrame(video, 800);
     scheduleCaptureLoop();
     await captureAndAnalyze({ forceFull: false });
-    if (isScanning) captureAndAnalyze({ forceFull: true });
+    if (isScanning) captureAndAnalyze({ forceFull: true, silent: VisionSpeech.speaking });
     window.SightraUI?.announce('Sight scan started');
   } finally {
     scanBtn.dataset.busy = '0';

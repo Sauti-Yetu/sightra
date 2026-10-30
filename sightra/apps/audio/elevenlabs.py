@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_FEMALE = "EXAVITQu4vr4xnSDxMaL"  # Sarah
 DEFAULT_MALE = "pNInz6obpgDQGcFmaJgB"  # Adam
-MODEL_ID = "eleven_multilingual_v2"
+MODEL_ID = os.environ.get("ELEVENLABS_MODEL_ID", "eleven_flash_v2_5")
 
 
 def _api_key() -> str:
@@ -52,7 +52,7 @@ def synthesize(text: str, *, gender: str = "female") -> tuple[bytes, str]:
                 "model_id": MODEL_ID,
                 "voice_settings": {"stability": 0.45, "similarity_boost": 0.75},
             },
-            timeout=45,
+            timeout=8,
         )
         if response.status_code >= 400:
             logger.error("ElevenLabs TTS failed: %s %s", response.status_code, response.text[:200])

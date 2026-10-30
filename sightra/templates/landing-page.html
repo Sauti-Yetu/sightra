@@ -31,7 +31,22 @@
   </div>
 </section>
 
-<section id="product" class="mt-12" aria-label="Core features">
+<section id="product" class="mt-12 grid gap-8 md:grid-cols-2 md:items-center">
+  <div class="order-2 md:order-1">
+    <img src="{% static 'img/landing-mobility.png' %}" alt="Person using a white cane outdoors" class="w-full rounded-2xl shadow-[var(--shadow)]" loading="lazy" />
+  </div>
+  <div class="order-1 md:order-2">
+    <h2 class="font-headline text-2xl font-semibold">Built for real-world movement</h2>
+    <p class="mt-3 text-[var(--text-muted)]">Sightra combines camera perception, spoken guidance, and optional volunteer video. Descriptions can be wrong or delayed — keep using your usual mobility skills.</p>
+    <ul class="mt-6 space-y-3 text-sm">
+      <li class="flex gap-3"><span class="material-symbols-outlined text-[var(--brand-blue)]" aria-hidden="true">check_circle</span> Obstacle-aware vision scanning</li>
+      <li class="flex gap-3"><span class="material-symbols-outlined text-[var(--brand-blue)]" aria-hidden="true">check_circle</span> Reader for text, documents, signs, and currency</li>
+      <li class="flex gap-3"><span class="material-symbols-outlined text-[var(--brand-blue)]" aria-hidden="true">check_circle</span> Voice commands, plus TalkBack or VoiceOver</li>
+    </ul>
+  </div>
+</section>
+
+<section class="mt-12" aria-label="Core features">
   <div class="grid gap-4 md:grid-cols-2">
     <article class="card p-6">
       <h2 class="font-headline text-2xl font-semibold">Vision</h2>

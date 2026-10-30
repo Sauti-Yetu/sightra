@@ -35,7 +35,7 @@ def _decode_pil(frame_data):
         img.load()
         if img.mode not in ("RGB", "L"):
             img = img.convert("RGB")
-        img.thumbnail((512, 512))
+        img.thumbnail((384, 384))
         return img
     except Exception:
         logger.exception("Could not decode vision frame for Gemini")
@@ -62,7 +62,7 @@ def analyze_frame_context(
     user_asked = bool((text_prompt or "").strip())
 
     use_fast = narration_mode == "fast" and not user_asked
-    if use_fast and (hazard_alert or objects):
+    if use_fast:
         analysis_text = hazard_alert or _brief_from_objects(objects)
         return {
             "analysis_text": analysis_text,
