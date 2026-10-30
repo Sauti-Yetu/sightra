@@ -23,10 +23,6 @@
       <div class="mt-8 flex flex-wrap gap-3">
         <a href="/signup/" class="btn-primary">Get started</a>
         <a href="#product" class="btn-secondary">Explore Sightra</a>
-        <button type="button" class="btn-secondary inline-flex items-center gap-2" data-pwa-install>
-          <span class="material-symbols-outlined text-lg" aria-hidden="true">download</span>
-          Download app
-        </button>
       </div>
     </div>
     <div class="relative min-h-[280px] bg-[var(--bg-muted)] md:min-h-full">
@@ -35,9 +31,9 @@
   </div>
 </section>
 
-<section id="product" class="landing-panel mt-12 grid gap-8 p-6 md:grid-cols-2 md:items-center md:p-8">
-  <div class="order-2 flex justify-center md:order-1">
-    <img src="{% static 'img/landing-mobility.png' %}" alt="Person using a white cane outdoors" class="landing-mobility-photo" loading="lazy" width="360" height="280" />
+<section id="product" class="mt-12 grid gap-8 md:grid-cols-2 md:items-center">
+  <div class="order-2 md:order-1">
+    <img src="{% static 'img/landing-mobility.png' %}" alt="Person using a white cane outdoors" class="w-full rounded-2xl shadow-[var(--shadow)]" loading="lazy" />
   </div>
   <div class="order-1 md:order-2">
     <h2 class="font-headline text-2xl font-semibold">Built for real-world movement</h2>
@@ -51,13 +47,13 @@
 </section>
 
 <section class="mt-12" aria-label="Core features">
-  <div class="landing-feature-grid grid gap-5 md:grid-cols-2">
-    <article class="card landing-feature-card p-6">
+  <div class="grid gap-4 md:grid-cols-2">
+    <article class="card p-6">
       <h2 class="font-headline text-2xl font-semibold">Vision</h2>
       <p class="mt-2 text-[var(--text-muted)]">Understand your surroundings with AI-assisted scene descriptions and obstacle awareness.</p>
       <a href="/vision/" class="btn-primary mt-6 inline-flex min-h-11 items-center">Open Vision</a>
     </article>
-    <article class="card landing-feature-card p-6">
+    <article class="card p-6">
       <h2 class="font-headline text-2xl font-semibold">Reader</h2>
       <p class="mt-2 text-[var(--text-muted)]">Listen to text, documents, signs and supported images.</p>
       <a href="/reader/" class="btn-primary mt-6 inline-flex min-h-11 items-center">Open Reader</a>
@@ -65,22 +61,13 @@
   </div>
 </section>
 
-<section id="about" class="landing-panel mt-12 px-8 py-10">
+<section id="about" class="mt-12 rounded-3xl bg-[var(--surface)] px-8 py-10 shadow-[var(--shadow)]">
   <h2 class="font-headline text-2xl font-semibold">Technology for greater independence.</h2>
   <p class="mt-3 max-w-2xl text-[var(--text-muted)]">Sightra is an assistive technology product by Sauti Yetu Assistive Venture, designed to make visual information more accessible through AI and spoken guidance.</p>
 </section>
 
-<section id="safety" class="landing-panel mt-12 px-8 py-10">
+<section id="safety" class="mt-12 rounded-3xl border border-[var(--brand-blue)]/15 bg-[var(--surface)] px-8 py-10">
   <h2 class="font-headline text-xl font-semibold">Trust and safety</h2>
   <p class="mt-3 max-w-2xl text-[var(--text-muted)]">AI guidance may be incomplete or incorrect. Always use your established mobility aids and judgement.</p>
-</section>
-
-<section id="download-app" class="landing-panel mt-12 px-8 py-10 text-center">
-  <h2 class="font-headline text-2xl font-semibold">Add Sightra to your home screen</h2>
-  <p class="mx-auto mt-2 max-w-xl text-sm text-[var(--text-muted)]">Install the app for convenient access. Vision and Reader still need an internet connection.</p>
-  <button type="button" class="btn-primary mt-6 inline-flex min-h-11 items-center gap-2" data-pwa-install>
-    <span class="material-symbols-outlined text-lg" aria-hidden="true">download</span>
-    Download app
-  </button>
 </section>
 {% endblock %}
