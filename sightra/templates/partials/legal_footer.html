@@ -1,3 +1,4 @@
+{% if not request.sightra_user %}
 <footer class="legal-footer mx-auto max-w-6xl px-4 py-8 text-center text-xs text-[var(--text-muted)]" role="contentinfo">
   <nav aria-label="Legal and privacy">
     <ul class="flex flex-wrap justify-center gap-x-4 gap-y-2">
@@ -15,9 +16,9 @@
       <li><a href="/legal/business/">Business details</a></li>
       <li><a href="/legal/rights/">Your rights</a></li>
       <li><a href="/legal/unsubscribe/">Unsubscribe</a></li>
-      {% if request.sightra_user %}<li><a href="/settings/privacy/">Privacy settings</a></li>{% endif %}
     </ul>
   </nav>
   <p class="mt-3">© {% now "Y" %} {{ legal.operator_name }} · {{ legal.product_name }} · {{ legal.jurisdiction }}</p>
   <p class="mt-1">{{ legal.contact_email }}{% if legal.postal_address %} · {{ legal.postal_address }}{% endif %}</p>
 </footer>
+{% endif %}
