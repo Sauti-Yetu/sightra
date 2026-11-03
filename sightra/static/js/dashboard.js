@@ -16,12 +16,23 @@
     }
   }
 
+  function firstName(raw) {
+    return String(raw || "").trim().split(/\s+/)[0] || "";
+  }
+
   function fillGreeting() {
     const el = document.getElementById("greeting");
     if (!el) return;
-    const name = (el.getAttribute("data-display-name") || "").trim();
+    const name = firstName(el.getAttribute("data-display-name"));
     const next = name ? `Welcome back, ${name}` : "Welcome back";
     if (el.textContent !== next) el.textContent = next;
+    return next;
+  }
+
+  function greetAloud() {
+    const message = fillGreeting();
+    if (!message) return;
+    window.SightraTTS?.speak(message, { immediate: true });
   }
 
   function setText(id, value) {
@@ -38,7 +49,8 @@
     if (a11y.reduceMotion) parts.push("Reduced motion");
     if (a11y.voiceFeedback) parts.push("Spoken UI feedback");
     setText("dash-pref-theme", theme === "dark" ? "Dark" : "Light");
-    setText("dash-pref-voice", a11y.voiceGender === "male" ? "Male" : "Female");
+    const voiceLabels = { sarah: "Sarah", rachel: "Rachel", charlotte: "Charlotte", adam: "Adam", liam: "Liam", brian: "Brian" };
+    setText("dash-pref-voice", voiceLabels[a11y.readingVoice] || (a11y.voiceGender === "male" ? "Adam" : "Sarah"));
     setText("dash-pref-language", LANG[a11y.spokenLanguage] || "English");
     setText("dash-pref-a11y", parts.length ? parts.join(", ") : "Default");
   }
@@ -46,6 +58,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     fillGreeting();
     fillPreferences();
+    greetAloud();
   });
   window.addEventListener("sightra:theme", fillPreferences);
   window.addEventListener("sightra:a11y", fillPreferences);

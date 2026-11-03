@@ -10,6 +10,15 @@
     ki: "en-KE",
   };
 
+  const READING_VOICES = {
+    sarah: { gender: "female", hints: /sarah|female|samantha|karen|moira|zira/i },
+    rachel: { gender: "female", hints: /rachel|female|samantha|karen/i },
+    charlotte: { gender: "female", hints: /charlotte|female|moira|zira/i },
+    adam: { gender: "male", hints: /adam|male|daniel|alex|fred|george/i },
+    liam: { gender: "male", hints: /liam|male|daniel|alex/i },
+    brian: { gender: "male", hints: /brian|male|fred|george/i },
+  };
+
   function prefs() {
     try {
       return JSON.parse(localStorage.getItem("sightra_a11y") || "{}");
@@ -18,7 +27,21 @@
     }
   }
 
+  function clamp(value, min, max, fallback) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return fallback;
+    return Math.min(max, Math.max(min, n));
+  }
+
+  function readingVoice() {
+    const key = (prefs().readingVoice || "").toLowerCase();
+    if (READING_VOICES[key]) return key;
+    return gender() === "male" ? "adam" : "sarah";
+  }
+
   function gender() {
+    const voice = READING_VOICES[(prefs().readingVoice || "").toLowerCase()];
+    if (voice) return voice.gender;
     return prefs().voiceGender === "male" ? "male" : "female";
   }
 
@@ -26,9 +49,30 @@
     return prefs().spokenLanguage || "en";
   }
 
+  function rate() {
+    return clamp(prefs().speechRate, 0.7, 1.4, 1);
+  }
+
+  function pitch() {
+    return clamp(prefs().speechPitch, 0.7, 1.4, 1);
+  }
+
   function csrf() {
     const m = document.cookie.match(/csrftoken=([^;]+)/);
     return m ? decodeURIComponent(m[1]) : "";
+  }
+
+  function pickDeviceVoice(utter) {
+    const voices = window.speechSynthesis.getVoices();
+    const voiceKey = readingVoice();
+    const meta = READING_VOICES[voiceKey] || READING_VOICES.sarah;
+    const langPrefix = (utter.lang || "en").slice(0, 2);
+    return (
+      voices.find((v) => {
+        const sameLang = (v.lang || "").toLowerCase().startsWith(langPrefix);
+        return sameLang && meta.hints.test(v.name || "");
+      }) || voices.find((v) => (v.lang || "").toLowerCase().startsWith(langPrefix))
+    );
   }
 
   function deviceSpeak(text) {
@@ -40,17 +84,9 @@
       window.speechSynthesis.cancel();
       const utter = new SpeechSynthesisUtterance(text);
       utter.lang = DEVICE_LANG[language()] || "en-US";
-      utter.rate = 1.05;
-      const voices = window.speechSynthesis.getVoices();
-      const wantMale = gender() === "male";
-      const langPrefix = (utter.lang || "en").slice(0, 2);
-      const match =
-        voices.find((v) => {
-          const name = (v.name || "").toLowerCase();
-          const sameLang = (v.lang || "").toLowerCase().startsWith(langPrefix);
-          const genderHit = wantMale ? /male|daniel|alex|fred|george/.test(name) : /female|samantha|karen|moira|zira|samantha|sarah/.test(name);
-          return sameLang && genderHit;
-        }) || voices.find((v) => (v.lang || "").toLowerCase().startsWith(langPrefix));
+      utter.rate = rate();
+      utter.pitch = pitch();
+      const match = pickDeviceVoice(utter);
       if (match) utter.voice = match;
       utter.onend = () => resolve();
       utter.onerror = () => resolve();
@@ -83,6 +119,7 @@
             text: cleaned,
             gender: opts.gender || gender(),
             language: opts.language || language(),
+            voice: opts.voice || readingVoice(),
           }),
         });
       } finally {
@@ -95,6 +132,7 @@
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       currentAudio = new Audio(url);
+      currentAudio.playbackRate = rate();
       currentAudio.onended = () => {
         URL.revokeObjectURL(url);
         currentAudio = null;
@@ -113,5 +151,5 @@
     window.speechSynthesis?.cancel();
   }
 
-  window.SightraTTS = { speak, stop, deviceSpeak, gender, language };
+  window.SightraTTS = { speak, stop, deviceSpeak, gender, language, rate, pitch, readingVoice };
 })();

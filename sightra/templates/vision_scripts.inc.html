@@ -119,6 +119,7 @@ async function startCamera() {
   try {
     streamRef = await window.SightraCamera.start(video);
     showEnableCamera(false);
+    startSignalMeters();
     if (voiceStatus) voiceStatus.textContent = 'Camera ready. Tap scan to analyse the scene.';
     return true;
   } catch (err) {
@@ -148,6 +149,132 @@ function csrfToken() {
 
 function setScanStatus(text) {
   if (voiceStatus && text) voiceStatus.textContent = text;
+}
+
+/* Live HUD: camera clarity from luma/contrast; voice input from mic RMS. */
+const SignalMeters = {
+  cameraTimer: null,
+  voiceTimer: null,
+  audioCtx: null,
+  analyser: null,
+  micStream: null,
+  sampleCanvas: document.createElement('canvas'),
+
+  cameraLabel(score, mean) {
+    if (mean < 40) return `${score}% dim`;
+    if (mean > 210) return `${score}% bright`;
+    if (score >= 70) return `${score}% clear`;
+    if (score >= 40) return `${score}% fair`;
+    return `${score}% low`;
+  },
+
+  sampleCamera() {
+    const bar = document.getElementById('camera-clarity-bar');
+    const readout = document.getElementById('camera-clarity-readout');
+    if (!video || !video.videoWidth) {
+      if (readout) readout.textContent = 'Waiting';
+      if (bar) bar.style.height = '0%';
+      return;
+    }
+    const canvas = this.sampleCanvas;
+    const w = 64;
+    const h = Math.max(1, Math.round((video.videoHeight / video.videoWidth) * w));
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(video, 0, 0, w, h);
+    const pixels = ctx.getImageData(0, 0, w, h).data;
+    let sum = 0;
+    let sumSq = 0;
+    const n = pixels.length / 4;
+    for (let i = 0; i < pixels.length; i += 4) {
+      const y = 0.2126 * pixels[i] + 0.7152 * pixels[i + 1] + 0.0722 * pixels[i + 2];
+      sum += y;
+      sumSq += y * y;
+    }
+    const mean = sum / n;
+    const contrast = Math.sqrt(Math.max(0, sumSq / n - mean * mean));
+    const exposure = 1 - Math.min(1, Math.abs(mean - 128) / 128);
+    const contrastN = Math.min(1, contrast / 55);
+    const score = Math.round((0.45 * exposure + 0.55 * contrastN) * 100);
+    if (bar) bar.style.height = `${score}%`;
+    if (readout) readout.textContent = this.cameraLabel(score, mean);
+  },
+
+  startCamera() {
+    this.stopCamera();
+    this.sampleCamera();
+    this.cameraTimer = window.setInterval(() => this.sampleCamera(), 450);
+  },
+
+  stopCamera() {
+    if (this.cameraTimer) {
+      window.clearInterval(this.cameraTimer);
+      this.cameraTimer = null;
+    }
+  },
+
+  setVoiceHud(score, label) {
+    const readout = document.getElementById('voice-clarity-readout');
+    if (readout) readout.textContent = label;
+    document.querySelectorAll('[data-voice-bar]').forEach((el) => {
+      const step = Number(el.getAttribute('data-voice-bar')) * 25;
+      el.classList.toggle('is-on', score >= step - 12);
+    });
+  },
+
+  sampleVoice() {
+    if (!this.analyser) return;
+    const data = new Uint8Array(this.analyser.fftSize);
+    this.analyser.getByteTimeDomainData(data);
+    let sum = 0;
+    for (let i = 0; i < data.length; i += 1) {
+      const x = (data[i] - 128) / 128;
+      sum += x * x;
+    }
+    const rms = Math.sqrt(sum / data.length);
+    const score = Math.round(Math.min(1, rms * 8) * 100);
+    let label = `${score}% quiet`;
+    if (score >= 70) label = `${score}% clear`;
+    else if (score >= 35) label = `${score}% ok`;
+    this.setVoiceHud(score, label);
+  },
+
+  async startVoice() {
+    if (this.analyser) return;
+    try {
+      this.micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const source = this.audioCtx.createMediaStreamSource(this.micStream);
+      this.analyser = this.audioCtx.createAnalyser();
+      this.analyser.fftSize = 1024;
+      source.connect(this.analyser);
+      this.setVoiceHud(0, 'Listening');
+      this.voiceTimer = window.setInterval(() => this.sampleVoice(), 200);
+    } catch {
+      this.setVoiceHud(0, 'Mic off');
+    }
+  },
+
+  stopVoice() {
+    if (this.voiceTimer) {
+      window.clearInterval(this.voiceTimer);
+      this.voiceTimer = null;
+    }
+    if (this.micStream) {
+      this.micStream.getTracks().forEach((track) => track.stop());
+      this.micStream = null;
+    }
+    this.analyser = null;
+    if (this.audioCtx) {
+      this.audioCtx.close().catch(() => {});
+      this.audioCtx = null;
+    }
+  },
+};
+
+function startSignalMeters() {
+  SignalMeters.startCamera();
 }
 
 function scheduleCaptureLoop() {
@@ -268,8 +395,8 @@ async function captureAndAnalyze(options = {}) {
       if (!options.silent) VisionSpeech.enqueue(msg, { urgent: false });
       return;
     }
-    const proc = document.getElementById('proc-readout');
-    if (proc) proc.textContent = `${Math.round(performance.now() - t0)}ms`;
+    const t1 = Math.round(performance.now() - t0);
+    if (window.console) console.debug('Vision scan ms', t1);
 
     if (!isScanning) return;
     if (!forceFull && requestId < frameCounter - 1) return;
@@ -357,6 +484,7 @@ async function startVoiceCommand() {
     'Voice questions use your microphone. Allow microphone access for Sightra?'
   );
   if (!micOk) return;
+  SignalMeters.startVoice();
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {

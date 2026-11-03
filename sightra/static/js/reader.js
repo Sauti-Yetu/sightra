@@ -72,19 +72,36 @@
   }
 
   function speakChunk(text) {
+    speaking = true;
+    const cleaned = (text || "").trim();
+    if (!cleaned) {
+      speaking = false;
+      return Promise.resolve();
+    }
+    if (window.SightraTTS?.deviceSpeak) {
+      return window.SightraTTS.deviceSpeak(cleaned).finally(() => {
+        speaking = false;
+      });
+    }
     return new Promise((resolve) => {
-      const cleaned = (text || "").trim();
-      if (!cleaned || !window.speechSynthesis) {
+      if (!window.speechSynthesis) {
+        speaking = false;
         resolve();
         return;
       }
       const utter = new SpeechSynthesisUtterance(cleaned);
       const langMap = { en: "en-US", sw: "sw-KE", fr: "fr-FR", ar: "ar-SA", so: "so-SO", ki: "en-KE" };
       utter.lang = langMap[language()] || "en-US";
-      utter.rate = 0.95;
-      utter.onend = resolve;
-      utter.onerror = resolve;
-      speaking = true;
+      utter.rate = window.SightraTTS?.rate?.() || 1;
+      utter.pitch = window.SightraTTS?.pitch?.() || 1;
+      utter.onend = () => {
+        speaking = false;
+        resolve();
+      };
+      utter.onerror = () => {
+        speaking = false;
+        resolve();
+      };
       window.speechSynthesis.speak(utter);
     });
   }

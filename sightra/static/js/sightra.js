@@ -23,6 +23,15 @@
     window.dispatchEvent(new CustomEvent("sightra:theme", { detail: { theme } }));
   }
 
+  const VOICE_GENDER = {
+    sarah: "female",
+    rachel: "female",
+    charlotte: "female",
+    adam: "male",
+    liam: "male",
+    brian: "male",
+  };
+
   const DEFAULT_A11Y = {
     highContrast: false,
     reduceMotion: false,
@@ -31,6 +40,9 @@
     voiceCommands: false,
     voiceGender: "female",
     spokenLanguage: "en",
+    readingVoice: "sarah",
+    speechRate: 1,
+    speechPitch: 1,
   };
 
   function syncA11yControls(opts) {
@@ -41,6 +53,16 @@
     document.querySelectorAll("[data-a11y-select]").forEach((select) => {
       const key = select.getAttribute("data-a11y-select");
       if (opts[key]) select.value = opts[key];
+    });
+    document.querySelectorAll("[data-a11y-range]").forEach((input) => {
+      const key = input.getAttribute("data-a11y-range");
+      if (opts[key] != null) input.value = String(opts[key]);
+    });
+    document.querySelectorAll("[data-speech-rate-value]").forEach((el) => {
+      el.textContent = `${Number(opts.speechRate || 1).toFixed(1)}×`;
+    });
+    document.querySelectorAll("[data-speech-pitch-value]").forEach((el) => {
+      el.textContent = Number(opts.speechPitch || 1).toFixed(1);
     });
     document.documentElement.style.fontSize = opts.largeText ? "106%" : "";
   }
@@ -115,24 +137,24 @@
   }
 
   function initA11yPanel() {
-    const panel = document.getElementById("a11y-panel");
-    const toggle = document.getElementById("a11y-toggle");
-    if (!panel || !toggle) return;
-
     const opts = Object.assign({}, DEFAULT_A11Y, readA11y());
     applyA11y(opts);
 
-    toggle.addEventListener("click", () => {
-      const hidden = panel.hasAttribute("hidden");
-      if (hidden) {
-        panel.removeAttribute("hidden");
-        panel.querySelector("input")?.focus();
-      } else {
-        panel.setAttribute("hidden", "hidden");
-        toggle.focus();
-      }
-      announce(hidden ? "Accessibility options opened" : "Accessibility options closed");
-    });
+    const panel = document.getElementById("a11y-panel");
+    const toggle = document.getElementById("a11y-toggle");
+    if (panel && toggle) {
+      toggle.addEventListener("click", () => {
+        const hidden = panel.hasAttribute("hidden");
+        if (hidden) {
+          panel.removeAttribute("hidden");
+          panel.querySelector("input")?.focus();
+        } else {
+          panel.setAttribute("hidden", "hidden");
+          toggle.focus();
+        }
+        announce(hidden ? "Accessibility options opened" : "Accessibility options closed");
+      });
+    }
 
     document.querySelectorAll("[data-a11y-key]").forEach((input) => {
       const key = input.getAttribute("data-a11y-key");
@@ -160,9 +182,26 @@
       const key = select.getAttribute("data-a11y-select");
       select.addEventListener("change", () => {
         opts[key] = select.value;
+        if (key === "readingVoice" && VOICE_GENDER[select.value]) {
+          opts.voiceGender = VOICE_GENDER[select.value];
+        }
         applyA11y(opts);
         announce(`${key} set to ${select.value}`);
       });
+    });
+
+    document.querySelectorAll("[data-a11y-range]").forEach((input) => {
+      const key = input.getAttribute("data-a11y-range");
+      const commit = () => {
+        opts[key] = Number(input.value);
+        applyA11y(opts);
+        announce(`${key === "speechRate" ? "Speaking rate" : "Voice pitch"} ${Number(input.value).toFixed(1)}`);
+      };
+      input.addEventListener("input", () => {
+        opts[key] = Number(input.value);
+        syncA11yControls(opts);
+      });
+      input.addEventListener("change", commit);
     });
   }
 

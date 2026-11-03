@@ -545,6 +545,89 @@ body.is-camera-page .voice-command-bar {
   padding: 0.5rem 0.75rem;
 }
 
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 1.55rem;
+  margin: 0.1rem 0 0;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 22%, transparent);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+input[type="checkbox"]::after {
+  content: "";
+  position: absolute;
+  top: 0.15rem;
+  left: 0.15rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
+  transition: transform 0.15s ease;
+}
+
+input[type="checkbox"]:checked {
+  background: var(--brand-blue);
+}
+
+input[type="checkbox"]:checked::after {
+  transform: translateX(1.2rem);
+}
+
+input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--brand-blue);
+  outline-offset: 2px;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--brand-blue);
+}
+
+.speech-rate-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(10, 10, 10, 0.55);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.speech-rate-control input[type="range"] {
+  width: 6.75rem;
+  accent-color: var(--brand-cyan);
+}
+
+.vision-meter-fill {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: var(--brand-cyan);
+  transition: height 0.25s ease;
+}
+
+.vision-voice-bar {
+  height: 1rem;
+  width: 0.375rem;
+  border-radius: 0.125rem;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.vision-voice-bar.is-on {
+  background: var(--brand-cyan);
+}
+
 @media (min-width: 768px) {
   .voice-command-bar {
     bottom: 1.5rem;

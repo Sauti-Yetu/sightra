@@ -42,6 +42,34 @@ class LandingAndManifestTests(TestCase):
         self.assertNotIn("Lookout", body)
 
 
+class SettingsAndVisionCopyTests(TestCase):
+    def _signed_in(self, path):
+        with patch("apps.accounts.middleware.SessionService.get_user", return_value={"id": "user-a", "email": "alice.ngugi@example.com"}):
+            return Client().get(path)
+
+    def test_settings_has_reading_voice_rate_and_pitch(self):
+        res = self._signed_in("/settings/")
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, "Reading voice")
+        self.assertContains(res, "Speaking rate")
+        self.assertContains(res, "Voice pitch")
+        self.assertContains(res, "My recorded voice (coming later)")
+
+    def test_vision_hud_uses_live_clarity_meters(self):
+        res = self._signed_in("/vision/")
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, "Camera clarity")
+        self.assertContains(res, "Voice input")
+        self.assertContains(res, "Spoken speed")
+        self.assertNotContains(res, "Depth range")
+        self.assertNotContains(res, "12.4m")
+
+    def test_reader_has_spoken_speed(self):
+        res = self._signed_in("/reader/")
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, "Spoken speed")
+
+
 class GeminiHelperTests(SimpleTestCase):
     def tearDown(self):
         import apps.core.gemini as gemini
@@ -156,6 +184,13 @@ class DisplayNameTests(SimpleTestCase):
     def test_missing_user(self):
         self.assertEqual(display_name_for(None), "")
         self.assertEqual(display_name_for({}), "")
+
+    def test_full_name_uses_first_token_only(self):
+        self.assertEqual(
+            display_name_for({"email": "jane@example.com", "user_metadata": {"full_name": "Jane Doe"}}),
+            "Jane",
+        )
+        self.assertEqual(_display_name_for({"display_name": "Jane Doe"}), "Jane")
 
     def test_dashboard_helper_matches_session_helper(self):
         samples = (

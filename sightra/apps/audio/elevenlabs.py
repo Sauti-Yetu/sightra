@@ -7,6 +7,8 @@ import os
 
 import requests
 
+from .voices import resolve_voice
+
 logger = logging.getLogger(__name__)
 
 DEFAULT_FEMALE = "EXAVITQu4vr4xnSDxMaL"  # Sarah
@@ -25,7 +27,7 @@ def voice_id_for(gender: str) -> str:
     return (os.environ.get("ELEVENLABS_VOICE_FEMALE") or DEFAULT_FEMALE).strip()
 
 
-def synthesize(text: str, *, gender: str = "female") -> tuple[bytes, str]:
+def synthesize(text: str, *, gender: str = "female", voice_key: str = "") -> tuple[bytes, str]:
     """
     Return (audio_bytes, content_type). Empty bytes if the key is missing or the API fails.
     """
@@ -37,7 +39,7 @@ def synthesize(text: str, *, gender: str = "female") -> tuple[bytes, str]:
         logger.warning("ELEVENLABS_API_KEY is not set; skipping cloud TTS")
         return b"", "audio/mpeg"
 
-    voice_id = voice_id_for(gender)
+    voice_id = resolve_voice(voice_key, gender)["id"] if voice_key else voice_id_for(gender)
     url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
     try:
         response = requests.post(

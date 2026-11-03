@@ -25,8 +25,8 @@
   <section id="voice" class="card p-6 md:col-span-2">
     <h2 class="font-headline text-lg font-semibold">Voice</h2>
     <p class="mt-1 text-sm text-[var(--text-muted)]">
-      Spoken readings use ElevenLabs when available, with a device voice fallback.
-      Voice commands are an extra navigation path. Screen readers such as TalkBack and VoiceOver still work.
+      Choose a trained reading voice for spoken guidance in Vision and Reader.
+      Later you will be able to record a preferred voice and use it for spoken commands.
     </p>
     <ul class="mt-4 space-y-4 text-sm">
       <li class="flex items-center justify-between gap-3">
@@ -38,10 +38,15 @@
         <input type="checkbox" data-a11y-key="voiceCommands" aria-label="Enable voice commands" />
       </li>
       <li class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <label for="settings-voice-gender">Voice</label>
-        <select id="settings-voice-gender" data-a11y-select="voiceGender" class="settings-select" aria-label="Spoken voice">
-          <option value="female">Female</option>
-          <option value="male">Male</option>
+        <label for="settings-reading-voice">Reading voice</label>
+        <select id="settings-reading-voice" data-a11y-select="readingVoice" class="settings-select" aria-label="Reading voice">
+          <option value="sarah">Sarah — clear, calm</option>
+          <option value="rachel">Rachel — warm narrative</option>
+          <option value="charlotte">Charlotte — soft guidance</option>
+          <option value="adam">Adam — steady, direct</option>
+          <option value="liam">Liam — conversational</option>
+          <option value="brian">Brian — lower, measured</option>
+          <option value="custom" disabled>My recorded voice (coming later)</option>
         </select>
       </li>
       <li class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -55,9 +60,23 @@
           <option value="ki">Kikuyu</option>
         </select>
       </li>
+      <li class="flex flex-col gap-2">
+        <div class="flex items-center justify-between gap-3">
+          <label for="settings-speech-rate">Speaking rate</label>
+          <span data-speech-rate-value>1.0×</span>
+        </div>
+        <input id="settings-speech-rate" type="range" min="0.7" max="1.4" step="0.1" value="1" data-a11y-range="speechRate" aria-label="Speaking rate" />
+      </li>
+      <li class="flex flex-col gap-2">
+        <div class="flex items-center justify-between gap-3">
+          <label for="settings-speech-pitch">Voice pitch</label>
+          <span data-speech-pitch-value>1.0</span>
+        </div>
+        <input id="settings-speech-pitch" type="range" min="0.7" max="1.4" step="0.1" value="1" data-a11y-range="speechPitch" aria-label="Voice pitch" />
+      </li>
     </ul>
     <p class="mt-4 text-xs text-[var(--text-muted)]">
-      Try: home, vision, reader, settings, scan, document, currency, signage, upload, repeat, stop, or help.
+      Rate and pitch apply to Vision, Reader, and spoken UI feedback. Try: home, vision, reader, settings, scan, document, currency, signage, upload, repeat, stop, or help.
     </p>
   </section>
 

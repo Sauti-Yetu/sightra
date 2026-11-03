@@ -27,7 +27,8 @@ def speak(request):
     if not text:
         return JsonResponse({"success": False, "error": "text is required"}, status=400)
 
-    audio, content_type = synthesize(text, gender=gender)
+    voice_key = (payload.get("voice") or payload.get("reading_voice") or "").strip()
+    audio, content_type = synthesize(text, gender=gender, voice_key=voice_key)
     if not audio:
         return JsonResponse(
             {
