@@ -78,6 +78,9 @@ class SettingsAndVisionCopyTests(TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertContains(res, "Spoken speed")
         self.assertContains(res, "Night light")
+        self.assertContains(res, "Read page")
+        self.assertContains(res, "Page text")
+        self.assertContains(res, "reader-transcript")
 
 
 class GeminiHelperTests(SimpleTestCase):

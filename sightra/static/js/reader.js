@@ -1,10 +1,10 @@
 (function () {
   const MODE_LABELS = {
-    live: "Live text",
-    document: "Document",
-    signage: "Signage",
-    currency: "Currency",
-    upload: "Document",
+    live: "Live",
+    document: "Page",
+    signage: "Sign",
+    currency: "Money",
+    upload: "Page",
   };
 
   const video = document.getElementById("readerCamera");
@@ -13,6 +13,7 @@
   const spokenEl = document.getElementById("readerSpoken");
   const transcriptEl = document.getElementById("readerTranscript");
   const statusEl = document.getElementById("readerStatus");
+  const playStateEl = document.getElementById("readerPlayState");
   const modeLabel = document.getElementById("readerModeLabel");
   const fileInput = document.getElementById("readerFile");
   const enableBtn = document.getElementById("readerEnableCamera");
@@ -20,8 +21,9 @@
   const sourceUploadBtn = document.getElementById("readerSourceUpload");
   const captureBtn = document.getElementById("readerCaptureBtn");
   const nightBtn = document.getElementById("readerNightBtn");
+  const shell = document.querySelector(".reader-shell");
 
-  let mode = "live";
+  let mode = "document";
   let source = "camera";
   let liveTimer = null;
   let busy = false;
@@ -30,6 +32,7 @@
   let stream = null;
   let readToken = 0;
   let speaking = false;
+  let narrating = false;
   let nightForced = localStorage.getItem("sightra_night_lock") === "1";
   let nightActive = false;
   let dimStreak = 0;
@@ -47,16 +50,47 @@
     if (statusEl) statusEl.textContent = text;
   }
 
-  function setCaptureLabel() {
-    if (!captureBtn) return;
-    captureBtn.setAttribute("aria-label", source === "upload" ? "Upload a photo to read" : "Read now");
+  function setPlayState(text) {
+    if (playStateEl) playStateEl.textContent = text;
   }
 
-  function showStill(url, { contain = false } = {}) {
+  function setReadingLayout(on) {
+    shell?.classList.toggle("is-reading", !!on);
+  }
+
+  function setPlaying(on) {
+    speaking = !!on;
+    const active = narrating || speaking;
+    shell?.classList.toggle("is-playing", active);
+    setPlayState(active ? "Speaking" : "Ready");
+  }
+
+  function setCaptureLabel() {
+    if (!captureBtn) return;
+    captureBtn.setAttribute("aria-label", source === "upload" ? "Upload a photo to read" : "Read page");
+  }
+
+  function renderTranscript(chunks, currentIndex) {
+    if (!transcriptEl) return;
+    transcriptEl.replaceChildren();
+    if (!chunks.length) {
+      transcriptEl.textContent = "No text found on this page.";
+      return;
+    }
+    chunks.forEach((chunk, idx) => {
+      const span = document.createElement("span");
+      span.className = "reader-sentence" + (idx === currentIndex ? " is-current" : "");
+      span.textContent = chunk + (idx === chunks.length - 1 ? "" : " ");
+      transcriptEl.appendChild(span);
+      if (idx === currentIndex) {
+        span.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }
+    });
+  }
+
+  function showStill(url) {
     if (!still || !url) return;
     still.src = url;
-    still.classList.toggle("object-contain", contain);
-    still.classList.toggle("object-cover", !contain);
     still.classList.remove("hidden");
     if (video) video.classList.add("hidden");
   }
@@ -77,20 +111,14 @@
   }
 
   function speakChunk(text) {
-    speaking = true;
     const cleaned = (text || "").trim();
-    if (!cleaned) {
-      speaking = false;
-      return Promise.resolve();
-    }
+    if (!cleaned) return Promise.resolve();
+    setPlaying(true);
     if (window.SightraTTS?.deviceSpeak) {
-      return window.SightraTTS.deviceSpeak(cleaned).finally(() => {
-        speaking = false;
-      });
+      return window.SightraTTS.deviceSpeak(cleaned).catch(() => {});
     }
     return new Promise((resolve) => {
       if (!window.speechSynthesis) {
-        speaking = false;
         resolve();
         return;
       }
@@ -99,20 +127,15 @@
       utter.lang = langMap[language()] || "en-US";
       utter.rate = window.SightraTTS?.rate?.() || 1;
       utter.pitch = window.SightraTTS?.pitch?.() || 1;
-      utter.onend = () => {
-        speaking = false;
-        resolve();
-      };
-      utter.onerror = () => {
-        speaking = false;
-        resolve();
-      };
+      utter.onend = () => resolve();
+      utter.onerror = () => resolve();
       window.speechSynthesis.speak(utter);
     });
   }
 
   function stopSpeech() {
-    speaking = false;
+    narrating = false;
+    setPlaying(false);
     window.SightraTTS?.stop();
     window.speechSynthesis?.cancel();
   }
@@ -120,21 +143,29 @@
   async function streamAndNarrate(spoken, text, token) {
     lastSpoken = spoken || text || "";
     lastText = text || spoken || "";
+    setReadingLayout(true);
     if (spokenEl) spokenEl.textContent = lastSpoken || "Nothing read yet.";
-    if (transcriptEl) transcriptEl.textContent = "";
     const chunks = splitSentences(lastText);
     if (!chunks.length) {
-      if (transcriptEl) transcriptEl.textContent = "No transcript.";
+      narrating = false;
+      renderTranscript([], -1);
+      setPlaying(false);
       return;
     }
-    for (let i = 0; i < chunks.length; i += 1) {
-      if (token !== readToken) return;
-      const soFar = chunks.slice(0, i + 1).join(" ");
-      if (transcriptEl) {
-        transcriptEl.textContent = soFar;
-        transcriptEl.scrollTop = transcriptEl.scrollHeight;
+    narrating = true;
+    setPlaying(true);
+    try {
+      for (let i = 0; i < chunks.length; i += 1) {
+        if (token !== readToken) return;
+        renderTranscript(chunks, i);
+        await speakChunk(chunks[i]);
       }
-      await speakChunk(chunks[i]);
+      if (token === readToken) renderTranscript(chunks, -1);
+    } finally {
+      if (token === readToken) {
+        narrating = false;
+        setPlaying(false);
+      }
     }
   }
 
@@ -167,10 +198,10 @@
     stopLive();
     if (source === "camera") {
       hideStill();
-      setStatus("Camera ready. Point at the page, then tap the shutter.");
+      setStatus("Point at a page, then tap Read page.");
       startCamera();
     } else {
-      setStatus("Upload a photo of a document, sign, or note.");
+      setStatus("Upload a photo of a page, then it will be read aloud.");
       if (openPicker) fileInput?.click();
     }
     window.SightraUI?.announce(source === "upload" ? "Upload mode" : "Camera mode");
@@ -232,7 +263,7 @@
       showEnable(false);
       startNightWatch();
       await applyNight(true);
-      if (source === "camera") setStatus("Camera ready. Tap the shutter to read.");
+      if (source === "camera") setStatus("Point at a page, then tap Read page.");
       return stream;
     } catch (err) {
       stream = null;
@@ -283,16 +314,18 @@
     }
   }
 
-  async function analyze(frameData, { freeze = false, contain = false } = {}) {
+  async function analyze(frameData, { freeze = false } = {}) {
     if (!frameData) return;
     const token = ++readToken;
     busy = true;
     stopSpeech();
-    if (freeze) showStill(frameData, { contain });
-    setStatus("Reading…");
-    if (spokenEl) spokenEl.textContent = "Reading the page…";
-    if (transcriptEl) transcriptEl.textContent = "Text will appear here as it is read aloud.";
-    window.SightraUI?.announce("Reading the page");
+    if (freeze) showStill(frameData);
+    setStatus("Reading this page…");
+    setPlayState("Reading");
+    setReadingLayout(true);
+    if (spokenEl) spokenEl.textContent = "Reading this page.";
+    if (transcriptEl) transcriptEl.textContent = "The words will appear here as they are read aloud.";
+    window.SightraUI?.announce("Reading this page");
     try {
       let { res, data } = await postAnalyze(frameData);
       if (token !== readToken) return;
@@ -316,7 +349,7 @@
       const spoken = data.spoken || data.error || "Nothing found.";
       const text = data.text || spoken;
       await streamAndNarrate(spoken, text, token);
-      if (token === readToken) setStatus("Reading complete. Tap repeat to hear it again.");
+      if (token === readToken) setStatus("Page finished. Tap Read page for the next page, or Repeat to hear this one again.");
     } catch (err) {
       if (token !== readToken) return;
       const msg =
@@ -346,7 +379,7 @@
       showEnable(true);
       return;
     }
-    await analyze(frame, { freeze: mode !== "live" || !liveTimer, contain: false });
+    await analyze(frame, { freeze: mode !== "live" || !liveTimer });
   }
 
   function stopLive() {
@@ -396,6 +429,14 @@
     readToken += 1;
     streamAndNarrate(lastSpoken, lastText, readToken);
   });
+  document.getElementById("readerStopBtn")?.addEventListener("click", () => {
+    readToken += 1;
+    stopLive();
+    stopSpeech();
+    setPlayState("Stopped");
+    setStatus("Reading stopped.");
+    window.SightraUI?.announce("Reading stopped");
+  });
   document.getElementById("readerLiveBtn")?.addEventListener("click", () => {
     if (liveTimer) stopLive();
     else startLive();
@@ -441,8 +482,8 @@
     const reader = new FileReader();
     reader.onload = () => {
       const dataUrl = String(reader.result || "");
-      showStill(dataUrl, { contain: true });
-      analyze(dataUrl, { freeze: true, contain: true });
+      showStill(dataUrl);
+      analyze(dataUrl, { freeze: true });
     };
     reader.onerror = () => setStatus("Could not open that file. Try another photo.");
     reader.readAsDataURL(file);
