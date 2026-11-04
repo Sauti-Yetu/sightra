@@ -473,18 +473,41 @@ body.is-camera-page .legal-footer {
   color: var(--text-muted);
 }
 
-.reader-mode-select {
-  display: block;
-  width: min(9.5rem, 42vw);
-  margin: 0;
-  border: 0;
-  background: transparent;
-  color: var(--text);
+.reader-mode-label {
   font-family: Lexend, Inter, system-ui, sans-serif;
   font-size: 1rem;
   font-weight: 600;
   line-height: 1.2;
-  padding: 0;
+}
+
+.reader-modes {
+  display: flex;
+  gap: 0.35rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 1rem 0.45rem;
+  scrollbar-width: none;
+}
+
+.reader-modes::-webkit-scrollbar {
+  display: none;
+}
+
+.reader-mode {
+  flex: 1 0 auto;
+  min-height: 2.15rem;
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg-muted);
+  white-space: nowrap;
+}
+
+.reader-mode.is-active {
+  color: #fff;
+  background: var(--brand-blue);
 }
 
 .reader-top-tools {
@@ -524,6 +547,10 @@ body.is-camera-page .legal-footer {
   max-width: 76rem;
   margin: 0 auto;
   padding: 0 1rem;
+}
+
+.reader-shell.is-reading .reader-stage {
+  grid-template-rows: minmax(7.5rem, 34%) minmax(0, 1fr);
 }
 
 .reader-page {
@@ -639,24 +666,29 @@ body.is-camera-page .legal-footer {
 }
 
 .reader-copy {
+  position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 6.75rem;
-  max-height: 32vh;
+  min-height: 6.5rem;
+  max-height: 28vh;
+  overflow: hidden;
   border-radius: 1.25rem;
   background: var(--surface);
   box-shadow: var(--shadow);
-  padding: 0.75rem 1rem 0.85rem;
+  padding: 1.7rem 1rem 0.85rem;
 }
 
-.reader-copy-head {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  margin-bottom: 0.65rem;
+.reader-shell.is-reading .reader-copy {
+  max-height: none;
+  min-height: 0;
 }
 
 .reader-play-state {
+  position: absolute;
+  top: 0.55rem;
+  left: 0.9rem;
+  z-index: 1;
+  margin: 0;
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -664,21 +696,14 @@ body.is-camera-page .legal-footer {
   color: var(--brand-blue);
 }
 
-.reader-shell.is-playing .reader-play-state {
-  color: var(--brand-blue);
-}
-
-.reader-status {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
 .reader-transcript {
   display: flex;
+  flex: 1;
   flex-direction: column;
   justify-content: center;
-  gap: 0.35rem;
-  min-height: 4.5rem;
+  gap: 0.45rem;
+  min-height: 0;
+  overflow: hidden;
   font-family: Lexend, Inter, system-ui, sans-serif;
   color: var(--text);
 }
@@ -686,26 +711,33 @@ body.is-camera-page .legal-footer {
 .reader-line {
   margin: 0;
   text-align: center;
-  transition: opacity 0.2s ease, font-size 0.2s ease;
+  overflow-wrap: anywhere;
 }
 
 .reader-line.is-prev,
 .reader-line.is-next {
-  font-size: 0.92rem;
-  line-height: 1.45;
+  flex: 0 1 auto;
+  max-height: 2.7em;
+  overflow: hidden;
+  font-size: 0.9rem;
+  line-height: 1.35;
   font-weight: 500;
-  opacity: 0.38;
+  opacity: 0.4;
 }
 
 .reader-line.is-current {
-  font-size: 1.28rem;
-  line-height: 1.45;
+  flex: 0 1 auto;
+  max-height: 7.2em;
+  overflow: hidden;
+  font-size: 1.22rem;
+  line-height: 1.4;
   font-weight: 600;
 }
 
 html[data-a11y-contrast="high"] .reader-line.is-current {
-  text-decoration: underline;
-  text-underline-offset: 0.18em;
+  background: color-mix(in srgb, var(--brand-blue) 16%, transparent);
+  border-radius: 0.4rem;
+  padding: 0.15rem 0.35rem;
 }
 
 .reader-dock {
@@ -788,25 +820,33 @@ html[data-a11y-contrast="high"] .reader-line.is-current {
 }
 
 @media (min-width: 768px) {
+  .reader-modes {
+    justify-content: center;
+    padding-bottom: 0.55rem;
+  }
+
   .reader-dock {
     padding: 0.55rem 1rem 1.15rem;
   }
 
   .reader-line.is-current {
-    font-size: 1.45rem;
+    font-size: 1.4rem;
+    max-height: 8.4em;
   }
 
-  .reader-stage {
-    grid-template-columns: minmax(20rem, 1.15fr) minmax(16rem, 0.85fr);
+  .reader-stage,
+  .reader-shell.is-reading .reader-stage {
+    grid-template-columns: minmax(20rem, 1.1fr) minmax(16rem, 0.9fr);
     grid-template-rows: minmax(0, 1fr);
     gap: 1rem;
     padding: 0 1.5rem 0.4rem;
   }
 
-  .reader-copy {
+  .reader-copy,
+  .reader-shell.is-reading .reader-copy {
     max-height: none;
-    padding: 1.15rem 1.25rem;
-    justify-content: center;
+    min-height: 0;
+    padding: 2rem 1.25rem 1.15rem;
   }
 
   .reader-actions {

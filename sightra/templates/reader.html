@@ -13,14 +13,7 @@
     </a>
     <div class="reader-top-title">
       <p class="reader-kicker">Reader</p>
-      <label class="sr-only" for="readerModeSelect">Reader mode</label>
-      <select id="readerModeSelect" class="reader-mode-select" aria-label="Reader mode">
-        <option value="live">Live</option>
-        <option value="document" selected>Page</option>
-        <option value="signage">Sign</option>
-        <option value="currency">Money</option>
-      </select>
-      <p id="readerModeLabel" class="sr-only">Page</p>
+      <p id="readerModeLabel" class="reader-mode-label">Document</p>
     </div>
     <div class="reader-top-tools">
       <button type="button" id="readerNightBtn" class="night-light-btn" aria-pressed="false" aria-label="Night light">
@@ -29,6 +22,13 @@
       </button>
     </div>
   </header>
+
+  <div class="reader-modes" role="tablist" aria-label="Reader modes">
+    <button type="button" class="reader-mode" data-reader-mode="live" aria-selected="false">Live</button>
+    <button type="button" class="reader-mode is-active" data-reader-mode="document" aria-selected="true">Document</button>
+    <button type="button" class="reader-mode" data-reader-mode="signage" aria-selected="false">Signage</button>
+    <button type="button" class="reader-mode" data-reader-mode="currency" aria-selected="false">Currency</button>
+  </div>
 
   <input id="readerFile" type="file" accept="image/*,.heic,.heif,image/heic,image/heif,image/webp" class="sr-only" />
 
@@ -52,13 +52,11 @@
     </section>
 
     <section class="reader-copy" aria-label="Page text">
-      <div class="reader-copy-head">
-        <p id="readerPlayState" class="reader-play-state">Ready</p>
-        <p id="readerStatus" class="reader-status" role="status">Point at a page, then tap Read page.</p>
-      </div>
+      <p id="readerPlayState" class="reader-play-state">Ready</p>
+      <p id="readerStatus" class="sr-only" role="status">Point at a page, then tap Read page.</p>
       <p id="readerSpoken" class="sr-only">Point the camera at a page, then tap Read page.</p>
       <div id="readerTranscript" class="reader-transcript" tabindex="0" dir="auto">
-        <p class="reader-line is-current">Point at a page, then tap Read page. Words appear here one line at a time.</p>
+        <p class="reader-line is-current">Point at a page, then tap Read page.</p>
       </div>
     </section>
   </div>
@@ -89,5 +87,5 @@
 {% include "bottom_nav.html" %}
 {% endblock %}
 {% block page_scripts %}
-<script src="{% static 'js/reader.js' %}?v=17"></script>
+<script src="{% static 'js/reader.js' %}?v=18"></script>
 {% endblock %}

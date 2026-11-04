@@ -1,10 +1,10 @@
 (function () {
   const MODE_LABELS = {
     live: "Live",
-    document: "Page",
-    signage: "Sign",
-    currency: "Money",
-    upload: "Page",
+    document: "Document",
+    signage: "Signage",
+    currency: "Currency",
+    upload: "Document",
   };
 
   const video = document.getElementById("readerCamera");
@@ -15,7 +15,6 @@
   const statusEl = document.getElementById("readerStatus");
   const playStateEl = document.getElementById("readerPlayState");
   const modeLabel = document.getElementById("readerModeLabel");
-  const modeSelect = document.getElementById("readerModeSelect");
   const fileInput = document.getElementById("readerFile");
   const enableBtn = document.getElementById("readerEnableCamera");
   const sourceCameraBtn = document.getElementById("readerSourceCamera");
@@ -417,13 +416,19 @@
   function setMode(next, { skipLiveReset = false } = {}) {
     const mapped = next === "upload" ? "document" : next;
     mode = MODE_LABELS[mapped] ? mapped : "live";
-    if (modeSelect && modeSelect.value !== mode) modeSelect.value = mode;
+    document.querySelectorAll("[data-reader-mode]").forEach((btn) => {
+      const on = btn.getAttribute("data-reader-mode") === mode;
+      btn.classList.toggle("is-active", on);
+      btn.setAttribute("aria-selected", on ? "true" : "false");
+    });
     if (modeLabel) modeLabel.textContent = MODE_LABELS[mode];
     if (!skipLiveReset) stopLive();
     window.SightraUI?.announce(MODE_LABELS[mode] + " mode");
   }
 
-  modeSelect?.addEventListener("change", () => setMode(modeSelect.value));
+  document.querySelectorAll("[data-reader-mode]").forEach((btn) => {
+    btn.addEventListener("click", () => setMode(btn.getAttribute("data-reader-mode")));
+  });
   captureBtn?.addEventListener("click", readNow);
   document.getElementById("readerRepeatBtn")?.addEventListener("click", () => {
     if (!lastText && !lastSpoken) return;
