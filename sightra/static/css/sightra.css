@@ -900,13 +900,50 @@ html[data-a11y-contrast="high"] .reader-line.is-current {
   color: var(--text-muted);
 }
 
+.settings-page {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.settings-page .card,
+.settings-page p,
+.settings-page li,
+.settings-page blockquote,
+.settings-page ul {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+.settings-select-wrap {
+  display: block;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
 .settings-select {
-  min-width: 10rem;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   border-radius: 0.75rem;
   border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
   background: var(--bg-muted);
   color: var(--text);
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 2.25rem 0.5rem 0.75rem;
+  text-overflow: ellipsis;
+}
+
+.settings-page input[type="range"] {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 input[type="checkbox"] {
