@@ -18,6 +18,10 @@
     }
   }
 
+  function videoTrack(stream) {
+    return stream && stream.getVideoTracks ? stream.getVideoTracks()[0] : null;
+  }
+
   function waitForFrame(video, timeoutMs) {
     const timeout = timeoutMs || 5000;
     if (video && video.videoWidth > 0) return Promise.resolve(true);
@@ -73,7 +77,12 @@
     });
     if (isMobile()) {
       list.push({
-        video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } },
+        video: {
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          frameRate: { ideal: 24 },
+        },
         audio: false,
       });
       list.push({ video: { facingMode: { ideal: "environment" } }, audio: false });
@@ -102,6 +111,105 @@
       return "No camera was found. On a computer, allow camera access in system settings, then tap Enable camera.";
     }
     return (err && err.message) || "Could not start the camera.";
+  }
+
+  function capabilities(stream) {
+    const track = videoTrack(stream);
+    try {
+      return (track && track.getCapabilities && track.getCapabilities()) || {};
+    } catch {
+      return {};
+    }
+  }
+
+  function hasTorch(stream) {
+    return !!capabilities(stream).torch;
+  }
+
+  async function setNightMode(stream, enabled) {
+    const track = videoTrack(stream);
+    const result = { torch: false, torchSupported: false, exposure: false };
+    if (!track) return result;
+    const caps = capabilities(stream);
+    result.torchSupported = !!caps.torch;
+    const advanced = [];
+    if (caps.torch) advanced.push({ torch: !!enabled });
+    if (caps.exposureCompensation) {
+      const max =
+        typeof caps.exposureCompensation.max === "number" ? caps.exposureCompensation.max : 2;
+      advanced.push({ exposureCompensation: enabled ? max : 0 });
+    }
+    const modes = [].concat(caps.exposureMode || []);
+    if (enabled && modes.includes("continuous")) {
+      advanced.push({ exposureMode: "continuous" });
+    }
+    try {
+      if (advanced.length) await track.applyConstraints({ advanced });
+      result.torch = !!(caps.torch && enabled);
+      result.exposure = !!(caps.exposureCompensation && enabled);
+    } catch {
+      if (caps.torch) {
+        try {
+          await track.applyConstraints({ advanced: [{ torch: !!enabled }] });
+          result.torch = !!enabled;
+        } catch {
+          result.torch = false;
+        }
+      }
+    }
+    try {
+      await track.applyConstraints({
+        frameRate: enabled ? { ideal: 15, max: 24 } : { ideal: 30 },
+      });
+    } catch {
+      /* some browsers reject frameRate after start */
+    }
+    return result;
+  }
+
+  const lumaCanvas = document.createElement("canvas");
+
+  function measureLuma(video) {
+    if (!video || !video.videoWidth) return -1;
+    const w = 48;
+    const h = Math.max(1, Math.round((video.videoHeight / video.videoWidth) * w));
+    lumaCanvas.width = w;
+    lumaCanvas.height = h;
+    const ctx = lumaCanvas.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return -1;
+    ctx.drawImage(video, 0, 0, w, h);
+    const pixels = ctx.getImageData(0, 0, w, h).data;
+    let sum = 0;
+    const n = pixels.length / 4;
+    for (let i = 0; i < pixels.length; i += 4) {
+      sum += 0.2126 * pixels[i] + 0.7152 * pixels[i + 1] + 0.0722 * pixels[i + 2];
+    }
+    return sum / n;
+  }
+
+  function enhanceLowLight(ctx, width, height) {
+    const img = ctx.getImageData(0, 0, width, height);
+    const d = img.data;
+    let sum = 0;
+    const n = d.length / 4;
+    for (let i = 0; i < d.length; i += 4) {
+      sum += 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
+    }
+    const mean = sum / n;
+    if (mean >= 72) return { mean, enhanced: false };
+    const target = 118;
+    const gain = Math.min(mean < 28 ? 3.1 : 2.3, target / Math.max(10, mean));
+    const lift = Math.min(55, Math.max(8, target - mean) * 0.45);
+    const gamma = mean < 32 ? 0.58 : 0.72;
+    for (let i = 0; i < d.length; i += 4) {
+      for (let c = 0; c < 3; c += 1) {
+        let v = d[i + c] * gain + lift;
+        v = 255 * Math.pow(Math.min(255, Math.max(0, v)) / 255, gamma);
+        d[i + c] = v;
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+    return { mean, enhanced: true };
   }
 
   async function start(video) {
@@ -147,7 +255,7 @@
     throw new Error(friendlyError(lastErr));
   }
 
-  function capture(video, canvas, quality, maxDim) {
+  function capture(video, canvas, quality, maxDim, options) {
     if (!video || !canvas || !video.videoWidth) return "";
     let width = video.videoWidth;
     let height = video.videoHeight;
@@ -159,8 +267,13 @@
     }
     canvas.width = width;
     canvas.height = height;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
     ctx.drawImage(video, 0, 0, width, height);
+    const force = options && options.lowLight;
+    const luma = measureLuma(video);
+    if (force === true || (force !== false && luma >= 0 && luma < 72)) {
+      enhanceLowLight(ctx, width, height);
+    }
     return canvas.toDataURL("image/jpeg", quality || 0.7);
   }
 
@@ -170,5 +283,14 @@
     if (video) video.srcObject = null;
   }
 
-  window.SightraCamera = { start, waitForFrame, capture, stop, prepare };
+  window.SightraCamera = {
+    start,
+    waitForFrame,
+    capture,
+    stop,
+    prepare,
+    setNightMode,
+    hasTorch,
+    measureLuma,
+  };
 })();

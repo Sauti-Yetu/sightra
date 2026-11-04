@@ -17,7 +17,10 @@
       <img src="{% static 'img/sightra-logo.png' %}?v=7" alt="Sightra" class="h-10 w-10 rounded-lg object-cover ring-1 ring-white/20" width="40" height="40" />
     </a>
     <p id="readerModeLabel" class="justify-self-center font-headline text-sm font-semibold tracking-wide">Live text</p>
-    <span class="justify-self-end w-10" aria-hidden="true"></span>
+    <button type="button" id="readerNightBtn" class="night-light-btn justify-self-end" aria-pressed="false" aria-label="Night light">
+      <span class="material-symbols-outlined text-xl" aria-hidden="true">flashlight_on</span>
+      <span class="sr-only">Night light</span>
+    </button>
   </header>
   <input id="readerFile" type="file" accept="image/*,.heic,.heif,image/heic,image/heif,image/webp" class="sr-only" />
 
@@ -69,5 +72,5 @@
 {% include "bottom_nav.html" %}
 {% endblock %}
 {% block page_scripts %}
-<script src="{% static 'js/reader.js' %}?v=14"></script>
+<script src="{% static 'js/reader.js' %}?v=15"></script>
 {% endblock %}

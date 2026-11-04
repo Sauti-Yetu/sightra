@@ -13,7 +13,8 @@ class LandingAndManifestTests(TestCase):
         client = Client()
         res = client.get("/")
         self.assertEqual(res.status_code, 200)
-        self.assertContains(res, "See more. Understand more.")
+        self.assertContains(res, "Designed for mobility, built for dignity.")
+        self.assertNotContains(res, "See more. Understand more.")
         self.assertContains(res, "Get started")
         self.assertContains(res, "Explore Sightra")
         self.assertContains(res, "Built for real-world movement")
@@ -21,6 +22,10 @@ class LandingAndManifestTests(TestCase):
         self.assertContains(res, "Obstacle-aware vision scanning")
         self.assertContains(res, "Open Vision")
         self.assertContains(res, "Open Reader")
+        self.assertContains(res, "Download the Sightra app")
+        self.assertContains(res, "Download on Android")
+        self.assertContains(res, "Download on iOS")
+        self.assertContains(res, "data-pwa-install")
         self.assertContains(res, "Sauti Yetu Assistive Venture")
         self.assertContains(res, "Always use your established mobility aids")
         self.assertContains(res, "app-icon-192.png")
@@ -53,7 +58,10 @@ class SettingsAndVisionCopyTests(TestCase):
         self.assertContains(res, "Reading voice")
         self.assertContains(res, "Speaking rate")
         self.assertContains(res, "Voice pitch")
-        self.assertContains(res, "My recorded voice (coming later)")
+        self.assertContains(res, "My recorded voice (record a sample first)")
+        self.assertContains(res, "Voice cloning")
+        self.assertContains(res, "Record sample")
+        self.assertContains(res, "Training a clone you can use as a reading voice comes in a later release")
 
     def test_vision_hud_uses_live_clarity_meters(self):
         res = self._signed_in("/vision/")
@@ -61,6 +69,7 @@ class SettingsAndVisionCopyTests(TestCase):
         self.assertContains(res, "Camera clarity")
         self.assertContains(res, "Voice input")
         self.assertContains(res, "Spoken speed")
+        self.assertContains(res, "Night light")
         self.assertNotContains(res, "Depth range")
         self.assertNotContains(res, "12.4m")
 
@@ -68,6 +77,7 @@ class SettingsAndVisionCopyTests(TestCase):
         res = self._signed_in("/reader/")
         self.assertEqual(res.status_code, 200)
         self.assertContains(res, "Spoken speed")
+        self.assertContains(res, "Night light")
 
 
 class GeminiHelperTests(SimpleTestCase):

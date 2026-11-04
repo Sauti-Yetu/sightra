@@ -5,9 +5,15 @@ const scanLabel = document.getElementById('scanLabel');
 const voiceBtn = document.getElementById('visionVoiceBtn');
 const voiceStatus = document.getElementById('visionVoiceStatus');
 const enableCamBtn = document.getElementById('visionEnableCamera');
+const nightBtn = document.getElementById('visionNightBtn');
 
 let isScanning = false;
 let streamRef = null;
+let nightForced = localStorage.getItem('sightra_night_lock') === '1';
+let nightActive = false;
+let dimStreak = 0;
+let brightStreak = 0;
+let lastNightAnnounce = 0;
 let captureIntervalId = null;
 let fastInFlight = false;
 let fullInFlight = false;
@@ -109,6 +115,44 @@ function showEnableCamera(show) {
   enableCamBtn.classList.toggle('hidden', !show);
 }
 
+function setNightButton(on) {
+  if (!nightBtn) return;
+  nightBtn.classList.toggle('is-on', on);
+  nightBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+}
+
+async function applyNight(forceApply) {
+  if (!streamRef || !window.SightraCamera?.setNightMode) return;
+  const want = nightForced || dimStreak >= 2;
+  if (!forceApply && want === nightActive) {
+    setNightButton(nightForced || nightActive);
+    return;
+  }
+  const result = await window.SightraCamera.setNightMode(streamRef, want);
+  nightActive = want;
+  setNightButton(nightForced || nightActive);
+  if (!want || Date.now() - lastNightAnnounce < 8000) return;
+  lastNightAnnounce = Date.now();
+  const msg = result.torch ? 'Low light. Torch on.' : 'Low light. Brightening the picture.';
+  setScanStatus(msg);
+  window.SightraUI?.announce(msg);
+}
+
+function noteSceneLuma(mean) {
+  if (mean < 0) return;
+  if (mean < 45) {
+    dimStreak += 1;
+    brightStreak = 0;
+  } else if (mean > 95) {
+    brightStreak += 1;
+    dimStreak = 0;
+  } else {
+    dimStreak = Math.max(0, dimStreak - 1);
+    brightStreak = Math.max(0, brightStreak - 1);
+  }
+  applyNight();
+}
+
 async function startCamera() {
   if (streamRef && video && video.videoWidth) return true;
   if (!window.SightraCamera) {
@@ -118,9 +162,11 @@ async function startCamera() {
   }
   try {
     streamRef = await window.SightraCamera.start(video);
+    nightActive = false;
     showEnableCamera(false);
     startSignalMeters();
     if (voiceStatus) voiceStatus.textContent = 'Camera ready. Tap scan to analyse the scene.';
+    await applyNight(true);
     return true;
   } catch (err) {
     streamRef = null;
@@ -199,6 +245,7 @@ const SignalMeters = {
     const score = Math.round((0.45 * exposure + 0.55 * contrastN) * 100);
     if (bar) bar.style.height = `${score}%`;
     if (readout) readout.textContent = this.cameraLabel(score, mean);
+    noteSceneLuma(mean);
   },
 
   startCamera() {
@@ -334,7 +381,7 @@ async function captureAndAnalyze(options = {}) {
     return;
   }
   const frameData = window.SightraCamera
-    ? window.SightraCamera.capture(video, canvas, 0.45, 480)
+    ? window.SightraCamera.capture(video, canvas, 0.45, 480, { lowLight: nightForced || nightActive })
     : (() => {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
@@ -592,6 +639,18 @@ enableCamBtn?.addEventListener('click', async (event) => {
   event.stopPropagation();
   await startCamera();
 });
+nightBtn?.addEventListener('click', async () => {
+  nightForced = !nightForced;
+  localStorage.setItem('sightra_night_lock', nightForced ? '1' : '0');
+  if (nightForced) dimStreak = 3;
+  else {
+    dimStreak = 0;
+    nightActive = false;
+  }
+  await applyNight(true);
+  window.SightraUI?.announce(nightForced ? 'Night light on' : 'Night light automatic');
+});
+setNightButton(nightForced);
 startCamera();
 window.addEventListener('sightra:privacy-onboarded', () => startCamera());
 

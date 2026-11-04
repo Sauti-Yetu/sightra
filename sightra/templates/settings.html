@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Settings | Sightra{% endblock %}
 {% block main_class %}mx-auto flex max-w-6xl gap-8 px-4 pb-28 pt-4 md:pb-8{% endblock %}
 {% block content %}
@@ -46,7 +47,7 @@
           <option value="adam">Adam — steady, direct</option>
           <option value="liam">Liam — conversational</option>
           <option value="brian">Brian — lower, measured</option>
-          <option value="custom" disabled>My recorded voice (coming later)</option>
+          <option value="custom" disabled>My recorded voice (record a sample first)</option>
         </select>
       </li>
       <li class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -78,6 +79,27 @@
     <p class="mt-4 text-xs text-[var(--text-muted)]">
       Rate and pitch apply to Vision, Reader, and spoken UI feedback. Try: home, vision, reader, settings, scan, document, currency, signage, upload, repeat, stop, or help.
     </p>
+
+    <div id="voice-cloning" class="mt-8 border-t border-[color-mix(in_srgb,var(--text)_12%,transparent)] pt-6">
+      <h3 class="font-headline text-base font-semibold">Voice cloning</h3>
+      <p class="mt-1 text-sm text-[var(--text-muted)]">
+        Record a preferred voice for spoken guidance. The sample stays on this device.
+        Training a clone you can use as a reading voice comes in a later release.
+      </p>
+      <blockquote class="mt-4 rounded-2xl bg-[var(--bg-muted)] px-4 py-3 text-sm leading-relaxed">
+        Read this aloud when recording: “Hello. This is the voice I want Sightra to use for spoken guidance.”
+      </blockquote>
+      <div class="mt-4 flex flex-wrap items-center gap-2">
+        <span id="voice-clone-meter" class="voice-clone-meter" aria-hidden="true"></span>
+        <button type="button" id="voice-clone-record" class="btn-primary text-sm">Record sample</button>
+        <button type="button" id="voice-clone-stop" class="btn-ghost text-sm ring-1 ring-black/5 dark:ring-white/10" hidden>Stop</button>
+        <button type="button" id="voice-clone-play" class="btn-ghost text-sm ring-1 ring-black/5 dark:ring-white/10" disabled>Play sample</button>
+        <button type="button" id="voice-clone-delete" class="btn-ghost text-sm ring-1 ring-black/5 dark:ring-white/10" disabled>Delete sample</button>
+      </div>
+      <p id="voice-clone-status" class="mt-3 text-xs text-[var(--text-muted)]" aria-live="polite">
+        No sample saved yet. Record a short reading of the prompt above.
+      </p>
+    </div>
   </section>
 
   <section id="privacy" class="card p-6 md:col-span-2">
@@ -109,4 +131,5 @@
     document.getElementById('a11y-toggle')?.click();
   });
 </script>
+<script src="{% static 'js/voice-clone.js' %}?v=1"></script>
 {% endblock %}

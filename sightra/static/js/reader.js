@@ -19,6 +19,7 @@
   const sourceCameraBtn = document.getElementById("readerSourceCamera");
   const sourceUploadBtn = document.getElementById("readerSourceUpload");
   const captureBtn = document.getElementById("readerCaptureBtn");
+  const nightBtn = document.getElementById("readerNightBtn");
 
   let mode = "live";
   let source = "camera";
@@ -29,6 +30,10 @@
   let stream = null;
   let readToken = 0;
   let speaking = false;
+  let nightForced = localStorage.getItem("sightra_night_lock") === "1";
+  let nightActive = false;
+  let dimStreak = 0;
+  let nightTimer = null;
 
   function language() {
     try {
@@ -171,6 +176,49 @@
     window.SightraUI?.announce(source === "upload" ? "Upload mode" : "Camera mode");
   }
 
+  function setNightButton(on) {
+    if (!nightBtn) return;
+    nightBtn.classList.toggle("is-on", on);
+    nightBtn.setAttribute("aria-pressed", on ? "true" : "false");
+  }
+
+  async function applyNight(forceApply) {
+    if (!stream || !window.SightraCamera?.setNightMode) return;
+    const want = nightForced || dimStreak >= 2;
+    if (!forceApply && want === nightActive) {
+      setNightButton(nightForced || nightActive);
+      return;
+    }
+    const result = await window.SightraCamera.setNightMode(stream, want);
+    nightActive = want;
+    setNightButton(nightForced || nightActive);
+    if (want) {
+      setStatus(result.torch ? "Low light. Torch on." : "Low light. Brightening the picture.");
+    }
+  }
+
+  function sampleNight() {
+    if (!window.SightraCamera?.measureLuma || !video?.videoWidth) return;
+    const mean = window.SightraCamera.measureLuma(video);
+    if (mean < 45) dimStreak += 1;
+    else if (mean > 95) dimStreak = 0;
+    else dimStreak = Math.max(0, dimStreak - 1);
+    applyNight();
+  }
+
+  function startNightWatch() {
+    stopNightWatch();
+    sampleNight();
+    nightTimer = window.setInterval(sampleNight, 700);
+  }
+
+  function stopNightWatch() {
+    if (nightTimer) {
+      window.clearInterval(nightTimer);
+      nightTimer = null;
+    }
+  }
+
   async function startCamera() {
     if (stream && video && video.videoWidth) return stream;
     if (!window.SightraCamera) {
@@ -180,7 +228,10 @@
     }
     try {
       stream = await window.SightraCamera.start(video);
+      nightActive = false;
       showEnable(false);
+      startNightWatch();
+      await applyNight(true);
       if (source === "camera") setStatus("Camera ready. Tap the shutter to read.");
       return stream;
     } catch (err) {
@@ -192,7 +243,11 @@
   }
 
   function captureFrame() {
-    if (window.SightraCamera) return window.SightraCamera.capture(video, canvas, 0.72, 1280);
+    if (window.SightraCamera) {
+      return window.SightraCamera.capture(video, canvas, 0.72, 1280, {
+        lowLight: nightForced || nightActive,
+      });
+    }
     if (!video || !canvas || !video.videoWidth) return "";
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -351,6 +406,18 @@
     setSource("camera");
     startCamera();
   });
+  nightBtn?.addEventListener("click", async () => {
+    nightForced = !nightForced;
+    localStorage.setItem("sightra_night_lock", nightForced ? "1" : "0");
+    if (nightForced) dimStreak = 3;
+    else {
+      dimStreak = 0;
+      nightActive = false;
+    }
+    await applyNight(true);
+    window.SightraUI?.announce(nightForced ? "Night light on" : "Night light automatic");
+  });
+  setNightButton(nightForced);
   fileInput?.addEventListener("change", async () => {
     const file = fileInput.files && fileInput.files[0];
     if (!file) return;

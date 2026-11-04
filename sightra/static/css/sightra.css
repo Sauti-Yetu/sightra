@@ -649,3 +649,32 @@ input[type="range"] {
 .camera-enable-btn.hidden {
   display: none !important;
 }
+
+.night-light-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.night-light-btn.is-on {
+  background: var(--brand-blue);
+  box-shadow: 0 0 16px var(--brand-cyan-glow);
+}
+
+.voice-clone-meter {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 22%, transparent);
+}
+
+.voice-clone-meter.is-recording {
+  background: #dc2626;
+  box-shadow: 0 0 0 6px rgba(220, 38, 38, 0.18);
+}

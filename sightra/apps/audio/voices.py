@@ -1,8 +1,8 @@
 """Reading-voice catalogue for spoken guidance.
 
-These are the trained ElevenLabs voices Sightra can use today. A future
-release will let a user record a preferred voice and store a clone id
-under READING_VOICE_CUSTOM. Until then that option stays disabled in UI.
+These are the trained ElevenLabs voices Sightra can use today. Settings
+lets a user record a preferred-voice sample on-device. A later release
+will train a clone and store its id under READING_VOICE_CUSTOM.
 """
 
 from __future__ import annotations
