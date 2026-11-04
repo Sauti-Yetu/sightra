@@ -81,6 +81,7 @@ class SettingsAndVisionCopyTests(TestCase):
         self.assertContains(res, "Read page")
         self.assertContains(res, "Page text")
         self.assertContains(res, "reader-transcript")
+        self.assertContains(res, "one line at a time")
 
 
 class GeminiHelperTests(SimpleTestCase):

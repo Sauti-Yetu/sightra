@@ -15,6 +15,7 @@
   const statusEl = document.getElementById("readerStatus");
   const playStateEl = document.getElementById("readerPlayState");
   const modeLabel = document.getElementById("readerModeLabel");
+  const modeSelect = document.getElementById("readerModeSelect");
   const fileInput = document.getElementById("readerFile");
   const enableBtn = document.getElementById("readerEnableCamera");
   const sourceCameraBtn = document.getElementById("readerSourceCamera");
@@ -70,22 +71,25 @@
     captureBtn.setAttribute("aria-label", source === "upload" ? "Upload a photo to read" : "Read page");
   }
 
+  function promptLine(text, kind) {
+    const line = document.createElement("p");
+    line.className = "reader-line " + kind;
+    line.textContent = text;
+    return line;
+  }
+
   function renderTranscript(chunks, currentIndex) {
     if (!transcriptEl) return;
     transcriptEl.replaceChildren();
     if (!chunks.length) {
-      transcriptEl.textContent = "No text found on this page.";
+      transcriptEl.appendChild(promptLine("No text found on this page.", "is-current"));
       return;
     }
-    chunks.forEach((chunk, idx) => {
-      const span = document.createElement("span");
-      span.className = "reader-sentence" + (idx === currentIndex ? " is-current" : "");
-      span.textContent = chunk + (idx === chunks.length - 1 ? "" : " ");
-      transcriptEl.appendChild(span);
-      if (idx === currentIndex) {
-        span.scrollIntoView({ block: "nearest", behavior: "smooth" });
-      }
-    });
+    let index = currentIndex;
+    if (index < 0 || index >= chunks.length) index = chunks.length - 1;
+    if (index > 0) transcriptEl.appendChild(promptLine(chunks[index - 1], "is-prev"));
+    transcriptEl.appendChild(promptLine(chunks[index], "is-current"));
+    if (index < chunks.length - 1) transcriptEl.appendChild(promptLine(chunks[index + 1], "is-next"));
   }
 
   function showStill(url) {
@@ -324,7 +328,10 @@
     setPlayState("Reading");
     setReadingLayout(true);
     if (spokenEl) spokenEl.textContent = "Reading this page.";
-    if (transcriptEl) transcriptEl.textContent = "The words will appear here as they are read aloud.";
+    if (transcriptEl) {
+      transcriptEl.replaceChildren();
+      transcriptEl.appendChild(promptLine("Reading this page…", "is-current"));
+    }
     window.SightraUI?.announce("Reading this page");
     try {
       let { res, data } = await postAnalyze(frameData);
@@ -410,19 +417,13 @@
   function setMode(next, { skipLiveReset = false } = {}) {
     const mapped = next === "upload" ? "document" : next;
     mode = MODE_LABELS[mapped] ? mapped : "live";
-    document.querySelectorAll("[data-reader-mode]").forEach((btn) => {
-      const on = btn.getAttribute("data-reader-mode") === mode;
-      btn.classList.toggle("is-active", on);
-      btn.setAttribute("aria-selected", on ? "true" : "false");
-    });
+    if (modeSelect && modeSelect.value !== mode) modeSelect.value = mode;
     if (modeLabel) modeLabel.textContent = MODE_LABELS[mode];
     if (!skipLiveReset) stopLive();
     window.SightraUI?.announce(MODE_LABELS[mode] + " mode");
   }
 
-  document.querySelectorAll("[data-reader-mode]").forEach((btn) => {
-    btn.addEventListener("click", () => setMode(btn.getAttribute("data-reader-mode")));
-  });
+  modeSelect?.addEventListener("change", () => setMode(modeSelect.value));
   captureBtn?.addEventListener("click", readNow);
   document.getElementById("readerRepeatBtn")?.addEventListener("click", () => {
     if (!lastText && !lastSpoken) return;

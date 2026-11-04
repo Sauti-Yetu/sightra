@@ -13,7 +13,14 @@
     </a>
     <div class="reader-top-title">
       <p class="reader-kicker">Reader</p>
-      <p id="readerModeLabel" class="reader-mode-label">Page</p>
+      <label class="sr-only" for="readerModeSelect">Reader mode</label>
+      <select id="readerModeSelect" class="reader-mode-select" aria-label="Reader mode">
+        <option value="live">Live</option>
+        <option value="document" selected>Page</option>
+        <option value="signage">Sign</option>
+        <option value="currency">Money</option>
+      </select>
+      <p id="readerModeLabel" class="sr-only">Page</p>
     </div>
     <div class="reader-top-tools">
       <button type="button" id="readerNightBtn" class="night-light-btn" aria-pressed="false" aria-label="Night light">
@@ -33,6 +40,14 @@
       <div class="reader-page-guide" aria-hidden="true">
         <span></span><span></span><span></span><span></span>
       </div>
+      <label class="reader-rate">
+        <span class="material-symbols-outlined" aria-hidden="true">speed</span>
+        <span class="sr-only">Spoken speed</span>
+        <span class="reader-rate-rot">
+          <input type="range" min="0.7" max="1.4" step="0.1" value="1" data-a11y-range="speechRate" aria-label="Spoken speed" />
+        </span>
+        <span class="reader-rate-value" data-speech-rate-value>1.0×</span>
+      </label>
       <button type="button" id="readerEnableCamera" class="camera-enable-btn reader-enable">Enable camera</button>
     </section>
 
@@ -43,41 +58,29 @@
       </div>
       <p id="readerSpoken" class="sr-only">Point the camera at a page, then tap Read page.</p>
       <div id="readerTranscript" class="reader-transcript" tabindex="0" dir="auto">
-        The words will appear here as they are read aloud. Point at a book page, sign, or note, then tap Read page.
+        <p class="reader-line is-current">Point at a page, then tap Read page. Words appear here one line at a time.</p>
       </div>
     </section>
   </div>
 
   <footer class="reader-dock">
-    <div class="reader-dock-meta">
-      {% include "partials/speech_rate_control.html" %}
-    </div>
-    <div class="reader-modes" role="tablist" aria-label="Reader modes">
-      <button type="button" class="reader-mode" data-reader-mode="live" aria-selected="false">Live</button>
-      <button type="button" class="reader-mode is-active" data-reader-mode="document" aria-selected="true">Page</button>
-      <button type="button" class="reader-mode" data-reader-mode="signage" aria-selected="false">Sign</button>
-      <button type="button" class="reader-mode" data-reader-mode="currency" aria-selected="false">Money</button>
-    </div>
     <div class="reader-actions">
       <button type="button" id="readerSourceCamera" class="reader-source is-active" aria-pressed="true" aria-label="Camera">
         <span class="material-symbols-outlined" aria-hidden="true">photo_camera</span>
-        <span class="reader-source-label">Camera</span>
       </button>
       <button type="button" id="readerSourceUpload" class="reader-source" aria-pressed="false" aria-label="Photo">
         <span class="material-symbols-outlined" aria-hidden="true">upload</span>
-        <span class="reader-source-label">Photo</span>
       </button>
       <button type="button" id="readerRepeatBtn" class="reader-icon-btn" aria-label="Repeat last reading">
         <span class="material-symbols-outlined">replay</span>
       </button>
       <button type="button" id="readerCaptureBtn" class="reader-shutter" aria-label="Read page">
         <span class="material-symbols-outlined" aria-hidden="true" style="font-variation-settings:'FILL' 1">menu_book</span>
-        <span class="reader-shutter-label">Read page</span>
       </button>
       <button type="button" id="readerStopBtn" class="reader-icon-btn reader-stop" aria-label="Stop reading">
         <span class="material-symbols-outlined">stop</span>
       </button>
-      <button type="button" id="readerLiveBtn" class="reader-icon-btn" aria-pressed="false" aria-label="Toggle live reading">
+      <button type="button" id="readerLiveBtn" class="reader-icon-btn reader-live" aria-pressed="false" aria-label="Toggle live reading">
         <span class="material-symbols-outlined" id="readerLiveIcon">play_arrow</span>
       </button>
     </div>
@@ -86,5 +89,5 @@
 {% include "bottom_nav.html" %}
 {% endblock %}
 {% block page_scripts %}
-<script src="{% static 'js/reader.js' %}?v=16"></script>
+<script src="{% static 'js/reader.js' %}?v=17"></script>
 {% endblock %}
