@@ -6,7 +6,7 @@
 {% include "partials/app_sidebar.html" %}
 <div class="min-w-0 flex-1">
   <section class="mb-8" aria-labelledby="greeting">
-    <h1 id="greeting" class="font-headline text-3xl font-bold tracking-tight md:text-4xl" data-display-name="{{ display_name }}">{% if display_name %}Welcome back, {{ display_name }}{% else %}Welcome back{% endif %}</h1>
+    <h1 id="greeting" class="font-headline text-3xl font-bold tracking-tight md:text-4xl" data-display-name="{{ display_name }}" data-rendered="{% now 'U' %}">{% if display_name %}Welcome back, {{ display_name }}{% else %}Welcome back{% endif %}</h1>
     <p class="mt-2 max-w-xl text-[var(--text-muted)]">What would you like help with today?</p>
     <p class="mt-2 max-w-xl text-sm text-[var(--text-muted)]">AI guidance may be incomplete or incorrect. Always use your established mobility aids and judgement.</p>
   </section>
@@ -91,5 +91,5 @@
 </div>
 {% endblock %}
 {% block page_scripts %}
-<script src="{% static 'js/dashboard.js' %}?v=3"></script>
+<script src="{% static 'js/dashboard.js' %}?v=4"></script>
 {% endblock %}

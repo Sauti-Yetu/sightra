@@ -24,7 +24,12 @@
     const el = document.getElementById("greeting");
     if (!el) return;
     const name = firstName(el.getAttribute("data-display-name"));
+    const rendered = el.getAttribute("data-rendered");
     const next = name ? `Welcome back, ${name}` : "Welcome back";
+    // Log for debugging: ensure each user sees their own name
+    if (rendered) {
+      console.debug(`Dashboard rendered at ${new Date(parseInt(rendered) * 1000).toISOString()} for user: ${name || '(anonymous)'}`);
+    }
     if (el.textContent !== next) el.textContent = next;
     return next;
   }

@@ -42,6 +42,7 @@ class SupabaseAuthMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        # Always fetch fresh user data to prevent stale session issues
         request.sightra_user = SessionService.get_user(request)
         return self.get_response(request)
 

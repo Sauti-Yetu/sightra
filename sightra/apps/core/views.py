@@ -35,7 +35,7 @@ def _display_name_for(user):
 
 def dashboard(request):
     user = getattr(request, "sightra_user", None)
-    return render(
+    response = render(
         request,
         "dashboard.html",
         {
@@ -43,6 +43,11 @@ def dashboard(request):
             "signed_in": bool(user),
         },
     )
+    # Prevent browser caching of dashboard to ensure fresh user data on every visit
+    response["Cache-Control"] = "no-cache, no-store, must-revalidate, private"
+    response["Pragma"] = "no-cache"
+    response["Expires"] = "0"
+    return response
 
 
 @ensure_csrf_cookie
