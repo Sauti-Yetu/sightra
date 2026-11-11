@@ -10,7 +10,8 @@ For company technical reporting, governance, safety, and user manuals, see [`.do
 
 Privacy engineering audit and compliance gap analysis: [`docs/privacy-data-flow-audit.md`](docs/privacy-data-flow-audit.md), [`docs/compliance-verification-report.md`](docs/compliance-verification-report.md). In-app **Privacy & Legal** centre: `/legal/`.
 
-<img width="9423" height="7417" alt="Sightra PWA diagram" src="https://github.com/user-attachments/assets/e9671dbc-ab15-42a4-889b-8dc7d6c11287" />
+<img width="9423" height="7417" alt="Sightra PWA Diagram light mode" src="https://github.com/user-attachments/assets/9e74b16b-ac10-46b8-9f7e-0398d39f5f6b" />
+
 
 
 ---
